@@ -8,7 +8,7 @@ from ..schemas.auth import (
 from ..services.auth_service import AuthService
 from ..crud.sesion import sesion_crud
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])  # quitar el prefix
 
 
 @router.post("/registro")

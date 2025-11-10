@@ -5,6 +5,7 @@ from ..schemas.game import VerificarRespuestaRondaRequest
 from ..services.game_service_rondas import GameServiceRondas
 from ..crud.sesion import sesion_crud
 
+# ✅ Cambiar prefix para que coincida con el frontend
 router = APIRouter(prefix="/ronda", tags=["rondas"])
 
 

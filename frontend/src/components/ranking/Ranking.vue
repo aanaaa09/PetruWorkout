@@ -70,7 +70,7 @@ export default {
       this.error = null
 
       try {
-        const response = await fetch('http://localhost:5001/api/auth/ranking?limit=50')
+        const response = await fetch('http://localhost:5000/api/auth/ranking?limit=50')
 
         if (!response.ok) {
           throw new Error('Error al obtener el ranking')

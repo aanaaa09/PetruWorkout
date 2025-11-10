@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from pydantic_settings import BaseSettings
 
 
@@ -26,7 +28,10 @@ class Settings(BaseSettings):
     PUNTOS_ANIO: int = 4
     PREGUNTAS_POR_RONDA: int = 10
     BONUS_RACHA: int = 1
-
+    RONDAS_ACTIVAS: ClassVar[dict] = {}
+    SERVIDAS: ClassVar[dict] = {}
+    CANCION_ACTUAL: ClassVar[dict] = {}
+    CACHE_ITUNES: ClassVar[dict] = {}
     # Playlists de Spotify
     PLAYLISTS: dict = {
         'juego_clasico': '5ChPyb9z3oH6MWzdkqwh2h',

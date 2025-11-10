@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional
 from ..config.database import get_db
 from ..schemas.game import VerificarRespuestaRequest
 from ..services.game_service import GameService
 from ..config.settings import settings
 
-router = APIRouter(tags=["game"])
+# ✅ Sin prefix aquí, se añade en main.py si es necesario
+router = APIRouter()
 
 
 @router.get("/playlists")
