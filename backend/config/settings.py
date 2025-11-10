@@ -1,20 +1,18 @@
+import os
 from typing import ClassVar
-
 from pydantic_settings import BaseSettings
-
-
 
 class Settings(BaseSettings):
     # Base de datos PostgreSQL
-    DB_HOST: str = "localhost"
-    DB_PORT: str = "5432"
-    DB_NAME: str = "songbyte_db"
-    DB_USER: str = "postgres"
-    DB_PASSWORD: str = "realmadrid"
+    DB_HOST: str
+    DB_PORT: str
+    DB_NAME: str
+    DB_USER: str
+    DB_PASSWORD: str
 
     # Spotify API
-    SPOTIFY_CLIENT_ID: str = "51ce072da9c24789ae732edf00428af1"
-    SPOTIFY_CLIENT_SECRET: str = "ddaea4e7dfa4428ca0ab97a877117444"
+    SPOTIFY_CLIENT_ID: str
+    SPOTIFY_CLIENT_SECRET: str
 
     # Sesiones
     SESSION_DURATION_DAYS: int = 7
@@ -32,7 +30,7 @@ class Settings(BaseSettings):
     SERVIDAS: ClassVar[dict] = {}
     CANCION_ACTUAL: ClassVar[dict] = {}
     CACHE_ITUNES: ClassVar[dict] = {}
-    # Playlists de Spotify
+
     PLAYLISTS: dict = {
         'juego_clasico': '5ChPyb9z3oH6MWzdkqwh2h',
         'urban_hits': '5BbhkBazvF4Fciu83ifxZu',
@@ -48,8 +46,7 @@ class Settings(BaseSettings):
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     class Config:
-        env_file = ".env"
+        env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
         case_sensitive = True
-
 
 settings = Settings()
