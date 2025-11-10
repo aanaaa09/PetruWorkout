@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Fondo circular con degradado -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9c27b0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e91e63;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="note-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0c3fc;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Círculo de fondo -->
+  <circle cx="100" cy="100" r="95" fill="url(#bg-gradient)" />
+
+  <!-- Nota musical estilizada -->
+  <g fill="url(#note-gradient)">
+    <!-- Cabeza de la nota -->
+    <ellipse cx="80" cy="140" rx="25" ry="20" transform="rotate(-15 80 140)" />
+
+    <!-- Tallo de la nota -->
+    <rect x="100" y="60" width="8" height="85" rx="4" />
+
+    <!-- Bandera superior -->
+    <path d="M 108 60 Q 140 50, 145 75 Q 140 70, 108 80 Z" />
+
+    <!-- Acento de onda de sonido -->
+    <path d="M 130 95 Q 150 85, 160 95" stroke="url(#note-gradient)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7" />
+    <path d="M 130 110 Q 155 100, 165 110" stroke="url(#note-gradient)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5" />
+  </g>
+</svg>

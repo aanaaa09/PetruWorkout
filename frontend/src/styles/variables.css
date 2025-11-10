@@ -1,0 +1,51 @@
+/* Variables CSS para mantener consistencia */
+:root {
+  /* Colores principales */
+  --color-primary: #9c27b0;
+  --color-primary-dark: #673ab7;
+  --color-secondary: #2196f3;
+  --color-success: #00c851;
+  --color-warning: #f39c12;
+  --color-error: #e74c3c;
+
+  /* Colores de fondo */
+  --bg-gradient-start: #2c1a4a;
+  --bg-gradient-mid: #4a2cd4;
+  --bg-gradient-end: #2c1a4a;
+
+  /* Efectos de vidrio (glassmorphism) */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(20px);
+
+  /* Sombras */
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.2);
+
+  /* Bordes redondeados */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 50px;
+
+  /* Espaciado */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Fuentes */
+  --font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.2rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+
+  /* Transiciones */
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s ease;
+}
