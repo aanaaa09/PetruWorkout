@@ -60,6 +60,7 @@ export default {
   },
   methods: {
     async login(data) {
+      if (this.cargando) return;
       this.error = null
       this.cargando = true
 
