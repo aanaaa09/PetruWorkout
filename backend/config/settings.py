@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     SPOTIFY_CLIENT_ID: str
     SPOTIFY_CLIENT_SECRET: str
 
+
     # Sesiones
     SESSION_DURATION_DAYS: int = 7
 
@@ -30,6 +31,7 @@ class Settings(BaseSettings):
     SERVIDAS: ClassVar[dict] = {}
     CANCION_ACTUAL: ClassVar[dict] = {}
     CACHE_ITUNES: ClassVar[dict] = {}
+    SPOTIFY_TOKEN: ClassVar[str] = None
 
     PLAYLISTS: dict = {
         'juego_clasico': '5ChPyb9z3oH6MWzdkqwh2h',

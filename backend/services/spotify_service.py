@@ -1,7 +1,8 @@
 import requests
 import base64
 import logging
-from ..config.settings import settings
+from ..config.settings import settings, Settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +29,7 @@ class SpotifyService:
             )
 
             if response.status_code == 200:
-                settings.SPOTIFY_TOKEN = response.json()['access_token']
+                Settings.SPOTIFY_TOKEN = response.json()['access_token']  # ← Settings con mayúscula
                 logger.info("Token de Spotify obtenido correctamente")
                 return True
             else:
@@ -52,11 +53,11 @@ class SpotifyService:
         """
         from backend.config import settings
 
-        if not settings.SPOTIFY_TOKEN:
+        if not Settings.SPOTIFY_TOKEN:
             if not SpotifyService.obtener_token():
                 return []
 
-        headers = {'Authorization': f'Bearer {settings.SPOTIFY_TOKEN}'}
+        headers = {'Authorization': f'Bearer {Settings.SPOTIFY_TOKEN}'}
         canciones = []
         offset = 0
         limit = 100
@@ -74,7 +75,7 @@ class SpotifyService:
                 # Si el token expiró, renovar
                 if response.status_code == 401:
                     if SpotifyService.obtener_token():
-                        headers['Authorization'] = f'Bearer {settings.SPOTIFY_TOKEN}'
+                        headers['Authorization'] = f'Bearer {Settings.SPOTIFY_TOKEN}'
                         response = requests.get(url, headers=headers, timeout=15)
 
                     if response.status_code != 200:

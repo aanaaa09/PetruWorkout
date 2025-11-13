@@ -5,6 +5,7 @@
     <AppHeader
       :usuario-logueado="!!usuarioActual"
       @mostrar-ranking="mostrarRanking = true"
+      @mostrar-añadir-cancion="modalAñadirCancion = true"
     />
 
     <div class="main-content">
@@ -39,6 +40,12 @@
         />
       </template>
     </div>
+
+    <!-- MODAL FUERA DEL main-content -->
+    <AñadirCancionModal
+      :mostrar="modalAñadirCancion"
+      @cerrar="modalAñadirCancion = false"
+    />
   </div>
 </template>
 
@@ -50,7 +57,7 @@ import PlaylistSelector from './components/playlist/PlaylistSelector.vue'
 import Game from './components/game/Game.vue'
 import GameRondas from './components/game/GameRondas.vue'
 import Ranking from './components/ranking/Ranking.vue'
-
+import AñadirCancionModal from './components/AñadirCancionModal.vue'
 export default {
   components: {
     AppHeader,
@@ -59,14 +66,16 @@ export default {
     PlaylistSelector,
     Game,
     GameRondas,
-    Ranking
+    Ranking,
+    AñadirCancionModal
   },
   data() {
     return {
       usuarioActual: null,
       token: null,
       modoYPlaylist: null,
-      mostrarRanking: false
+      mostrarRanking: false,
+      modalAñadirCancion: false
     }
   },
   methods: {

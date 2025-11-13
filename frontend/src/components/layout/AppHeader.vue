@@ -12,9 +12,13 @@
           <span class="icon">🏆</span>
           Ranking
         </button>
-        <button class="btn-header" @click="abrirAñadirCancion" disabled>
+        <button
+          class="btn-header"
+          @click="abrirAñadirCancion"
+          :disabled="!usuarioLogueado"
+          >
           <span class="icon">➕</span>
-          Añadir Canción
+        Añadir Canción
         </button>
       </div>
     </div>
@@ -37,8 +41,11 @@ export default {
       }
     },
     abrirAñadirCancion() {
-      console.log('Añadir canción')
-    }
+      if (this.usuarioLogueado) {
+        this.$emit('mostrar-añadir-cancion')
+      }
+    },
+
   }
 }
 </script>

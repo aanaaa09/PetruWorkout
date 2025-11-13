@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-
+from .routers import auth, game, game_rondas, add_song
 from .config.database import init_db
 from .routers import auth, game, game_rondas
 
@@ -42,6 +42,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(game.router, tags=["game"])  # Sin prefix
 app.include_router(game_rondas.router, tags=["rondas"])
+app.include_router(add_song.router, tags=["add_song"])
 
 
 # --------------------------
