@@ -13,10 +13,10 @@
           <select v-model="playlistSeleccionada" class="form-select">
             <option value="">Selecciona una playlist...</option>
             <option value="juego_clasico">🎵 Juego Clásico</option>
-            <option value="urban_hits">🎤 Urban Hits</option>
+            <option value="urban_hits">🔥 Urban Hits</option>
             <option value="ochenta_noventa">📻 Ochenta y Noventa</option>
             <option value="flamenco_rumba">💃 Flamenco y Rumba</option>
-            <option value="pop_espanol">🇪🇸 Pop Español</option>
+            <option value="pop_espanol">🎤 Pop Español</option>
           </select>
         </div>
 
@@ -309,6 +309,30 @@ export default {
   color: white;
   font-size: 1rem;
   transition: all 0.3s ease;
+}
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+/* Estilos específicos para las opciones del select */
+.form-select option {
+  background: #1a1a2e;
+  color: white;
+  padding: 0.5rem;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .form-select:focus,
