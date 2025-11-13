@@ -96,6 +96,7 @@ export default {
     },
 
     async registrar(data) {
+      if (this.cargando) return
       this.error = null
 
       if (data.password !== data.confirmPassword) {
