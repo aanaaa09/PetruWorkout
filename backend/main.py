@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+
+from backend.models import get_modelo_cancion
 from .routers import auth, game, game_rondas, add_song
-from .config.database import init_db
+from .config.database import init_db, Base, engine
 from .routers import auth, game, game_rondas
 
 # --------------------------
@@ -13,7 +15,13 @@ from .routers import auth, game, game_rondas
 # --------------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+# Crear modelos dinámicos para cada playlist que tengas
+playlists = ["juego_clasico", "urban_hits", "ochenta_noventa", "flamenco_rumba", "pop_espanol"]
+for key in playlists:
+    get_modelo_cancion(key)
 
+# Ahora sí creamos las tablas
+Base.metadata.create_all(bind=engine)
 # --------------------------
 # Crear app FastAPI
 # --------------------------
