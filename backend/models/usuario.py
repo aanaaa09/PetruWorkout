@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship
 from backend.config.database import Base
-import hashlib
+import bcrypt
 
 
 class Usuario(Base):
@@ -20,9 +20,9 @@ class Usuario(Base):
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hashea una contraseña usando SHA256"""
-        return hashlib.sha256(password.encode()).hexdigest()
+        """Hashea una contraseña usando bcrypt (mucho más seguro que SHA256)"""
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def verificar_password(self, password: str) -> bool:
         """Verifica si la contraseña es correcta"""
-        return self.password_hash == self.hash_password(password)
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))

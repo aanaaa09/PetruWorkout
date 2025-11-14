@@ -35,24 +35,21 @@ class CancionCRUD:
         logger.info(f"Canción guardada en {table_name}: {titulo} - {artista}")
 
     def get_all_by_playlist(self, db: Session, playlist_key: str):
-        """Obtiene todas las canciones de una playlist"""
+        """Obtiene todas las canciones de una playlist (optimizado)"""
         table_name = self._get_table_name(playlist_key)
 
         query = text(f"""
             SELECT id, titulo, artista, anio, spotify_id, spotify_url
             FROM {table_name}
+            ORDER BY fecha_agregada DESC
         """)
 
-        result = db.execute(query)
+        result = db.execute(query).fetchall()  # ← Más eficiente
 
-        # Crear objetos tipo namedtuple
         from collections import namedtuple
         Cancion = namedtuple('Cancion', ['id', 'titulo', 'artista', 'anio', 'spotify_id', 'spotify_url'])
 
-        canciones = [Cancion(*row) for row in result]
-
-        logger.info(f"Cargadas {len(canciones)} canciones de {table_name}")
-        return canciones
+        return [Cancion(*row) for row in result]
 
     def get_spotify_ids(self, db: Session, playlist_key: str) -> set:
         """Obtiene todos los IDs de Spotify de una playlist"""

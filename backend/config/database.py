@@ -6,9 +6,10 @@ from sqlalchemy.exc import SQLAlchemyError
 # Engine de SQLAlchemy
 engine = create_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,  # Verifica conexiones antes de usarlas
-    pool_size=10,
-    max_overflow=20
+    pool_pre_ping=True,
+    pool_size=20,
+    max_overflow=40,
+    pool_recycle=3600
 )
 
 # SessionLocal
