@@ -163,20 +163,21 @@ class GameServiceRondas:
 
             if correcto_final:
                 puntos_ganados = settings.PUNTOS_TITULO
-                mensaje = f"✅ ¡Correcto! ({similitud}% similitud)<br><strong>{titulo_real}</strong> - {artista_real}"
+                mensaje = f"✅ ¡Correcto! ({int(similitud)}% similitud)<br><strong>{titulo_real}</strong> - {artista_real}"
             else:
-                mensaje = f"❌ Incorrecto ({similitud}% similitud)<br>Era: <strong>{titulo_real}</strong> - {artista_real}"
+                mensaje = f"❌ Incorrecto ({int(similitud)}% similitud)<br>Era: <strong>{titulo_real}</strong> - {artista_real}"
 
         elif tipo_pregunta == 'solo_artista':
             resultado_fuzzy = verificar_respuesta_solo_artista(artista_real, artista_usuario)
             correcto_final = resultado_fuzzy['correcto']
             similitud = resultado_fuzzy['similitud']
 
+            # DESPUÉS:
             if correcto_final:
                 puntos_ganados = settings.PUNTOS_ARTISTA
-                mensaje = f"✅ ¡Correcto! ({similitud}% similitud)<br><strong>{titulo_real}</strong> - {artista_real}"
+                mensaje = f"✅ ¡Correcto! ({int(similitud)}% similitud)<br><strong>{titulo_real}</strong> - {artista_real}"
             else:
-                mensaje = f"❌ Incorrecto ({similitud}% similitud)<br>Era: {artista_real}<br>Canción: <strong>{titulo_real}</strong>"
+                mensaje = f"❌ Incorrecto ({int(similitud)}% similitud)<br>Era: {artista_real}<br>Canción: <strong>{titulo_real}</strong>"
 
         elif tipo_pregunta == 'solo_anio':
             resultado_fuzzy = verificar_respuesta_solo_anio(anio_real, anio_usuario)

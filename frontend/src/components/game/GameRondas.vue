@@ -104,9 +104,32 @@
     </div>
 
     <!-- Botón volver (solo visible si NO terminó la ronda) -->
-    <button v-if="rondaIniciada && !rondaTerminada" class="btn btn-volver" @click="volverConConfirmacion">
-      ⬅️ Volver al Menú
-    </button>
+    <button v-if="rondaIniciada && !rondaTerminada" class="btn btn-volver" @click="mostrarModalSalir = true">
+  ⬅️ Volver al Menú
+</button>
+
+<!-- Modal de confirmación para salir -->
+<transition name="modal-fade">
+  <div v-if="mostrarModalSalir" class="modal-overlay" @click.self="mostrarModalSalir = false">
+    <div class="modal-advertencia">
+      <div class="modal-header">
+        <h3>⚠️ Advertencia</h3>
+      </div>
+      <div class="modal-body">
+        <p>¿Seguro que quieres salir?</p>
+        <p class="texto-advertencia">Perderás el progreso de la ronda actual</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancelar" @click="mostrarModalSalir = false">
+          Cancelar
+        </button>
+        <button class="btn btn-confirmar-salir" @click="confirmarSalir">
+          Sí, salir
+        </button>
+      </div>
+    </div>
+  </div>
+</transition>
 
     <!-- Loading -->
     <div v-if="loading" style="text-align: center; padding: 20px;">
@@ -162,6 +185,7 @@ export default {
       puntosRonda: 0,
       puntosTotales: 0,
       rondaMostradaUnaVez: false,
+      mostrarModalSalir: false
 
     }
   },
@@ -457,14 +481,9 @@ export default {
       this.iniciarRonda()
     },
 
-    volverConConfirmacion() {
-      if (this.rondaIniciada && !this.rondaTerminada) {
-        if (confirm('¿Seguro que quieres salir? Perderás el progreso de la ronda actual.')) {
-          this.$emit('volver')
-        }
-      } else {
-        this.$emit('volver')
-      }
+    confirmarSalir() {
+      this.mostrarModalSalir = false
+      this.$emit('volver')
     }
   }
 }
@@ -616,6 +635,137 @@ export default {
 
   .botones-finales .btn {
     width: 100%;
+  }
+}
+
+/* Modal de advertencia */
+.modal-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding: 0;
+  animation: modalAppear 0.3s ease;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.modal-advertencia {
+  background: linear-gradient(135deg, #2d2d44 0%, #1e1e2e 100%);
+  border-radius: 20px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 0 0 2px rgba(243, 156, 18, 0.3);
+  animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 1.75rem 1.5rem 1.25rem;
+  border-bottom: 2px solid rgba(243, 156, 18, 0.3);
+  text-align: center;
+  background: rgba(243, 156, 18, 0.1);
+}
+
+.modal-header h3 {
+  color: #f39c12;
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.modal-body {
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.modal-body p {
+  color: white;
+  font-size: 1.15rem;
+  margin: 0 0 0.75rem 0;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.texto-advertencia {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+}
+
+.modal-footer {
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-cancelar,
+.btn-confirmar-salir {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-cancelar {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancelar:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-confirmar-salir {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+.btn-confirmar-salir:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .modal-advertencia {
+    width: 90vw;
+  }
+
+  .modal-footer {
+    flex-direction: column;
   }
 }
 </style>
