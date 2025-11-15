@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 from ..models.juego_tablero import PartidaTablero, TreeMapJugador
 from ..crud.cancion import cancion_crud
 from ..utils.fuzzy_match import verificar_respuesta_solo_titulo, verificar_respuesta_solo_artista
+from ..utils.qr_generator import generar_qr_base64
+from datetime import datetime
 import random
 import logging
 
@@ -14,8 +16,6 @@ class TableroService:
     @staticmethod
     def crear_partida(db: Session, playlist_key: str, configuracion: dict) -> PartidaTablero:
         """Crea una nueva partida de tablero"""
-
-        # Validar configuración
         tipo_juego = configuracion['tipo_juego']
 
         if tipo_juego == 'individual':
@@ -48,7 +48,9 @@ class TableroService:
                 partida_id=partida.id,
                 jugador_index=i,
                 canciones=[],
-                puntos_actuales=0
+                puntos_actuales=0,
+                completado_10=False,
+                karaoke_realizado=False
             )
             db.add(treemap)
 
@@ -59,36 +61,63 @@ class TableroService:
 
     @staticmethod
     def obtener_cancion_turno(db: Session, partida_id: int):
-        """Obtiene una canción para el turno actual"""
+        """Obtiene una canción para el turno actual y la guarda en la partida"""
 
         partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
         if not partida:
             return {'error': 'Partida no encontrada'}
 
-        # Obtener canción aleatoria de la playlist
+        # Obtener canciones de la playlist
         canciones = cancion_crud.get_all_by_playlist(db, partida.playlist_key)
-
         if not canciones:
             return {'error': 'No hay canciones disponibles'}
 
-        # Seleccionar canción aleatoria
-        cancion = random.choice(canciones)
+        # Inicializar canciones servidas si no existe
+        if not partida.canciones_servidas:
+            partida.canciones_servidas = []
 
-        # Obtener preview de iTunes (del servicio existente)
+        # Filtrar canciones no servidas
+        canciones_disponibles = [
+            c for c in canciones
+            if c.id not in partida.canciones_servidas
+        ]
+
+        # Si no quedan, resetear
+        if not canciones_disponibles:
+            logger.info(f"Reseteando canciones servidas de partida {partida_id}")
+            partida.canciones_servidas = []
+            canciones_disponibles = canciones
+
+        # Seleccionar canción aleatoria
+        import random
+        cancion = random.choice(canciones_disponibles)
+
+        # Obtener preview
         from ..services.itunes_service import ITunesService
         preview_url = ITunesService.buscar_preview(cancion.titulo, cancion.artista)
 
         if not preview_url:
             return {'error': 'No se encontró preview para esta canción'}
 
-        return {
-            'cancion_id': cancion.id,
-            'preview_url': preview_url,
+        # 🆕 GUARDAR LA CANCIÓN ACTUAL EN LA PARTIDA
+        partida.cancion_actual = {
+            'id': cancion.id,
+            'titulo': cancion.titulo,
+            'artista': cancion.artista,
+            'anio': cancion.anio,
             'spotify_id': cancion.spotify_id,
-            'titulo_real': cancion.titulo,
-            'artista_real': cancion.artista,
-            'anio_real': cancion.anio,
-            'spotify_url': cancion.spotify_url if cancion.spotify_url else f"https://open.spotify.com/track/{cancion.spotify_id}"
+            'spotify_url': cancion.spotify_url or f"https://open.spotify.com/track/{cancion.spotify_id}"
+        }
+
+        # Marcar como servida
+        partida.canciones_servidas.append(cancion.id)
+
+        db.commit()
+
+        return {
+            'preview_url': preview_url,
+            'turno_actual': partida.turno_actual,
+            'jugador_info': TableroService._obtener_info_jugador_actual(partida)
         }
 
     @staticmethod
@@ -106,6 +135,12 @@ class TableroService:
         if not partida:
             return {'error': 'Partida no encontrada'}
 
+        # 🆕 OBTENER LA CANCIÓN ACTUAL DE LA PARTIDA
+        if not partida.cancion_actual:
+            return {'error': 'No hay canción actual'}
+
+        cancion = partida.cancion_actual
+
         treemap = db.query(TreeMapJugador).filter(
             TreeMapJugador.partida_id == partida_id,
             TreeMapJugador.jugador_index == jugador_index
@@ -114,17 +149,13 @@ class TableroService:
         if not treemap:
             return {'error': 'TreeMap no encontrado'}
 
-        # Obtener la canción actual del turno (debería estar almacenada temporalmente)
-        # Por ahora, asumimos que se pasa la info de la canción
-        # En producción, deberías almacenar la canción actual en la partida
-
         # Validar título y artista
         resultado_titulo = verificar_respuesta_solo_titulo(
-            cancion['titulo_real'],
+            cancion['titulo'],
             titulo_usuario
         )
         resultado_artista = verificar_respuesta_solo_artista(
-            cancion['artista_real'],
+            cancion['artista'],
             artista_usuario
         )
 
@@ -139,22 +170,21 @@ class TableroService:
         anio_correcto = TableroService._verificar_posicion_anio(
             canciones_actuales,
             posicion,
-            cancion['anio_real']
+            cancion['anio']
         )
 
         if anio_correcto:
-            puntos_ganados += 1
+            puntos_ganados += 1  # 1 punto por año correcto
 
         if titulo_correcto and artista_correcto:
-            puntos_ganados += 5
+            puntos_ganados += 5  # 5 puntos por título y artista
 
-        # Actualizar TreeMap
+        # Actualizar TreeMap solo si el año es correcto
         if anio_correcto:
-            # Insertar canción en la posición
             nueva_cancion = {
-                'titulo': cancion['titulo_real'],
-                'artista': cancion['artista_real'],
-                'anio': cancion['anio_real'],
+                'titulo': cancion['titulo'],
+                'artista': cancion['artista'],
+                'anio': cancion['anio'],
                 'spotify_id': cancion['spotify_id'],
                 'spotify_url': cancion['spotify_url']
             }
@@ -177,34 +207,29 @@ class TableroService:
             'puntos_totales': treemap.puntos_actuales,
             'treemap_actualizado': treemap.canciones,
             'completado_10': treemap.completado_10,
-            'anio_real': cancion['anio_real']
+            'titulo_real': cancion['titulo'],
+            'artista_real': cancion['artista'],
+            'anio_real': cancion['anio']
         }
 
     @staticmethod
     def _verificar_posicion_anio(canciones: list, posicion: int, anio: int) -> bool:
         """Verifica si el año está en la posición correcta del TreeMap"""
-
         if not canciones:
-            # Primera canción, siempre es correcta
             return True
 
         # Verificar que mantiene el orden ascendente
-        if posicion > 0:
-            # Debe ser mayor o igual al anterior
-            if canciones[posicion - 1]['anio'] > anio:
-                return False
+        if posicion > 0 and canciones[posicion - 1]['anio'] > anio:
+            return False
 
-        if posicion < len(canciones):
-            # Debe ser menor o igual al siguiente
-            if canciones[posicion]['anio'] < anio:
-                return False
+        if posicion < len(canciones) and canciones[posicion]['anio'] < anio:
+            return False
 
         return True
 
     @staticmethod
     def avanzar_turno(db: Session, partida_id: int):
         """Avanza al siguiente turno"""
-
         partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
         if not partida:
             return {'error': 'Partida no encontrada'}
@@ -219,12 +244,59 @@ class TableroService:
         partida.turno_actual = (partida.turno_actual + 1) % num_jugadores
         db.commit()
 
-        return {'turno_actual': partida.turno_actual}
+        return {
+            'turno_actual': partida.turno_actual,
+            'jugador_turno': TableroService._obtener_info_jugador_turno(partida)
+        }
+
+    @staticmethod
+    def _obtener_info_jugador_turno(partida: PartidaTablero):
+        """Obtiene información del jugador en turno"""
+        configuracion = partida.jugadores
+        turno = partida.turno_actual
+
+        if partida.tipo_juego == 'individual':
+            jugador = configuracion['jugadores_individuales'][turno]
+            return {
+                'tipo': 'individual',
+                'nombre': jugador['nombre'],
+                'puntos': jugador.get('puntos', 0)
+            }
+        else:
+            pareja = configuracion['parejas'][turno]
+            return {
+                'tipo': 'pareja',
+                'nombre_pareja': pareja['nombre_pareja'],
+                'miembro1': pareja['miembro1']['nombre'],
+                'miembro2': pareja['miembro2']['nombre']
+            }
+
+    @staticmethod
+    def procesar_karaoke(db: Session, partida_id: int, jugador_index: int, puntos_karaoke: int):
+        """Procesa el resultado del karaoke"""
+        treemap = db.query(TreeMapJugador).filter(
+            TreeMapJugador.partida_id == partida_id,
+            TreeMapJugador.jugador_index == jugador_index
+        ).first()
+
+        if not treemap:
+            return {'error': 'TreeMap no encontrado'}
+
+        if treemap.karaoke_realizado:
+            return {'error': 'Ya se realizó el karaoke'}
+
+        treemap.puntos_actuales += puntos_karaoke
+        treemap.karaoke_realizado = True
+        db.commit()
+
+        return {
+            'puntos_karaoke': puntos_karaoke,
+            'puntos_totales': treemap.puntos_actuales
+        }
 
     @staticmethod
     def obtener_ganador(db: Session, partida_id: int):
         """Determina el ganador de la partida"""
-
         treemaps = db.query(TreeMapJugador).filter(
             TreeMapJugador.partida_id == partida_id
         ).all()
@@ -247,13 +319,11 @@ class TableroService:
     @staticmethod
     def finalizar_partida(db: Session, partida_id: int):
         """Finaliza la partida y actualiza puntos de usuarios registrados"""
-
         partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
         if not partida:
             return {'error': 'Partida no encontrada'}
 
         partida.estado = 'finalizada'
-        from datetime import datetime
         partida.fecha_fin = datetime.now()
 
         # Actualizar puntos de usuarios registrados
@@ -262,7 +332,6 @@ class TableroService:
         ).all()
 
         configuracion = partida.jugadores
-
         from ..crud.usuario import usuario_crud
 
         for treemap in treemaps:
@@ -283,6 +352,63 @@ class TableroService:
         db.commit()
 
         return {'mensaje': 'Partida finalizada y puntos actualizados'}
+
+    @staticmethod
+    def obtener_estado_partida(db: Session, partida_id: int):
+        """Obtiene el estado actual de la partida"""
+        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
+        if not partida:
+            return {'error': 'Partida no encontrada'}
+
+        treemaps = db.query(TreeMapJugador).filter(
+            TreeMapJugador.partida_id == partida_id
+        ).all()
+
+        return {
+            'partida_id': partida.id,
+            'turno_actual': partida.turno_actual,
+            'estado': partida.estado,
+            'jugador_turno': TableroService._obtener_info_jugador_turno(partida),
+            'treemaps': [
+                {
+                    'jugador_index': t.jugador_index,
+                    'canciones': t.canciones,
+                    'puntos': t.puntos_actuales,
+                    'completado_10': t.completado_10,
+                    'karaoke_realizado': t.karaoke_realizado
+                }
+                for t in treemaps
+            ]
+        }
+
+    @staticmethod
+    def _obtener_info_jugador_actual(partida: PartidaTablero):
+        """Obtiene la info del jugador/pareja actual"""
+
+        configuracion = partida.jugadores
+        turno = partida.turno_actual
+
+        if partida.tipo_juego == 'individual':
+            jugadores = configuracion.get('jugadores_individuales', [])
+            if turno < len(jugadores):
+                jugador = jugadores[turno]
+                return {
+                    'tipo': 'individual',
+                    'nombre': jugador['nombre'],
+                    'puntos': jugador.get('puntos', 0)
+                }
+        else:  # parejas
+            parejas = configuracion.get('parejas', [])
+            if turno < len(parejas):
+                pareja = parejas[turno]
+                return {
+                    'tipo': 'pareja',
+                    'nombre_pareja': pareja['nombre_pareja'],
+                    'miembro1': pareja['miembro1']['nombre'],
+                    'miembro2': pareja['miembro2']['nombre']
+                }
+
+        return {'error': 'Jugador no encontrado'}
 
 
 tablero_service = TableroService()

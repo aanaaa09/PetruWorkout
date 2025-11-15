@@ -1,186 +1,139 @@
 <template>
-  <div class="app-container">
-    <div class="blur-layer"></div>
-
-    <AppHeader
-      :usuario-logueado="!!usuarioActual"
-      @mostrar-ranking="mostrarRanking = true"
-      @mostrar-añadir-cancion="modalAñadirCancion = true"
+  <div class="selector-container">
+    <!-- Columna izquierda: Selector de modo -->
+    <ModeSelector
+      :modo-seleccionado="modoSeleccionado"
+      @select="seleccionarModo"
     />
 
-    <div class="main-content">
-      <Auth v-if="!usuarioActual" @login="iniciarSesion" />
+    <!-- Columna derecha: Contenido dinámico -->
+    <div class="contenido-area">
+      <!-- Mensaje inicial -->
+      <div v-if="!modoSeleccionado" class="mensaje-inicial">
+        <div class="mensaje-icono">👈</div>
+        <h2>Elige un modo de juego</h2>
+        <p>Selecciona una opción de la izquierda para comenzar</p>
+      </div>
 
-      <Ranking v-else-if="mostrarRanking" @cerrar="mostrarRanking = false" />
+      <!-- Instrucciones -->
+      <InstructionsCard
+        v-else-if="mostrarInstrucciones"
+        :titulo="tituloInstrucciones"
+        :show-continue="modoSeleccionado !== 'online'"
+        @close="volverModos"
+        @continue="mostrarInstrucciones = false"
+      >
+        <!-- Individual -->
+        <template v-if="modoSeleccionado === 'individual'">
+          <h3>📋 Cómo funciona:</h3>
+          <ul>
+            <li>Elige una playlist de canciones</li>
+            <li>Escucha fragmentos de 30 segundos</li>
+            <li>Adivina el título y el artista</li>
+            <li>Gana puntos por cada acierto</li>
+            <li>Compite en el ranking global</li>
+          </ul>
+        </template>
 
-      <template v-else>
-        <UserInfo
-          :usuario="usuarioActual"
-          @logout="cerrarSesion"
-        />
+        <!-- Tablero -->
+        <template v-else-if="modoSeleccionado === 'tablero'">
+          <div class="proximamente-banner">
+            🚧 PRÓXIMAMENTE 🚧
+          </div>
+          <h3>🎲 Características futuras:</h3>
+          <ul>
+            <li>Tablero interactivo con casillas especiales</li>
+            <li>Modo multijugador local (hasta 4 jugadores)</li>
+            <li>Casillas con retos y bonificaciones</li>
+            <li>Preguntas de diferentes tipos</li>
+            <li>Sistema de turnos y puntuación</li>
+          </ul>
+          <p class="proximamente-info">
+            Estamos trabajando en esta modalidad. ¡Vuelve pronto!
+          </p>
+        </template>
 
-        <PlaylistSelector
-          v-if="!modoYPlaylist"
-          @select="seleccionarModoYPlaylist"
-        />
+        <!-- Online -->
+        <template v-else-if="modoSeleccionado === 'online'">
+          <div class="proximamente-banner">
+            🚧 PRÓXIMAMENTE 🚧
+          </div>
+          <h3>🌐 Características futuras:</h3>
+          <ul>
+            <li>Partidas en tiempo real con jugadores de todo el mundo</li>
+            <li>Salas públicas y privadas</li>
+            <li>Chat en vivo durante las partidas</li>
+            <li>Rankings internacionales</li>
+            <li>Torneos y eventos especiales</li>
+          </ul>
+          <p class="proximamente-info">
+            El modo online llegará en futuras actualizaciones
+          </p>
+        </template>
+      </InstructionsCard>
 
-        <!-- NUEVO: Configuración de jugadores para modo tablero -->
-        <PlayerSetup
-          v-else-if="modoYPlaylist.modo === 'tablero' && !jugadoresTablero"
-          :playlist="modoYPlaylist.playlist"
-          @jugadores-listos="iniciarTablero"
-        />
-
-        <!-- Game Individual -->
-        <Game
-          v-else-if="modoYPlaylist.modo === 'tablero' && jugadoresTablero"
-          :playlist="modoYPlaylist.playlist"
-          :jugadores="jugadoresTablero"
-          @volver="volverSeleccion"
-        />
-
-        <!-- Game Rondas -->
-        <GameRondas
-          v-else-if="modoYPlaylist.modo === 'individual'"
-          :playlist="modoYPlaylist.playlist"
-          :token="token"
-          :usuario="usuarioActual"
-          @volver="volverSeleccion"
-          @actualizar-usuario="usuarioActual = $event"
-        />
-      </template>
+      <!-- Selector de playlist -->
+      <PlaylistGrid
+        v-else
+        :playlists="playlists"
+        @select="seleccionarPlaylist"
+        @back="mostrarInstrucciones = true"
+      />
     </div>
-
-    <AñadirCancionModal
-      :mostrar="modalAñadirCancion"
-      @cerrar="modalAñadirCancion = false"
-    />
   </div>
 </template>
 
 <script>
-import AppHeader from './components/layout/AppHeader.vue'
-import UserInfo from './components/layout/UserInfo.vue'
-import Auth from './components/auth/Auth.vue'
-import PlaylistSelector from './components/playlist/PlaylistSelector.vue'
-import PlayerSetup from './components/tablero/PlayerSetup.vue'
-import Game from './components/game/Game.vue'
-import GameRondas from './components/game/GameRondas.vue'
-import Ranking from './components/ranking/Ranking.vue'
-import AñadirCancionModal from './components/AñadirCancionModal.vue'
+import ModeSelector from './ModeSelector.vue'
+import InstructionsCard from './InstructionsCard.vue'
+import PlaylistGrid from './PlaylistGrid.vue'
+import { PLAYLISTS } from '../../config/playlists'
 
 export default {
+  name: 'PlaylistSelector',
   components: {
-    AppHeader,
-    UserInfo,
-    Auth,
-    PlaylistSelector,
-    PlayerSetup,
-    Game,
-    GameRondas,
-    Ranking,
-    AñadirCancionModal
+    ModeSelector,
+    InstructionsCard,
+    PlaylistGrid
   },
   data() {
     return {
-      usuarioActual: null,
-      token: null,
-      modoYPlaylist: null,
-      jugadoresTablero: null,
-      mostrarRanking: false,
-      modalAñadirCancion: false
+      modoSeleccionado: null,
+      mostrarInstrucciones: false,
+      playlists: PLAYLISTS
+    }
+  },
+  computed: {
+    tituloInstrucciones() {
+      const titulos = {
+        individual: '🎵 Modo Individual',
+        tablero: '🎲 Modo Tablero',
+        online: '🌐 Modo Online'
+      }
+      return titulos[this.modoSeleccionado] || 'Instrucciones'
     }
   },
   methods: {
-    iniciarSesion(data) {
-      this.usuarioActual = data.usuario
-      this.token = data.token
+    seleccionarModo(modo) {
+      this.modoSeleccionado = modo
+      this.mostrarInstrucciones = true
     },
 
-    async cerrarSesion() {
-      if (this.token) {
-        try {
-          await fetch('http://localhost:5000/api/auth/logout', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ token: this.token })
-          })
-        } catch (err) {
-          console.error('Error cerrando sesión:', err)
-        }
-      }
-      this.usuarioActual = null
-      this.token = null
-      this.modoYPlaylist = null
-      this.jugadoresTablero = null
-      this.mostrarRanking = false
+    volverModos() {
+      this.modoSeleccionado = null
+      this.mostrarInstrucciones = false
     },
 
-    seleccionarModoYPlaylist(data) {
-      this.modoYPlaylist = data
-
-      // Si es modo individual, no necesita configuración de jugadores
-      if (data.modo === 'individual') {
-        this.jugadoresTablero = null
-      }
-    },
-
-    iniciarTablero(data) {
-      console.log('🎮 Jugadores configurados:', data)
-      this.jugadoresTablero = data
-    },
-
-    volverSeleccion() {
-      // Cerrar sesiones de jugadores temporales (invitados y secundarios)
-      if (this.jugadoresTablero) {
-        this.cerrarSesionesTemporales()
-      }
-
-      this.modoYPlaylist = null
-      this.jugadoresTablero = null
-    },
-
-    async cerrarSesionesTemporales() {
-      if (!this.jugadoresTablero) return
-
-      const { jugadores } = this.jugadoresTablero
-
-      for (const jugador of jugadores) {
-        if (jugador.esPareja) {
-          // Cerrar sesión de miembros de pareja (excepto el usuario principal)
-          if (jugador.miembro1 && jugador.miembro1.token && jugador.miembro1.email !== this.usuarioActual?.email) {
-            await this.cerrarSesionToken(jugador.miembro1.token)
-          }
-          if (jugador.miembro2 && jugador.miembro2.token && jugador.miembro2.email !== this.usuarioActual?.email) {
-            await this.cerrarSesionToken(jugador.miembro2.token)
-          }
-        } else {
-          // Cerrar sesión de jugador individual (excepto el usuario principal)
-          if (jugador.token && jugador.email !== this.usuarioActual?.email) {
-            await this.cerrarSesionToken(jugador.token)
-          }
-        }
-      }
-    },
-
-    async cerrarSesionToken(token) {
-      try {
-        await fetch('http://localhost:5000/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token })
-        })
-      } catch (err) {
-        console.error('Error cerrando sesión temporal:', err)
-      }
+    seleccionarPlaylist(playlistKey) {
+      this.$emit('select', {
+        modo: this.modoSeleccionado,
+        playlist: playlistKey
+      })
     }
   }
 }
 </script>
+
 <style scoped>
 .selector-container {
   display: flex;

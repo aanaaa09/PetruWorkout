@@ -14,22 +14,31 @@
       <Ranking v-else-if="mostrarRanking" @cerrar="mostrarRanking = false" />
 
       <template v-else>
-        <UserInfo
-          :usuario="usuarioActual"
-          @logout="cerrarSesion"
-        />
+        <UserInfo :usuario="usuarioActual" @logout="cerrarSesion" />
 
+        <!-- Selector de modo y playlist -->
         <PlaylistSelector
           v-if="!modoYPlaylist"
           @select="seleccionarModoYPlaylist"
         />
 
-        <Game
-          v-else-if="modoYPlaylist.modo === 'tablero'"
+        <!-- Setup de jugadores para tablero -->
+        <PlayerSetup
+          v-else-if="modoYPlaylist.modo === 'tablero' && !partidaTablero"
+          :playlist="modoYPlaylist.playlist"
+          @partida-iniciada="iniciarPartidaTablero"
+        />
+
+        <!-- Juego Tablero -->
+        <GameTablero
+          v-else-if="modoYPlaylist.modo === 'tablero' && partidaTablero"
+          :partida-id="partidaTablero.partida_id"
+          :configuracion="partidaTablero.configuracion"
           :playlist="modoYPlaylist.playlist"
           @volver="volverSeleccion"
         />
 
+        <!-- Juego Individual (Rondas) -->
         <GameRondas
           v-else-if="modoYPlaylist.modo === 'individual'"
           :playlist="modoYPlaylist.playlist"
@@ -41,7 +50,6 @@
       </template>
     </div>
 
-    <!-- MODAL FUERA DEL main-content -->
     <AñadirCancionModal
       :mostrar="modalAñadirCancion"
       @cerrar="modalAñadirCancion = false"
@@ -54,17 +62,20 @@ import AppHeader from './components/layout/AppHeader.vue'
 import UserInfo from './components/layout/UserInfo.vue'
 import Auth from './components/auth/Auth.vue'
 import PlaylistSelector from './components/playlist/PlaylistSelector.vue'
-import Game from './components/game/Game.vue'
+import PlayerSetup from './components/tablero/PlayerSetup.vue'
+import GameTablero from './components/tablero/GameTablero.vue'
 import GameRondas from './components/game/GameRondas.vue'
 import Ranking from './components/ranking/Ranking.vue'
 import AñadirCancionModal from './components/AñadirCancionModal.vue'
+
 export default {
   components: {
     AppHeader,
     UserInfo,
     Auth,
     PlaylistSelector,
-    Game,
+    PlayerSetup,
+    GameTablero,
     GameRondas,
     Ranking,
     AñadirCancionModal
@@ -74,6 +85,7 @@ export default {
       usuarioActual: null,
       token: null,
       modoYPlaylist: null,
+      partidaTablero: null,
       mostrarRanking: false,
       modalAñadirCancion: false
     }
@@ -83,14 +95,13 @@ export default {
       this.usuarioActual = data.usuario
       this.token = data.token
     },
+
     async cerrarSesion() {
       if (this.token) {
         try {
           await fetch('http://localhost:5000/api/auth/logout', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: this.token })
           })
         } catch (err) {
@@ -100,17 +111,29 @@ export default {
       this.usuarioActual = null
       this.token = null
       this.modoYPlaylist = null
+      this.partidaTablero = null
       this.mostrarRanking = false
     },
+
     seleccionarModoYPlaylist(data) {
+      console.log('🎮 Modo y playlist seleccionados:', data)
       this.modoYPlaylist = data
     },
+
+    iniciarPartidaTablero(data) {
+      console.log('🎲 Partida de tablero iniciada:', data)
+      this.partidaTablero = data
+    },
+
     volverSeleccion() {
       this.modoYPlaylist = null
+      this.partidaTablero = null
     }
   }
 }
 </script>
+
+
 
 <style>
 * {

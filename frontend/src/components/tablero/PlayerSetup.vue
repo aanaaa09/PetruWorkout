@@ -560,7 +560,6 @@ export default {
 </script>
 
 <style scoped>
-
 .player-setup-container {
   display: flex;
   justify-content: center;
@@ -581,38 +580,7 @@ export default {
   animation: fadeIn 0.5s ease;
 }
 
-.miembros-pareja {
-  font-size: 0.85rem !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  font-style: italic;
-}
-
-.badge-tipo.invitado {
-  background: rgba(243, 156, 18, 0.2);
-  color: #f39c12;
-  border-color: rgba(243, 156, 18, 0.4);
-}
-
-.player-setup-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 70vh;
-  padding: 1rem;
-}
-
-.setup-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  width: 100%;
-  max-width: 600px;
-  animation: fadeIn 0.5s ease;
-}
-
+/* Headers */
 .paso-tipo h2,
 .paso-cantidad h2,
 .paso-registro h2,
@@ -630,6 +598,7 @@ export default {
   margin-bottom: 2rem;
 }
 
+/* Botones de tipo */
 .tipo-botones {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -666,8 +635,10 @@ export default {
 .btn-tipo p {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
+  margin: 0;
 }
 
+/* Advertencia */
 .advertencia {
   background: rgba(243, 156, 18, 0.2);
   border: 1px solid rgba(243, 156, 18, 0.5);
@@ -676,8 +647,10 @@ export default {
   text-align: center !important;
   color: #f39c12 !important;
   font-weight: 600;
+  margin-bottom: 1rem;
 }
 
+/* Selector de cantidad */
 .cantidad-selector {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -703,6 +676,7 @@ export default {
   box-shadow: 0 12px 40px rgba(156, 39, 176, 0.4);
 }
 
+/* Botón volver pequeño */
 .btn-volver-pequeno {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -719,6 +693,7 @@ export default {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Registro */
 .registro-opciones {
   margin-top: 2rem;
 }
@@ -762,6 +737,7 @@ export default {
   border-color: #f39c12;
 }
 
+/* Nombre de pareja */
 .nombre-pareja-input {
   background: rgba(255, 255, 255, 0.05);
   padding: 1.5rem;
@@ -811,6 +787,11 @@ export default {
   box-shadow: 0 8px 24px rgba(0, 200, 81, 0.4);
 }
 
+.btn-confirmar-nombre:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .registro-miembro h3 {
   text-align: center;
   color: white;
@@ -818,27 +799,30 @@ export default {
   font-size: 1.2rem;
 }
 
-/* Modales */
+/* ========== MODALES ========== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 9999;
+  padding: 1rem;
 }
 
 .modal-login {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border-radius: 20px;
   padding: 2rem;
-  max-width: 400px;
-  width: 90%;
+  width: 100%;
+  max-width: 450px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
@@ -848,11 +832,11 @@ export default {
 @keyframes modalAppear {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.9) translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -863,12 +847,16 @@ export default {
   background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 1.25rem;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .btn-cerrar-modal:hover {
@@ -880,17 +868,21 @@ export default {
   color: white;
   text-align: center;
   margin-bottom: 1.5rem;
+  margin-top: 0;
+  font-size: 1.5rem;
 }
 
 .input-modal {
   width: 100%;
-  padding: 0.875rem;
+  padding: 1rem;
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
   color: white;
   font-size: 1rem;
   margin-bottom: 1rem;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 .input-modal::placeholder {
@@ -901,17 +893,25 @@ export default {
   outline: none;
   border-color: #9c27b0;
   background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
 }
 
 .error-mensaje {
   background: rgba(239, 68, 68, 0.2);
   border: 1px solid rgba(239, 68, 68, 0.5);
   color: #fca5a5;
-  padding: 0.75rem;
-  border-radius: 8px;
+  padding: 1rem;
+  border-radius: 10px;
   margin-bottom: 1rem;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
 }
 
 .btn-modal-confirmar {
@@ -937,7 +937,8 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
 }
-/* Resumen */
+
+/* ========== RESUMEN ========== */
 .resumen-lista {
   display: flex;
   flex-direction: column;
@@ -982,9 +983,15 @@ export default {
   font-size: 0.9rem;
 }
 
+.miembros-pareja {
+  font-size: 0.85rem !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-style: italic;
+}
+
 .badge-tipo {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -993,8 +1000,10 @@ export default {
   border: 1px solid rgba(0, 200, 81, 0.4);
 }
 
-.resumen-item .badge-tipo {
-  margin-top: 0.25rem;
+.badge-tipo.invitado {
+  background: rgba(243, 156, 18, 0.2);
+  color: #f39c12;
+  border-color: rgba(243, 156, 18, 0.4);
 }
 
 .resumen-botones {
@@ -1032,12 +1041,17 @@ export default {
   box-shadow: 0 8px 32px rgba(0, 200, 81, 0.3);
 }
 
-.btn-comenzar:hover {
+.btn-comenzar:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0, 200, 81, 0.4);
 }
 
-/* Responsive */
+.btn-comenzar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
   .setup-card {
     padding: 1.5rem;
@@ -1058,6 +1072,11 @@ export default {
   .resumen-botones {
     flex-direction: column;
   }
+
+  .modal-login {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1066,7 +1085,13 @@ export default {
   }
 
   .modal-login {
-    padding: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .btn-cerrar-modal {
+    width: 36px;
+    height: 36px;
+    font-size: 1.25rem;
   }
 }
 </style>

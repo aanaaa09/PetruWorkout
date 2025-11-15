@@ -8,10 +8,15 @@ class PartidaTablero(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     playlist_key = Column(String(100), nullable=False)
-    tipo_juego = Column(String(20), nullable=False)  # 'individual' o 'parejas'
-    estado = Column(String(20), default='activa')  # 'activa', 'finalizada'
-    jugadores = Column(JSON, nullable=False)  # Lista de jugadores con su info
+    tipo_juego = Column(String(20), nullable=False)
+    estado = Column(String(20), default='activa')
+    jugadores = Column(JSON, nullable=False)
     turno_actual = Column(Integer, default=0)
+
+    # 🆕 AÑADIR ESTOS CAMPOS:
+    cancion_actual = Column(JSON, nullable=True)  # Info de la canción sonando
+    canciones_servidas = Column(JSON, default=list)  # IDs ya usados
+
     fecha_inicio = Column(DateTime(timezone=True), server_default=func.now())
     fecha_fin = Column(DateTime(timezone=True), nullable=True)
 
