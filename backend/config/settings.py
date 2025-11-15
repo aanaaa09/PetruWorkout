@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     # Spotify API
     SPOTIFY_CLIENT_ID: str
     SPOTIFY_CLIENT_SECRET: str
-
+    SPOTIFY_REFRESH_TOKEN: str = ""
+    SPOTIFY_USER_TOKEN: str = ""
 
     # Sesiones
     SESSION_DURATION_DAYS: int = 7

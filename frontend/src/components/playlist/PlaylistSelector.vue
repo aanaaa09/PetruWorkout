@@ -1,151 +1,186 @@
 <template>
-  <div class="selector-container">
-    <ModeSelector
-      :modo-seleccionado="modoSeleccionado"
-      @select="seleccionarModo"
+  <div class="app-container">
+    <div class="blur-layer"></div>
+
+    <AppHeader
+      :usuario-logueado="!!usuarioActual"
+      @mostrar-ranking="mostrarRanking = true"
+      @mostrar-añadir-cancion="modalAñadirCancion = true"
     />
 
-    <div class="contenido-area">
-      <div v-if="!modoSeleccionado" class="mensaje-inicial">
-        <div class="mensaje-icono">🎮</div>
-        <h2>Selecciona un modo de juego</h2>
-        <p>Elige cómo quieres jugar desde el menú de la izquierda</p>
-      </div>
+    <div class="main-content">
+      <Auth v-if="!usuarioActual" @login="iniciarSesion" />
 
-      <!-- NUEVO: Instrucciones del Modo Individual (Rondas) -->
-      <InstructionsCard
-        v-else-if="modoSeleccionado === 'individual' && !playlistVisible"
-        titulo="🎵 Juego Individual - Rondas"
-        :show-continue="true"
-        @close="volverModos"
-        @continue="mostrarPlaylists"
-      >
-        <h3>📋 Cómo jugar:</h3>
-        <ul>
-          <li><strong>10 Preguntas:</strong> Cada ronda tiene 10 canciones</li>
-          <li><strong>Dado Aleatorio:</strong> Se tira un dado que decide qué adivinar:
-            <ul style="margin-top: 0.5rem; padding-left: 1rem;">
-              <li>🎵 <strong>Título y Artista</strong> (2 pts cada uno)</li>
-              <li>📅 <strong>Solo el Año</strong> (4 pts)</li>
-              <li>🎤 <strong>Solo el Artista</strong> (2 pts)</li>
-            </ul>
-          </li>
-          <li><strong>Racha de Aciertos:</strong> Respuestas correctas consecutivas suman bonus (+1 pt por cada una)</li>
-          <li><strong>Puntuación Final:</strong> Al terminar la ronda, los puntos se suman a tu cuenta</li>
-        </ul>
+      <Ranking v-else-if="mostrarRanking" @cerrar="mostrarRanking = false" />
 
-        <h3>💡 Consejos:</h3>
-        <ul>
-          <li>Mantén la racha para multiplicar tus puntos</li>
-          <li>El sistema acepta variaciones en el título/artista</li>
-          <li>Puedes rendirte si no sabes la respuesta</li>
-        </ul>
-      </InstructionsCard>
+      <template v-else>
+        <UserInfo
+          :usuario="usuarioActual"
+          @logout="cerrarSesion"
+        />
 
-      <!-- NUEVO: Instrucciones Modo Tablero (Juego Clásico) -->
-      <InstructionsCard
-        v-else-if="modoSeleccionado === 'tablero' && !playlistVisible"
-        titulo="🎲 Modo Tablero - Clásico"
-        :show-continue="true"
-        @close="volverModos"
-        @continue="mostrarPlaylistsTablero"
-      >
-        <h3>📋 Cómo jugar:</h3>
-        <ul>
-          <li><strong>Escucha:</strong> Se reproducirá un fragmento de 30 segundos</li>
-          <li><strong>Adivina:</strong> Escribe el título y artista de la canción</li>
-          <li><strong>Verifica:</strong> No necesitas ser exacto, aceptamos similitudes</li>
-          <li><strong>Juego Libre:</strong> Sin límite de canciones, juega a tu ritmo</li>
-        </ul>
+        <PlaylistSelector
+          v-if="!modoYPlaylist"
+          @select="seleccionarModoYPlaylist"
+        />
 
-        <h3>💡 Consejos:</h3>
-        <ul>
-          <li>El sistema acepta variaciones en el título</li>
-          <li>Si hay varios artistas, escribe al menos uno</li>
-          <li>Puedes rendirte para ver la respuesta</li>
-        </ul>
-      </InstructionsCard>
+        <!-- NUEVO: Configuración de jugadores para modo tablero -->
+        <PlayerSetup
+          v-else-if="modoYPlaylist.modo === 'tablero' && !jugadoresTablero"
+          :playlist="modoYPlaylist.playlist"
+          @jugadores-listos="iniciarTablero"
+        />
 
-      <!-- Modo Online sin cambios -->
-      <InstructionsCard
-        v-else-if="modoSeleccionado === 'online' && !playlistVisible"
-        titulo="🌐 Modo Online"
-        @close="volverModos"
-      >
-        <div class="proximamente-banner">
-          <span>🚧 Próximamente disponible 🚧</span>
-        </div>
-        <!-- ... resto igual ... -->
-      </InstructionsCard>
+        <!-- Game Individual -->
+        <Game
+          v-else-if="modoYPlaylist.modo === 'tablero' && jugadoresTablero"
+          :playlist="modoYPlaylist.playlist"
+          :jugadores="jugadoresTablero"
+          @volver="volverSeleccion"
+        />
 
-      <!-- Selector de Playlists para Individual -->
-      <PlaylistGrid
-        v-else-if="modoSeleccionado === 'individual' && playlistVisible"
-        @back="volverInstrucciones"
-        @select="selectIndividual"
-      />
-
-      <!-- Selector de Playlists para Tablero -->
-      <PlaylistGrid
-        v-else-if="modoSeleccionado === 'tablero' && playlistVisible"
-        @back="volverInstrucciones"
-        @select="selectTablero"
-      />
+        <!-- Game Rondas -->
+        <GameRondas
+          v-else-if="modoYPlaylist.modo === 'individual'"
+          :playlist="modoYPlaylist.playlist"
+          :token="token"
+          :usuario="usuarioActual"
+          @volver="volverSeleccion"
+          @actualizar-usuario="usuarioActual = $event"
+        />
+      </template>
     </div>
+
+    <AñadirCancionModal
+      :mostrar="modalAñadirCancion"
+      @cerrar="modalAñadirCancion = false"
+    />
   </div>
 </template>
 
 <script>
-import ModeSelector from './ModeSelector.vue'
-import InstructionsCard from './InstructionsCard.vue'
-import PlaylistGrid from './PlaylistGrid.vue'
+import AppHeader from './components/layout/AppHeader.vue'
+import UserInfo from './components/layout/UserInfo.vue'
+import Auth from './components/auth/Auth.vue'
+import PlaylistSelector from './components/playlist/PlaylistSelector.vue'
+import PlayerSetup from './components/tablero/PlayerSetup.vue'
+import Game from './components/game/Game.vue'
+import GameRondas from './components/game/GameRondas.vue'
+import Ranking from './components/ranking/Ranking.vue'
+import AñadirCancionModal from './components/AñadirCancionModal.vue'
 
 export default {
   components: {
-    ModeSelector,
-    InstructionsCard,
-    PlaylistGrid
+    AppHeader,
+    UserInfo,
+    Auth,
+    PlaylistSelector,
+    PlayerSetup,
+    Game,
+    GameRondas,
+    Ranking,
+    AñadirCancionModal
   },
   data() {
     return {
-      modoSeleccionado: null,
-      playlistVisible: false
+      usuarioActual: null,
+      token: null,
+      modoYPlaylist: null,
+      jugadoresTablero: null,
+      mostrarRanking: false,
+      modalAñadirCancion: false
     }
   },
   methods: {
-    seleccionarModo(modo) {
-      this.modoSeleccionado = modo
-      this.playlistVisible = false
+    iniciarSesion(data) {
+      this.usuarioActual = data.usuario
+      this.token = data.token
     },
 
-    volverModos() {
-      this.modoSeleccionado = null
-      this.playlistVisible = false
+    async cerrarSesion() {
+      if (this.token) {
+        try {
+          await fetch('http://localhost:5000/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: this.token })
+          })
+        } catch (err) {
+          console.error('Error cerrando sesión:', err)
+        }
+      }
+      this.usuarioActual = null
+      this.token = null
+      this.modoYPlaylist = null
+      this.jugadoresTablero = null
+      this.mostrarRanking = false
     },
 
-    mostrarPlaylists() {
-      this.playlistVisible = true
+    seleccionarModoYPlaylist(data) {
+      this.modoYPlaylist = data
+
+      // Si es modo individual, no necesita configuración de jugadores
+      if (data.modo === 'individual') {
+        this.jugadoresTablero = null
+      }
     },
 
-    mostrarPlaylistsTablero() {
-      this.playlistVisible = true
+    iniciarTablero(data) {
+      console.log('🎮 Jugadores configurados:', data)
+      this.jugadoresTablero = data
     },
 
-    volverInstrucciones() {
-      this.playlistVisible = false
+    volverSeleccion() {
+      // Cerrar sesiones de jugadores temporales (invitados y secundarios)
+      if (this.jugadoresTablero) {
+        this.cerrarSesionesTemporales()
+      }
+
+      this.modoYPlaylist = null
+      this.jugadoresTablero = null
     },
 
-    selectIndividual(key) {
-      this.$emit('select', { modo: 'individual', playlist: key })
+    async cerrarSesionesTemporales() {
+      if (!this.jugadoresTablero) return
+
+      const { jugadores } = this.jugadoresTablero
+
+      for (const jugador of jugadores) {
+        if (jugador.esPareja) {
+          // Cerrar sesión de miembros de pareja (excepto el usuario principal)
+          if (jugador.miembro1 && jugador.miembro1.token && jugador.miembro1.email !== this.usuarioActual?.email) {
+            await this.cerrarSesionToken(jugador.miembro1.token)
+          }
+          if (jugador.miembro2 && jugador.miembro2.token && jugador.miembro2.email !== this.usuarioActual?.email) {
+            await this.cerrarSesionToken(jugador.miembro2.token)
+          }
+        } else {
+          // Cerrar sesión de jugador individual (excepto el usuario principal)
+          if (jugador.token && jugador.email !== this.usuarioActual?.email) {
+            await this.cerrarSesionToken(jugador.token)
+          }
+        }
+      }
     },
 
-    selectTablero(key) {
-      this.$emit('select', { modo: 'tablero', playlist: key })
+    async cerrarSesionToken(token) {
+      try {
+        await fetch('http://localhost:5000/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token })
+        })
+      } catch (err) {
+        console.error('Error cerrando sesión temporal:', err)
+      }
     }
   }
 }
 </script>
-
 <style scoped>
 .selector-container {
   display: flex;

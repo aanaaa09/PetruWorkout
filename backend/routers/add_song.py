@@ -7,6 +7,15 @@ from ..crud.cancion import cancion_crud
 from ..config.settings import settings, Settings
 import logging
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from ..config.database import get_db
+from ..services.spotify_service import SpotifyService
+from ..crud.cancion import cancion_crud
+from ..config.settings import settings, Settings
+import logging
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["add_song"])
@@ -100,7 +109,7 @@ async def buscar_cancion(data: BuscarCancionRequest, db: Session = Depends(get_d
 
 @router.post("/añadir-cancion")
 async def añadir_cancion(data: AñadirCancionRequest, db: Session = Depends(get_db)):
-    """Añade una canción a una playlist"""
+    """Añade una canción a una playlist (BD local y Spotify)"""
 
     # Validar playlist
     if data.playlist_key not in settings.PLAYLISTS:
@@ -142,7 +151,7 @@ async def añadir_cancion(data: AñadirCancionRequest, db: Session = Depends(get
             except (ValueError, IndexError):
                 pass
 
-        # Guardar en la base de datos
+        # 1. Guardar en la base de datos LOCAL
         cancion_crud.create(
             db,
             titulo=titulo,
@@ -153,11 +162,21 @@ async def añadir_cancion(data: AñadirCancionRequest, db: Session = Depends(get
             playlist_key=data.playlist_key
         )
 
-        logger.info(f"Canción añadida: {titulo} - {artista} a {data.playlist_key}")
+        logger.info(f"Canción añadida a BD local: {titulo} - {artista} en {data.playlist_key}")
+
+        # 2. Añadir a la playlist REAL de Spotify
+        playlist_id = settings.PLAYLISTS[data.playlist_key]
+        spotify_agregada = SpotifyService.agregar_cancion_a_playlist(playlist_id, data.spotify_id)
+
+        if spotify_agregada:
+            logger.info(f"✅ Canción también añadida a playlist de Spotify: {titulo}")
+        else:
+            logger.warning(f"⚠️ Canción guardada localmente pero NO se pudo añadir a Spotify: {titulo}")
 
         return {
             'success': True,
             'mensaje': 'Canción añadida correctamente',
+            'spotify_sincronizada': spotify_agregada,
             'cancion': {
                 'titulo': titulo,
                 'artista': artista,
@@ -165,6 +184,8 @@ async def añadir_cancion(data: AñadirCancionRequest, db: Session = Depends(get
             }
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error añadiendo canción: {e}")
         raise HTTPException(status_code=500, detail=f"Error al añadir la canción: {str(e)}")

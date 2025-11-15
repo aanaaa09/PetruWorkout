@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from backend.models import get_modelo_cancion
-from .routers import auth, game, game_rondas, add_song
+from .routers import auth, game, game_rondas, add_song, tablero
 from .config.database import init_db, Base, engine
 from .routers import auth, game, game_rondas
 
@@ -51,7 +51,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(game.router, tags=["game"])  # Sin prefix
 app.include_router(game_rondas.router, tags=["rondas"])
 app.include_router(add_song.router, tags=["add_song"])
-
+app.include_router(tablero.router)
 
 # --------------------------
 # Health y info API
