@@ -38,7 +38,7 @@
     <!-- Línea de Tiempo Visual -->
     <div class="linea-tiempo-container">
       <h3>📊 Línea de Tiempo Musical</h3>
-      <p class="orden-explicacion">COLOCACIÓN: ⬆️ Más antiguas abajo | ⬇️ Más recientes arriba</p>
+      <p class="orden-explicacion">COLOCACIÓN: ⬆Más antiguas abajo | Más recientes arriba</p>
       <div class="linea-tiempo-lista">
         <!-- Casilla inicial (si está vacío) -->
         <div v-if="lineaTiempoInvertida.length === 0" class="linea-casilla vacia" @click="seleccionarPosicion(0)">
