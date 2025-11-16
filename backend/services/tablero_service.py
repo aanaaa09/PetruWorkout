@@ -1,9 +1,12 @@
 from sqlalchemy.orm import Session
 from ..models.juego_tablero import PartidaTablero, TreeMapJugador
 from ..crud.cancion import cancion_crud
+from ..crud.usuario import usuario_crud
+from ..crud.sesion import sesion_crud
 from ..utils.fuzzy_match import verificar_respuesta_solo_titulo, verificar_respuesta_solo_artista
 from ..utils.qr_generator import generar_qr_base64
 from datetime import datetime
+from sortedcontainers import SortedList
 import random
 import logging
 
@@ -18,15 +21,75 @@ class TableroService:
         """Crea una nueva partida de tablero"""
         tipo_juego = configuracion['tipo_juego']
 
+        # Validar y procesar jugadores según el tipo
         if tipo_juego == 'individual':
             jugadores = configuracion.get('jugadores_individuales', [])
             if len(jugadores) > 4 or len(jugadores) < 1:
                 raise ValueError("Debe haber entre 1 y 4 jugadores")
+
+            # Validar y cargar datos de jugadores registrados
+            for jugador in jugadores:
+                if jugador['tipo'] == 'registrado':
+                    if not jugador.get('token'):
+                        raise ValueError(f"Token requerido para jugador registrado: {jugador['nombre']}")
+
+                    # Validar sesión y cargar datos del usuario
+                    sesion = sesion_crud.validate_token(db, jugador['token'])
+                    if not sesion:
+                        raise ValueError(f"Sesión inválida para jugador: {jugador['nombre']}")
+
+                    usuario = usuario_crud.get_by_id(db, sesion.usuario_id)
+                    if not usuario:
+                        raise ValueError(f"Usuario no encontrado: {jugador['nombre']}")
+
+                    # Actualizar datos del jugador con info de BD
+                    jugador['usuario_id'] = usuario.id
+                    jugador['nombre'] = usuario.nombre
+                    jugador['email'] = usuario.email
+                    jugador['puntos'] = usuario.puntos
+
         else:  # parejas
             parejas = configuracion.get('parejas', [])
             if len(parejas) > 3 or len(parejas) < 1:
                 raise ValueError("Debe haber entre 1 y 3 parejas")
-            jugadores = parejas
+
+            # Validar y cargar datos de cada miembro de pareja
+            for pareja in parejas:
+                # Procesar miembro 1
+                miembro1 = pareja['miembro1']
+                if miembro1['tipo'] == 'registrado':
+                    if not miembro1.get('token'):
+                        raise ValueError(f"Token requerido para {miembro1['nombre']}")
+
+                    sesion = sesion_crud.validate_token(db, miembro1['token'])
+                    if not sesion:
+                        raise ValueError(f"Sesión inválida para {miembro1['nombre']}")
+
+                    usuario = usuario_crud.get_by_id(db, sesion.usuario_id)
+                    if not usuario:
+                        raise ValueError(f"Usuario no encontrado: {miembro1['nombre']}")
+
+                    miembro1['usuario_id'] = usuario.id
+                    miembro1['nombre'] = usuario.nombre
+                    miembro1['email'] = usuario.email
+
+                # Procesar miembro 2
+                miembro2 = pareja['miembro2']
+                if miembro2['tipo'] == 'registrado':
+                    if not miembro2.get('token'):
+                        raise ValueError(f"Token requerido para {miembro2['nombre']}")
+
+                    sesion = sesion_crud.validate_token(db, miembro2['token'])
+                    if not sesion:
+                        raise ValueError(f"Sesión inválida para {miembro2['nombre']}")
+
+                    usuario = usuario_crud.get_by_id(db, sesion.usuario_id)
+                    if not usuario:
+                        raise ValueError(f"Usuario no encontrado: {miembro2['nombre']}")
+
+                    miembro2['usuario_id'] = usuario.id
+                    miembro2['nombre'] = usuario.nombre
+                    miembro2['email'] = usuario.email
 
         # Crear partida
         partida = PartidaTablero(
@@ -34,7 +97,8 @@ class TableroService:
             tipo_juego=tipo_juego,
             jugadores=configuracion,
             turno_actual=0,
-            estado='activa'
+            estado='activa',
+            canciones_servidas=[]
         )
 
         db.add(partida)
@@ -42,12 +106,16 @@ class TableroService:
         db.refresh(partida)
 
         # Crear TreeMaps para cada jugador/pareja
-        num_jugadores = len(jugadores)
+        if tipo_juego == 'individual':
+            num_jugadores = len(jugadores)
+        else:
+            num_jugadores = len(parejas)
+
         for i in range(num_jugadores):
             treemap = TreeMapJugador(
                 partida_id=partida.id,
                 jugador_index=i,
-                canciones=[],
+                canciones=[],  # Lista vacía que será ordenada
                 puntos_actuales=0,
                 completado_10=False,
                 karaoke_realizado=False
@@ -56,7 +124,7 @@ class TableroService:
 
         db.commit()
 
-        logger.info(f"Partida tablero creada: ID={partida.id}, Jugadores={num_jugadores}")
+        logger.info(f"Partida tablero creada: ID={partida.id}, Tipo={tipo_juego}, Jugadores={num_jugadores}")
         return partida
 
     @staticmethod
@@ -76,20 +144,22 @@ class TableroService:
         if not partida.canciones_servidas:
             partida.canciones_servidas = []
 
-        # Filtrar canciones no servidas
+        # Filtrar canciones no servidas y que tengan año
         canciones_disponibles = [
             c for c in canciones
-            if c.id not in partida.canciones_servidas
+            if c.id not in partida.canciones_servidas and c.anio is not None
         ]
 
         # Si no quedan, resetear
         if not canciones_disponibles:
             logger.info(f"Reseteando canciones servidas de partida {partida_id}")
             partida.canciones_servidas = []
-            canciones_disponibles = canciones
+            canciones_disponibles = [c for c in canciones if c.anio is not None]
+
+        if not canciones_disponibles:
+            return {'error': 'No hay canciones con año disponibles'}
 
         # Seleccionar canción aleatoria
-        import random
         cancion = random.choice(canciones_disponibles)
 
         # Obtener preview
@@ -99,7 +169,7 @@ class TableroService:
         if not preview_url:
             return {'error': 'No se encontró preview para esta canción'}
 
-        # 🆕 GUARDAR LA CANCIÓN ACTUAL EN LA PARTIDA
+        # Guardar la canción actual en la partida
         partida.cancion_actual = {
             'id': cancion.id,
             'titulo': cancion.titulo,
@@ -118,267 +188,6 @@ class TableroService:
             'preview_url': preview_url,
             'turno_actual': partida.turno_actual,
             'jugador_info': TableroService._obtener_info_jugador_actual(partida)
-        }
-
-    @staticmethod
-    def colocar_cancion_treemap(
-            db: Session,
-            partida_id: int,
-            jugador_index: int,
-            posicion: int,
-            titulo_usuario: str,
-            artista_usuario: str
-    ):
-        """Coloca una canción en el TreeMap del jugador y valida"""
-
-        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
-        if not partida:
-            return {'error': 'Partida no encontrada'}
-
-        # 🆕 OBTENER LA CANCIÓN ACTUAL DE LA PARTIDA
-        if not partida.cancion_actual:
-            return {'error': 'No hay canción actual'}
-
-        cancion = partida.cancion_actual
-
-        treemap = db.query(TreeMapJugador).filter(
-            TreeMapJugador.partida_id == partida_id,
-            TreeMapJugador.jugador_index == jugador_index
-        ).first()
-
-        if not treemap:
-            return {'error': 'TreeMap no encontrado'}
-
-        # Validar título y artista
-        resultado_titulo = verificar_respuesta_solo_titulo(
-            cancion['titulo'],
-            titulo_usuario
-        )
-        resultado_artista = verificar_respuesta_solo_artista(
-            cancion['artista'],
-            artista_usuario
-        )
-
-        titulo_correcto = resultado_titulo['correcto']
-        artista_correcto = resultado_artista['correcto']
-
-        # Calcular puntos
-        puntos_ganados = 0
-
-        # Verificar si el año está en la posición correcta
-        canciones_actuales = treemap.canciones or []
-        anio_correcto = TableroService._verificar_posicion_anio(
-            canciones_actuales,
-            posicion,
-            cancion['anio']
-        )
-
-        if anio_correcto:
-            puntos_ganados += 1  # 1 punto por año correcto
-
-        if titulo_correcto and artista_correcto:
-            puntos_ganados += 5  # 5 puntos por título y artista
-
-        # Actualizar TreeMap solo si el año es correcto
-        if anio_correcto:
-            nueva_cancion = {
-                'titulo': cancion['titulo'],
-                'artista': cancion['artista'],
-                'anio': cancion['anio'],
-                'spotify_id': cancion['spotify_id'],
-                'spotify_url': cancion['spotify_url']
-            }
-            canciones_actuales.insert(posicion, nueva_cancion)
-            treemap.canciones = canciones_actuales
-
-        treemap.puntos_actuales += puntos_ganados
-
-        # Verificar si completó 10 canciones
-        if len(treemap.canciones) >= 10 and not treemap.completado_10:
-            treemap.completado_10 = True
-
-        db.commit()
-
-        return {
-            'correcto_anio': anio_correcto,
-            'correcto_titulo': titulo_correcto,
-            'correcto_artista': artista_correcto,
-            'puntos_ganados': puntos_ganados,
-            'puntos_totales': treemap.puntos_actuales,
-            'treemap_actualizado': treemap.canciones,
-            'completado_10': treemap.completado_10,
-            'titulo_real': cancion['titulo'],
-            'artista_real': cancion['artista'],
-            'anio_real': cancion['anio']
-        }
-
-    @staticmethod
-    def _verificar_posicion_anio(canciones: list, posicion: int, anio: int) -> bool:
-        """Verifica si el año está en la posición correcta del TreeMap"""
-        if not canciones:
-            return True
-
-        # Verificar que mantiene el orden ascendente
-        if posicion > 0 and canciones[posicion - 1]['anio'] > anio:
-            return False
-
-        if posicion < len(canciones) and canciones[posicion]['anio'] < anio:
-            return False
-
-        return True
-
-    @staticmethod
-    def avanzar_turno(db: Session, partida_id: int):
-        """Avanza al siguiente turno"""
-        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
-        if not partida:
-            return {'error': 'Partida no encontrada'}
-
-        configuracion = partida.jugadores
-        num_jugadores = len(
-            configuracion.get('jugadores_individuales', [])
-            if partida.tipo_juego == 'individual'
-            else configuracion.get('parejas', [])
-        )
-
-        partida.turno_actual = (partida.turno_actual + 1) % num_jugadores
-        db.commit()
-
-        return {
-            'turno_actual': partida.turno_actual,
-            'jugador_turno': TableroService._obtener_info_jugador_turno(partida)
-        }
-
-    @staticmethod
-    def _obtener_info_jugador_turno(partida: PartidaTablero):
-        """Obtiene información del jugador en turno"""
-        configuracion = partida.jugadores
-        turno = partida.turno_actual
-
-        if partida.tipo_juego == 'individual':
-            jugador = configuracion['jugadores_individuales'][turno]
-            return {
-                'tipo': 'individual',
-                'nombre': jugador['nombre'],
-                'puntos': jugador.get('puntos', 0)
-            }
-        else:
-            pareja = configuracion['parejas'][turno]
-            return {
-                'tipo': 'pareja',
-                'nombre_pareja': pareja['nombre_pareja'],
-                'miembro1': pareja['miembro1']['nombre'],
-                'miembro2': pareja['miembro2']['nombre']
-            }
-
-    @staticmethod
-    def procesar_karaoke(db: Session, partida_id: int, jugador_index: int, puntos_karaoke: int):
-        """Procesa el resultado del karaoke"""
-        treemap = db.query(TreeMapJugador).filter(
-            TreeMapJugador.partida_id == partida_id,
-            TreeMapJugador.jugador_index == jugador_index
-        ).first()
-
-        if not treemap:
-            return {'error': 'TreeMap no encontrado'}
-
-        if treemap.karaoke_realizado:
-            return {'error': 'Ya se realizó el karaoke'}
-
-        treemap.puntos_actuales += puntos_karaoke
-        treemap.karaoke_realizado = True
-        db.commit()
-
-        return {
-            'puntos_karaoke': puntos_karaoke,
-            'puntos_totales': treemap.puntos_actuales
-        }
-
-    @staticmethod
-    def obtener_ganador(db: Session, partida_id: int):
-        """Determina el ganador de la partida"""
-        treemaps = db.query(TreeMapJugador).filter(
-            TreeMapJugador.partida_id == partida_id
-        ).all()
-
-        if not treemaps:
-            return {'error': 'No hay datos de la partida'}
-
-        # Encontrar el jugador con más puntos
-        ganador = max(treemaps, key=lambda t: t.puntos_actuales)
-
-        return {
-            'jugador_index': ganador.jugador_index,
-            'puntos': ganador.puntos_actuales,
-            'todos_los_puntos': [
-                {'jugador_index': t.jugador_index, 'puntos': t.puntos_actuales}
-                for t in treemaps
-            ]
-        }
-
-    @staticmethod
-    def finalizar_partida(db: Session, partida_id: int):
-        """Finaliza la partida y actualiza puntos de usuarios registrados"""
-        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
-        if not partida:
-            return {'error': 'Partida no encontrada'}
-
-        partida.estado = 'finalizada'
-        partida.fecha_fin = datetime.now()
-
-        # Actualizar puntos de usuarios registrados
-        treemaps = db.query(TreeMapJugador).filter(
-            TreeMapJugador.partida_id == partida_id
-        ).all()
-
-        configuracion = partida.jugadores
-        from ..crud.usuario import usuario_crud
-
-        for treemap in treemaps:
-            idx = treemap.jugador_index
-
-            if partida.tipo_juego == 'individual':
-                jugador = configuracion['jugadores_individuales'][idx]
-                if jugador.get('usuario_id'):
-                    usuario_crud.add_points(db, jugador['usuario_id'], treemap.puntos_actuales)
-            else:
-                pareja = configuracion['parejas'][idx]
-                # Sumar puntos a ambos miembros si están registrados
-                if pareja['miembro1'].get('usuario_id'):
-                    usuario_crud.add_points(db, pareja['miembro1']['usuario_id'], treemap.puntos_actuales)
-                if pareja['miembro2'].get('usuario_id'):
-                    usuario_crud.add_points(db, pareja['miembro2']['usuario_id'], treemap.puntos_actuales)
-
-        db.commit()
-
-        return {'mensaje': 'Partida finalizada y puntos actualizados'}
-
-    @staticmethod
-    def obtener_estado_partida(db: Session, partida_id: int):
-        """Obtiene el estado actual de la partida"""
-        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
-        if not partida:
-            return {'error': 'Partida no encontrada'}
-
-        treemaps = db.query(TreeMapJugador).filter(
-            TreeMapJugador.partida_id == partida_id
-        ).all()
-
-        return {
-            'partida_id': partida.id,
-            'turno_actual': partida.turno_actual,
-            'estado': partida.estado,
-            'jugador_turno': TableroService._obtener_info_jugador_turno(partida),
-            'treemaps': [
-                {
-                    'jugador_index': t.jugador_index,
-                    'canciones': t.canciones,
-                    'puntos': t.puntos_actuales,
-                    'completado_10': t.completado_10,
-                    'karaoke_realizado': t.karaoke_realizado
-                }
-                for t in treemaps
-            ]
         }
 
     @staticmethod
@@ -409,6 +218,7 @@ class TableroService:
                 }
 
         return {'error': 'Jugador no encontrado'}
+
 
 
 tablero_service = TableroService()

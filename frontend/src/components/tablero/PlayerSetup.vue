@@ -61,39 +61,6 @@
             </button>
           </div>
         </div>
-
-        <!-- Modal Login -->
-        <transition name="modal-fade">
-          <div v-if="mostrarLoginJugador" class="modal-overlay" @click.self="cerrarModales">
-            <div class="modal-login">
-              <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
-              <h3>Iniciar Sesión - Jugador {{ jugadorActual + 1 }}</h3>
-              <input v-model="loginEmail" type="email" placeholder="Email" class="input-modal" @keypress.enter="loginJugador" />
-              <input v-model="loginPassword" type="password" placeholder="Contraseña" class="input-modal" @keypress.enter="loginJugador" />
-              <div v-if="errorLogin" class="error-mensaje">{{ errorLogin }}</div>
-              <button class="btn-modal-confirmar" @click="loginJugador" :disabled="cargando">
-                {{ cargando ? '⏳ Entrando...' : 'Entrar' }}
-              </button>
-            </div>
-          </div>
-        </transition>
-
-        <!-- Modal Registro -->
-        <transition name="modal-fade">
-          <div v-if="mostrarRegistroJugador" class="modal-overlay" @click.self="cerrarModales">
-            <div class="modal-login">
-              <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
-              <h3>Registrarse - Jugador {{ jugadorActual + 1 }}</h3>
-              <input v-model="registroNombre" type="text" placeholder="Nombre" class="input-modal" />
-              <input v-model="registroEmail" type="email" placeholder="Email" class="input-modal" />
-              <input v-model="registroPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)" class="input-modal" @keypress.enter="registrarJugador" />
-              <div v-if="errorRegistro" class="error-mensaje">{{ errorRegistro }}</div>
-              <button class="btn-modal-confirmar" @click="registrarJugador" :disabled="cargando">
-                {{ cargando ? '⏳ Registrando...' : 'Crear Cuenta' }}
-              </button>
-            </div>
-          </div>
-        </transition>
       </div>
 
       <!-- Paso 4: Registro Parejas -->
@@ -136,38 +103,6 @@
               </button>
             </div>
           </div>
-
-          <!-- Modales (mismos que individual) -->
-          <transition name="modal-fade">
-            <div v-if="mostrarLoginJugador" class="modal-overlay" @click.self="cerrarModales">
-              <div class="modal-login">
-                <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
-                <h3>Iniciar Sesión - Miembro {{ miembroActual + 1 }}</h3>
-                <input v-model="loginEmail" type="email" placeholder="Email" class="input-modal" @keypress.enter="loginJugador" />
-                <input v-model="loginPassword" type="password" placeholder="Contraseña" class="input-modal" @keypress.enter="loginJugador" />
-                <div v-if="errorLogin" class="error-mensaje">{{ errorLogin }}</div>
-                <button class="btn-modal-confirmar" @click="loginJugador" :disabled="cargando">
-                  {{ cargando ? '⏳ Entrando...' : 'Entrar' }}
-                </button>
-              </div>
-            </div>
-          </transition>
-
-          <transition name="modal-fade">
-            <div v-if="mostrarRegistroJugador" class="modal-overlay" @click.self="cerrarModales">
-              <div class="modal-login">
-                <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
-                <h3>Registrarse - Miembro {{ miembroActual + 1 }}</h3>
-                <input v-model="registroNombre" type="text" placeholder="Nombre" class="input-modal" />
-                <input v-model="registroEmail" type="email" placeholder="Email" class="input-modal" />
-                <input v-model="registroPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)" class="input-modal" @keypress.enter="registrarJugador" />
-                <div v-if="errorRegistro" class="error-mensaje">{{ errorRegistro }}</div>
-                <button class="btn-modal-confirmar" @click="registrarJugador" :disabled="cargando">
-                  {{ cargando ? '⏳ Registrando...' : 'Crear Cuenta' }}
-                </button>
-              </div>
-            </div>
-          </transition>
         </div>
       </div>
 
@@ -211,8 +146,43 @@
       </div>
     </div>
   </div>
-</template>
 
+  <!-- Modales fuera del contenedor principal usando Teleport -->
+  <Teleport to="body">
+    <transition name="modal-fade">
+      <div v-if="mostrarLoginJugador" class="modal-overlay" @click.self="cerrarModales">
+        <div class="modal-login">
+          <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
+          <h3>Iniciar Sesión - {{ tipoJuego === 'individual' ? `Jugador ${jugadorActual + 1}` : `Miembro ${miembroActual + 1}` }}</h3>
+          <input v-model="loginEmail" type="email" placeholder="Email" class="input-modal" @keypress.enter="loginJugador" />
+          <input v-model="loginPassword" type="password" placeholder="Contraseña" class="input-modal" @keypress.enter="loginJugador" />
+          <div v-if="errorLogin" class="error-mensaje">{{ errorLogin }}</div>
+          <button class="btn-modal-confirmar" @click="loginJugador" :disabled="cargando">
+            {{ cargando ? '⏳ Entrando...' : 'Entrar' }}
+          </button>
+        </div>
+      </div>
+    </transition>
+  </Teleport>
+
+  <Teleport to="body">
+    <transition name="modal-fade">
+      <div v-if="mostrarRegistroJugador" class="modal-overlay" @click.self="cerrarModales">
+        <div class="modal-login">
+          <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
+          <h3>Registrarse - {{ tipoJuego === 'individual' ? `Jugador ${jugadorActual + 1}` : `Miembro ${miembroActual + 1}` }}</h3>
+          <input v-model="registroNombre" type="text" placeholder="Nombre" class="input-modal" />
+          <input v-model="registroEmail" type="email" placeholder="Email" class="input-modal" />
+          <input v-model="registroPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)" class="input-modal" @keypress.enter="registrarJugador" />
+          <div v-if="errorRegistro" class="error-mensaje">{{ errorRegistro }}</div>
+          <button class="btn-modal-confirmar" @click="registrarJugador" :disabled="cargando">
+            {{ cargando ? '⏳ Registrando...' : 'Crear Cuenta' }}
+          </button>
+        </div>
+      </div>
+    </transition>
+  </Teleport>
+</template>
 <script>
 export default {
   name: 'PlayerSetup',
@@ -560,6 +530,25 @@ export default {
 </script>
 
 <style scoped>
+/* Reset global para este componente */
+* {
+  box-sizing: border-box;
+}
+
+.player-setup-container,
+.player-setup-container * {
+  position: relative;
+}
+
+/* El modal necesita romper el contexto de posicionamiento */
+.modal-overlay {
+  position: fixed !important;
+}
+
+.modal-overlay * {
+  box-sizing: border-box;
+}
+
 .player-setup-container {
   display: flex;
   justify-content: center;
@@ -798,7 +787,6 @@ export default {
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
 }
-
 /* ========== MODALES ========== */
 .modal-overlay {
   position: fixed;
@@ -809,30 +797,30 @@ export default {
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 .modal-login {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 20px;
-  padding: 2rem;
+  background: linear-gradient(135deg, #2d2d44 0%, #1e1e2e 100%);
+  border-radius: 24px;
+  padding: 2.5rem;
   width: 100%;
-  max-width: 450px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 480px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(156, 39, 176, 0.4);
   position: relative;
-  animation: modalAppear 0.3s ease;
+  animation: modalAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes modalAppear {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: scale(0.85) translateY(-30px);
   }
   to {
     opacity: 1;
@@ -842,100 +830,29 @@ export default {
 
 .btn-cerrar-modal {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: rgba(231, 76, 60, 0.15);
+  border: 2px solid rgba(231, 76, 60, 0.4);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   font-size: 1.5rem;
-  color: white;
+  color: #ff6b6b;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 700;
   line-height: 1;
 }
 
 .btn-cerrar-modal:hover {
-  background: rgba(255, 68, 68, 0.3);
-  transform: rotate(90deg);
-}
-
-.modal-login h3 {
+  background: rgba(231, 76, 60, 0.3);
+  border-color: #e74c3c;
   color: white;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  margin-top: 0;
-  font-size: 1.5rem;
-}
-
-.input-modal {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-}
-
-.input-modal::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.input-modal:focus {
-  outline: none;
-  border-color: #9c27b0;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
-}
-
-.error-mensaje {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  color: #fca5a5;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  text-align: center;
-  font-size: 0.95rem;
-  animation: shake 0.5s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
-}
-
-.btn-modal-confirmar {
-  width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #9c27b0, #673ab7);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 32px rgba(156, 39, 176, 0.3);
-}
-
-.btn-modal-confirmar:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(156, 39, 176, 0.4);
-}
-
-.btn-modal-confirmar:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  transform: rotate(90deg) scale(1.1);
 }
 
 /* ========== RESUMEN ========== */

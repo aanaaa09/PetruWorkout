@@ -55,6 +55,7 @@
       @cerrar="modalAñadirCancion = false"
     />
   </div>
+  <div id="modal-portal"></div>
 </template>
 
 <script>
@@ -150,6 +151,7 @@ body, html {
   background: linear-gradient(135deg, #2c1a4a 0%, #4a2cd4 50%, #2c1a4a 100%);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
+  position: relative;
 }
 
 @keyframes gradientShift {
@@ -160,6 +162,7 @@ body, html {
 
 #app {
   height: 100vh;
+  position: relative;
 }
 
 .app-container {
@@ -168,6 +171,7 @@ body, html {
   flex-direction: column;
   width: 100%;
   backdrop-filter: blur(20px);
+   position: relative;
 }
 
 .blur-layer {
