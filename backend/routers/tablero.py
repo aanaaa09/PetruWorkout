@@ -47,23 +47,13 @@ def obtener_cancion(partida_id: int, db: Session = Depends(get_db)):
 @router.post("/colocar-cancion")
 def colocar_cancion(data: ColocarCancionRequest, db: Session = Depends(get_db)):
     """Coloca una canción en el TreeMap y valida"""
-    # Necesitamos pasar los datos de la canción actual
-    # En una implementación real, estos datos deberían estar almacenados temporalmente
-    # Por ahora, los pasamos en el request
     resultado = tablero_service.colocar_cancion_treemap(
         db,
         data.partida_id,
         data.jugador_index,
         data.posicion,
         data.titulo or '',
-        data.artista or '',
-        {
-            'titulo_real': data.titulo_real,
-            'artista_real': data.artista_real,
-            'anio_real': data.anio_real,
-            'spotify_id': data.spotify_id,
-            'spotify_url': data.spotify_url
-        }
+        data.artista or ''
     )
 
     if 'error' in resultado:

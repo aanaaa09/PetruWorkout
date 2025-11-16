@@ -214,7 +214,12 @@ export default {
     playlist: {
       type: String,
       required: true
-    }
+    },
+    token: {
+    type: String,
+    required: true
+  }
+
   },
   data() {
     return {

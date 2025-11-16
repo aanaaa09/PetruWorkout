@@ -42,12 +42,6 @@ class ColocarCancionRequest(BaseModel):
     posicion: int  # Posición en el TreeMap donde se coloca
     titulo: Optional[str] = None
     artista: Optional[str] = None
-    # Datos de la canción actual (en producción esto debería estar en servidor)
-    titulo_real: str
-    artista_real: str
-    anio_real: int
-    spotify_id: str
-    spotify_url: str
 
 
 class KaraokeRequest(BaseModel):

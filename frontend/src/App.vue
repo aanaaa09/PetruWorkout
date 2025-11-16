@@ -14,7 +14,12 @@
       <Ranking v-else-if="mostrarRanking" @cerrar="mostrarRanking = false" />
 
       <template v-else>
-        <UserInfo :usuario="usuarioActual" @logout="cerrarSesion" />
+        <!-- 👇 SOLO mostrar UserInfo si NO estamos en tablero -->
+        <UserInfo
+          v-if="!partidaTablero"
+          :usuario="usuarioActual"
+          @logout="cerrarSesion"
+        />
 
         <!-- Selector de modo y playlist -->
         <PlaylistSelector
@@ -24,10 +29,11 @@
 
         <!-- Setup de jugadores para tablero -->
         <PlayerSetup
-          v-else-if="modoYPlaylist.modo === 'tablero' && !partidaTablero"
-          :playlist="modoYPlaylist.playlist"
-          @partida-iniciada="iniciarPartidaTablero"
-        />
+  v-else-if="modoYPlaylist.modo === 'tablero' && !partidaTablero"
+  :playlist="modoYPlaylist.playlist"
+  :token="token"
+  @partida-iniciada="iniciarPartidaTablero"
+/>
 
         <!-- Juego Tablero -->
         <GameTablero
@@ -35,6 +41,7 @@
           :partida-id="partidaTablero.partida_id"
           :configuracion="partidaTablero.configuracion"
           :playlist="modoYPlaylist.playlist"
+          :token="token"
           @volver="volverSeleccion"
         />
 
@@ -55,9 +62,7 @@
       @cerrar="modalAñadirCancion = false"
     />
   </div>
-  <div id="modal-portal"></div>
 </template>
-
 <script>
 import AppHeader from './components/layout/AppHeader.vue'
 import UserInfo from './components/layout/UserInfo.vue'
