@@ -182,6 +182,30 @@
       </div>
     </transition>
   </Teleport>
+  <!-- Modal Invitado -->
+  <Teleport to="body">
+    <transition name="modal-fade">
+      <div v-if="mostrarModalInvitado" class="modal-overlay" @click.self="cerrarModales">
+        <div class="modal-login">
+          <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
+          <h3>👤 Jugar como Invitado</h3>
+          <p class="modal-descripcion">Ingresa tu nombre para continuar</p>
+          <input
+            v-model="nombreInvitado"
+            type="text"
+            placeholder="Tu nombre"
+            class="input-modal"
+            @keypress.enter="confirmarInvitado"
+            ref="inputInvitado"
+          />
+          <div v-if="errorInvitado" class="error-mensaje">{{ errorInvitado }}</div>
+          <button class="btn-modal-confirmar" @click="confirmarInvitado" :disabled="!nombreInvitado.trim()">
+            Continuar
+          </button>
+        </div>
+      </div>
+    </transition>
+  </Teleport>
 </template>
 <script>
 export default {
@@ -223,17 +247,20 @@ export default {
       iniciandoPartida: false,
       errorLogin: '',
       errorRegistro: '',
-      errorIniciar: ''
+      errorIniciar: '',
+      mostrarModalInvitado: false,
+      nombreInvitado: '',
+      errorInvitado: ''
     }
   },
   computed: {
-    maxCantidad() {
-      return this.tipoJuego === 'individual' ? 4 : 3
-    },
-    jugadoresLista() {
-      return this.tipoJuego === 'individual' ? this.jugadoresIndividuales : this.parejas
-    }
+  maxCantidad() {
+    return this.tipoJuego === 'individual' ? 4 : 3
   },
+  jugadoresLista() {
+    return this.tipoJuego === 'individual' ? this.jugadoresIndividuales : this.parejas
+  }
+},
   methods: {
     // ========== Navegación ==========
     seleccionarTipo(tipo) {
@@ -388,18 +415,35 @@ export default {
 
     // ========== Invitado ==========
     registrarInvitado() {
-      const nombre = prompt('¿Cuál es tu nombre?')
+    this.mostrarModalInvitado = true
+    this.nombreInvitado = ''
+    this.errorInvitado = ''
 
-      if (nombre && nombre.trim()) {
-        this.agregarJugador({
-          tipo: 'invitado',
-          nombre: nombre.trim(),
-          puntos: 0
-        })
-
-        this.avanzarJugador()
+    // Auto-focus en el input después de que se renderice
+    this.$nextTick(() => {
+      if (this.$refs.inputInvitado) {
+        this.$refs.inputInvitado.focus()
       }
-    },
+    })
+  },
+
+  confirmarInvitado() {
+    if (!this.nombreInvitado.trim()) {
+      this.errorInvitado = 'Por favor ingresa tu nombre'
+      return
+    }
+
+    this.agregarJugador({
+      tipo: 'invitado',
+      nombre: this.nombreInvitado.trim(),
+      puntos: 0
+    })
+
+    this.cerrarModales()
+    this.avanzarJugador()
+  },
+
+
 
     // ========== Lógica de Jugadores ==========
     agregarJugador(datosJugador) {
@@ -498,16 +542,19 @@ export default {
     cerrarModales() {
       this.mostrarLoginJugador = false
       this.mostrarRegistroJugador = false
+      this.mostrarModalInvitado = false
     },
 
     limpiarFormularios() {
       this.loginEmail = ''
-      this.loginPassword = ''
-      this.registroNombre = ''
-      this.registroEmail = ''
-      this.registroPassword = ''
-      this.errorLogin = ''
-      this.errorRegistro = ''
+    this.loginPassword = ''
+    this.registroNombre = ''
+    this.registroEmail = ''
+    this.registroPassword = ''
+    this.nombreInvitado = ''
+    this.errorLogin = ''
+    this.errorRegistro = ''
+    this.errorInvitado = ''
     },
 
     obtenerNombreJugador(jugador) {
@@ -787,7 +834,7 @@ export default {
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
 }
-/* ========== MODALES ========== */
+/* ========== MODALES MEJORADOS ========== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -810,9 +857,11 @@ export default {
   border-radius: 24px;
   padding: 2.5rem;
   width: 100%;
-  max-width: 480px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
-  border: 2px solid rgba(156, 39, 176, 0.4);
+  max-width: 500px;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(156, 39, 176, 0.2);
+  border: 2px solid rgba(156, 39, 176, 0.3);
   position: relative;
   animation: modalAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -833,10 +882,10 @@ export default {
   top: 1.25rem;
   right: 1.25rem;
   background: rgba(231, 76, 60, 0.15);
-  border: 2px solid rgba(231, 76, 60, 0.4);
+  border: 2px solid rgba(231, 76, 60, 0.3);
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  width: 48px;
+  height: 48px;
   font-size: 1.5rem;
   color: #ff6b6b;
   cursor: pointer;
@@ -853,6 +902,155 @@ export default {
   border-color: #e74c3c;
   color: white;
   transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
+}
+
+.modal-login h3 {
+  color: white;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  margin-top: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff, #e0c3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-descripcion {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.input-modal {
+  width: 100%;
+  padding: 1.125rem 1.5rem;
+  border: 2px solid rgba(156, 39, 176, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1.05rem;
+  margin-bottom: 1.25rem;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.input-modal::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input-modal:focus {
+  outline: none;
+  border-color: #9c27b0;
+  background: rgba(156, 39, 176, 0.1);
+  box-shadow:
+    0 0 0 4px rgba(156, 39, 176, 0.15),
+    0 4px 12px rgba(156, 39, 176, 0.2);
+  transform: translateY(-2px);
+}
+
+.input-modal:hover:not(:focus) {
+  border-color: rgba(156, 39, 176, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.error-mensaje {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.15));
+  border: 2px solid rgba(231, 76, 60, 0.4);
+  color: #ff6b6b;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  animation: shake 0.5s ease;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.btn-modal-confirmar {
+  width: 100%;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #9c27b0, #673ab7);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 8px 25px rgba(156, 39, 176, 0.4),
+    0 0 0 0 rgba(156, 39, 176, 0.5);
+  margin-top: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-modal-confirmar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-modal-confirmar:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.btn-modal-confirmar:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 35px rgba(156, 39, 176, 0.5),
+    0 0 0 4px rgba(156, 39, 176, 0.2);
+  background: linear-gradient(135deg, #ab47bc, #7e57c2);
+}
+
+.btn-modal-confirmar:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+}
+
+.btn-modal-confirmar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  background: linear-gradient(135deg, #666, #555);
+}
+
+/* Transición del modal */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active .modal-login,
+.modal-fade-leave-active .modal-login {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-fade-enter-from .modal-login,
+.modal-fade-leave-to .modal-login {
+  transform: scale(0.85) translateY(-30px);
 }
 
 /* ========== RESUMEN ========== */
