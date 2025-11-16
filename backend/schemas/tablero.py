@@ -3,19 +3,19 @@ from typing import List, Optional
 
 
 class JugadorIndividual(BaseModel):
-    tipo: str  # 'registrado' o 'invitado'
+    tipo: str
     nombre: str
     email: Optional[str] = None
     puntos: int = 0
-    token: Optional[str] = None
+    token: Optional[str] = None  # Solo si es 'registrado'
     usuario_id: Optional[int] = None
 
 
 class MiembroPareja(BaseModel):
-    tipo: str  # 'registrado' o 'invitado'
+    tipo: str
     nombre: str
     email: Optional[str] = None
-    token: Optional[str] = None
+    token: Optional[str] = None  # Solo si es 'registrado'
     usuario_id: Optional[int] = None
 
 

@@ -53,9 +53,6 @@
             <button class="btn-opcion" @click="mostrarLoginJugador = true">
               ✅ Sí, iniciar sesión
             </button>
-            <button class="btn-opcion" @click="mostrarRegistroJugador = true">
-              📝 No, registrarme ahora
-            </button>
             <button class="btn-opcion invitado" @click="registrarInvitado">
               👤 Jugar como invitado
             </button>
@@ -94,9 +91,6 @@
             <div class="opciones-botones">
               <button class="btn-opcion" @click="mostrarLoginJugador = true">
                 ✅ Sí, iniciar sesión
-              </button>
-              <button class="btn-opcion" @click="mostrarRegistroJugador = true">
-                📝 No, registrarme ahora
               </button>
               <button class="btn-opcion invitado" @click="registrarInvitado">
                 👤 Jugar como invitado
@@ -165,23 +159,6 @@
     </transition>
   </Teleport>
 
-  <Teleport to="body">
-    <transition name="modal-fade">
-      <div v-if="mostrarRegistroJugador" class="modal-overlay" @click.self="cerrarModales">
-        <div class="modal-login">
-          <button class="btn-cerrar-modal" @click="cerrarModales">✕</button>
-          <h3>Registrarse - {{ tipoJuego === 'individual' ? `Jugador ${jugadorActual + 1}` : `Miembro ${miembroActual + 1}` }}</h3>
-          <input v-model="registroNombre" type="text" placeholder="Nombre" class="input-modal" />
-          <input v-model="registroEmail" type="email" placeholder="Email" class="input-modal" />
-          <input v-model="registroPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)" class="input-modal" @keypress.enter="registrarJugador" />
-          <div v-if="errorRegistro" class="error-mensaje">{{ errorRegistro }}</div>
-          <button class="btn-modal-confirmar" @click="registrarJugador" :disabled="cargando">
-            {{ cargando ? '⏳ Registrando...' : 'Crear Cuenta' }}
-          </button>
-        </div>
-      </div>
-    </transition>
-  </Teleport>
   <!-- Modal Invitado -->
   <Teleport to="body">
     <transition name="modal-fade">
@@ -237,20 +214,16 @@ export default {
 
       // Modales
       mostrarLoginJugador: false,
-      mostrarRegistroJugador: false,
 
       // Formularios
       loginEmail: '',
       loginPassword: '',
-      registroNombre: '',
-      registroEmail: '',
-      registroPassword: '',
+
 
       // Estados
       cargando: false,
       iniciandoPartida: false,
       errorLogin: '',
-      errorRegistro: '',
       errorIniciar: '',
       mostrarModalInvitado: false,
       nombreInvitado: '',
@@ -373,57 +346,7 @@ export default {
       }
     },
 
-    // ========== Registro ==========
-    async registrarJugador() {
-      this.errorRegistro = ''
 
-      if (!this.registroNombre.trim() || !this.registroEmail.trim() || !this.registroPassword.trim()) {
-        this.errorRegistro = 'Todos los campos son requeridos'
-        return
-      }
-
-      if (this.registroPassword.length < 6) {
-        this.errorRegistro = 'La contraseña debe tener al menos 6 caracteres'
-        return
-      }
-
-      this.cargando = true
-
-      try {
-        const response = await fetch('http://localhost:5000/api/auth/registro', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nombre: this.registroNombre,
-            email: this.registroEmail,
-            password: this.registroPassword
-          })
-        })
-
-        const data = await response.json()
-
-        if (response.ok && data.success) {
-          this.agregarJugador({
-            tipo: 'registrado',
-            nombre: data.usuario.nombre,
-            email: data.usuario.email,
-            puntos: data.usuario.puntos,
-            token: data.token,
-            usuario_id: data.usuario.id
-          })
-
-          this.cerrarModales()
-          this.limpiarFormularios()
-          this.avanzarJugador()
-        } else {
-          this.errorRegistro = data.error || 'Error al registrar'
-        }
-      } catch (err) {
-        this.errorRegistro = 'Error de conexión con el servidor'
-      } finally {
-        this.cargando = false
-      }
-    },
 
     // ========== Invitado ==========
     registrarInvitado() {
@@ -551,19 +474,14 @@ export default {
     // ========== Utilidades ==========
     cerrarModales() {
       this.mostrarLoginJugador = false
-      this.mostrarRegistroJugador = false
       this.mostrarModalInvitado = false
     },
 
     limpiarFormularios() {
       this.loginEmail = ''
       this.loginPassword = ''
-      this.registroNombre = ''
-      this.registroEmail = ''
-      this.registroPassword = ''
       this.nombreInvitado = ''
       this.errorLogin = ''
-      this.errorRegistro = ''
       this.errorInvitado = ''
     },
 

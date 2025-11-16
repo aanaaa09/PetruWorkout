@@ -32,9 +32,13 @@ class TableroService:
 
             # Validar cada jugador
             for jugador in jugadores:
+                # ✅ Validar que el tipo sea válido
+                if jugador['tipo'] not in ['registrado', 'invitado']:
+                    raise ValueError(f"Tipo de jugador inválido: {jugador['tipo']}. Debe ser 'registrado' o 'invitado'")
+
                 if jugador['tipo'] == 'registrado':
                     if not jugador.get('token'):
-                        raise ValueError(f"Token requerido para jugador: {jugador['nombre']}")
+                        raise ValueError(f"Token requerido para jugador registrado: {jugador['nombre']}")
 
                     sesion = sesion_crud.validate_token(db, jugador['token'])
                     if not sesion:
@@ -49,6 +53,11 @@ class TableroService:
                     jugador['email'] = usuario.email
                     jugador['puntos'] = usuario.puntos
 
+                elif jugador['tipo'] == 'invitado':
+                    # ✅ Para invitados, solo validar que tengan nombre
+                    if not jugador.get('nombre') or len(jugador['nombre'].strip()) < 2:
+                        raise ValueError("Los jugadores invitados deben tener un nombre válido (mínimo 2 caracteres)")
+
         else:  # parejas
             parejas = configuracion.get('parejas', [])
             if len(parejas) > 3 or len(parejas) < 1:
@@ -58,8 +67,11 @@ class TableroService:
                 if not pareja.get('nombre_pareja'):
                     raise ValueError("Cada pareja debe tener un nombre")
 
-                # Validar miembro 1
+                # ✅ Validar miembro 1
                 m1 = pareja['miembro1']
+                if m1['tipo'] not in ['registrado', 'invitado']:
+                    raise ValueError(f"Tipo inválido para {m1['nombre']}: debe ser 'registrado' o 'invitado'")
+
                 if m1['tipo'] == 'registrado':
                     if not m1.get('token'):
                         raise ValueError(f"Token requerido para: {m1['nombre']}")
@@ -76,8 +88,15 @@ class TableroService:
                     m1['nombre'] = usuario.nombre
                     m1['email'] = usuario.email
 
-                # Validar miembro 2
+                elif m1['tipo'] == 'invitado':
+                    if not m1.get('nombre') or len(m1['nombre'].strip()) < 2:
+                        raise ValueError("Los miembros invitados deben tener un nombre válido")
+
+                # ✅ Validar miembro 2
                 m2 = pareja['miembro2']
+                if m2['tipo'] not in ['registrado', 'invitado']:
+                    raise ValueError(f"Tipo inválido para {m2['nombre']}: debe ser 'registrado' o 'invitado'")
+
                 if m2['tipo'] == 'registrado':
                     if not m2.get('token'):
                         raise ValueError(f"Token requerido para: {m2['nombre']}")
@@ -94,6 +113,10 @@ class TableroService:
                     m2['nombre'] = usuario.nombre
                     m2['email'] = usuario.email
 
+                elif m2['tipo'] == 'invitado':
+                    if not m2.get('nombre') or len(m2['nombre'].strip()) < 2:
+                        raise ValueError("Los miembros invitados deben tener un nombre válido")
+
         # Crear partida
         partida = PartidaTablero(
             playlist_key=playlist_key,
@@ -101,7 +124,7 @@ class TableroService:
             jugadores=configuracion,
             turno_actual=0,
             estado='activa',
-            canciones_servidas=[]
+            canciones_servidas=[]  # ✅ Inicializar vacío
         )
 
         db.add(partida)
@@ -118,7 +141,7 @@ class TableroService:
             linea_tiempo = LineaTiempoJugador(
                 partida_id=partida.id,
                 jugador_index=i,
-                canciones_por_anio={},  # SortedDict vacío
+                canciones_por_anio={},
                 puntos_actuales=0,
                 completado_10=False,
                 karaoke_realizado=False,
@@ -128,7 +151,7 @@ class TableroService:
 
         db.commit()
 
-        logger.info(f"Partida creada: ID={partida.id}, Tipo={tipo_juego}")
+        logger.info(f"Partida creada: ID={partida.id}, Tipo={tipo_juego}, Jugadores: {num_jugadores}")
         return partida
 
     @staticmethod
@@ -149,25 +172,26 @@ class TableroService:
         if not canciones:
             return {'error': 'No hay canciones disponibles'}
 
-        # Inicializar lista de servidas
+        # ✅ CAMBIO: Usar canciones_servidas de la partida (compartidas entre todos)
         if not partida.canciones_servidas:
             partida.canciones_servidas = []
 
-        # Filtrar canciones con año
+        # ✅ Filtrar canciones con año que NO hayan sido servidas en TODA la partida
         disponibles = [
             c for c in canciones
             if c.anio is not None and c.id not in partida.canciones_servidas
         ]
 
-        # Resetear si no quedan
+        # Resetear si no quedan (todas ya fueron usadas)
         if not disponibles:
+            logger.info(f"🔄 Reseteando canciones servidas en partida {partida_id}")
             partida.canciones_servidas = []
             disponibles = [c for c in canciones if c.anio is not None]
 
         if not disponibles:
             return {'error': 'No hay canciones con año'}
 
-        # ✅ NUEVO: Intentar hasta 5 canciones para encontrar preview
+        # ✅ Intentar hasta 5 canciones para encontrar preview
         max_intentos = 5
         intentos = 0
         preview_url = None
@@ -213,7 +237,7 @@ class TableroService:
             'spotify_url': cancion_seleccionada.spotify_url or f"https://open.spotify.com/track/{cancion_seleccionada.spotify_id}"
         }
 
-        # Marcar como servida
+        # ✅ Marcar como servida en la partida (para TODOS los jugadores)
         if cancion_seleccionada.id not in partida.canciones_servidas:
             partida.canciones_servidas.append(cancion_seleccionada.id)
 
@@ -222,7 +246,9 @@ class TableroService:
         return {
             'preview_url': preview_url,
             'turno_actual': partida.turno_actual,
-            'jugador_info': TableroService._obtener_info_jugador_actual(partida)
+            'jugador_info': TableroService._obtener_info_jugador_actual(partida),
+            'canciones_servidas': len(partida.canciones_servidas),  # ✅ Info adicional
+            'canciones_totales': len(canciones)
         }
 
     @staticmethod
