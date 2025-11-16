@@ -1,15 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from ..config.database import get_db
-from ..models.juego_tablero import TreeMapJugador
+from ..models.juego_tablero import LineaTiempoJugador
 from ..schemas.tablero import (
     IniciarPartidaRequest,
     ColocarCancionRequest,
-    KaraokeRequest
+    CrearCasillaRequest,
+    KaraokeRequest,
+    ReiniciarPartidaRequest
 )
 from ..services.tablero_service import tablero_service
 
 router = APIRouter(prefix="/api/tablero", tags=["tablero"])
+
+
+def get_token_from_header(authorization: str = Header(None)):
+    """Extrae el token del header Authorization"""
+    if not authorization:
+        return None
+    return authorization.replace("Bearer ", "")
 
 
 @router.post("/iniciar")
@@ -44,16 +53,56 @@ def obtener_cancion(partida_id: int, db: Session = Depends(get_db)):
     return resultado
 
 
+@router.post("/crear-casilla")
+def crear_casilla(data: CrearCasillaRequest, db: Session = Depends(get_db)):
+    """Prepara para crear una nueva casilla (informativo)"""
+    resultado = tablero_service.crear_casilla(
+        db,
+        data.partida_id,
+        data.jugador_index,
+        data.posicion
+    )
+
+    if 'error' in resultado:
+        raise HTTPException(status_code=400, detail=resultado['error'])
+
+    return resultado
+
+
 @router.post("/colocar-cancion")
 def colocar_cancion(data: ColocarCancionRequest, db: Session = Depends(get_db)):
-    """Coloca una canción en el TreeMap y valida"""
-    resultado = tablero_service.colocar_cancion_treemap(
+    """Coloca una canción en la línea de tiempo y valida"""
+    resultado = tablero_service.colocar_cancion(
         db,
         data.partida_id,
         data.jugador_index,
         data.posicion,
         data.titulo or '',
         data.artista or ''
+    )
+
+    if 'error' in resultado:
+        raise HTTPException(status_code=400, detail=resultado['error'])
+
+    return resultado
+
+
+@router.post("/karaoke")
+def procesar_karaoke(data: KaraokeRequest, db: Session = Depends(get_db)):
+    """
+    Procesa el resultado del karaoke
+    Por ahora recibe los puntos directamente (0-20)
+    TODO: Implementar evaluación con IA
+    """
+    # Extraer puntos del request (temporalmente manual)
+    # En producción, esto vendría de un servicio de IA que evalúa el audio
+    puntos_karaoke = 15  # Placeholder
+
+    resultado = tablero_service.procesar_karaoke(
+        db,
+        data.partida_id,
+        data.jugador_index,
+        puntos_karaoke
     )
 
     if 'error' in resultado:
@@ -69,22 +118,6 @@ def avanzar_turno(partida_id: int, db: Session = Depends(get_db)):
 
     if 'error' in resultado:
         raise HTTPException(status_code=404, detail=resultado['error'])
-
-    return resultado
-
-
-@router.post("/karaoke")
-def procesar_karaoke(data: KaraokeRequest, db: Session = Depends(get_db)):
-    """Procesa el resultado del karaoke"""
-    resultado = tablero_service.procesar_karaoke(
-        db,
-        data.partida_id,
-        data.jugador_index,
-        data.puntos_karaoke
-    )
-
-    if 'error' in resultado:
-        raise HTTPException(status_code=400, detail=resultado['error'])
 
     return resultado
 
@@ -113,52 +146,71 @@ def obtener_ganador(partida_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{partida_id}/finalizar")
 def finalizar_partida(partida_id: int, db: Session = Depends(get_db)):
-    """Finaliza la partida"""
+    """Finaliza la partida y suma puntos"""
     resultado = tablero_service.finalizar_partida(db, partida_id)
 
     if 'error' in resultado:
         raise HTTPException(status_code=404, detail=resultado['error'])
 
     return resultado
-@router.post("/{partida_id}/crear-casilla")
-def crear_casilla(
-    partida_id: int,
-    data: dict,
-    db: Session = Depends(get_db)
+
+
+@router.post("/reiniciar")
+def reiniciar_partida(
+        data: ReiniciarPartidaRequest,
+        db: Session = Depends(get_db),
+        authorization: str = Header(None)
 ):
-    """Crea una nueva casilla en el TreeMap (endpoint informativo)"""
-    resultado = tablero_service.crear_casilla_treemap(
+    """Reinicia la partida con o sin los mismos jugadores"""
+    token_principal = get_token_from_header(authorization)
+
+    resultado = tablero_service.reiniciar_partida(
         db,
-        partida_id,
-        data['jugador_index'],
-        data['posicion']
+        data.partida_id,
+        data.mismos_jugadores,
+        token_principal or ''
     )
 
     if 'error' in resultado:
-        raise HTTPException(status_code=400, detail=resultado['error'])
+        raise HTTPException(status_code=404, detail=resultado['error'])
 
     return resultado
 
 
-@router.get("/{partida_id}/treemap/{jugador_index}")
-def obtener_treemap(
-    partida_id: int,
-    jugador_index: int,
-    db: Session = Depends(get_db)
+@router.get("/{partida_id}/linea-tiempo/{jugador_index}")
+def obtener_linea_tiempo(
+        partida_id: int,
+        jugador_index: int,
+        db: Session = Depends(get_db)
 ):
-    """Obtiene el TreeMap de un jugador"""
-    treemap = db.query(TreeMapJugador).filter(
-        TreeMapJugador.partida_id == partida_id,
-        TreeMapJugador.jugador_index == jugador_index
+    """Obtiene la línea de tiempo de un jugador específico"""
+    linea_tiempo = db.query(LineaTiempoJugador).filter(
+        LineaTiempoJugador.partida_id == partida_id,
+        LineaTiempoJugador.jugador_index == jugador_index
     ).first()
 
-    if not treemap:
-        raise HTTPException(status_code=404, detail="TreeMap no encontrado")
+    if not linea_tiempo:
+        raise HTTPException(status_code=404, detail="Línea de tiempo no encontrada")
+
+    from sortedcontainers import SortedDict
+    canciones_dict = SortedDict(linea_tiempo.canciones_por_anio or {})
+
+    canciones_ordenadas = [
+        {
+            'anio': int(anio),
+            'titulo': info['titulo'],
+            'artista': info['artista'],
+            'spotify_id': info['spotify_id'],
+            'spotify_url': info['spotify_url']
+        }
+        for anio, info in canciones_dict.items()
+    ]
 
     return {
-        'canciones': treemap.canciones or [],
-        'puntos': treemap.puntos_actuales,
-        'completado_10': treemap.completado_10,
-        'karaoke_realizado': treemap.karaoke_realizado,
-        'necesita_karaoke': treemap.completado_10 and not treemap.karaoke_realizado
+        'canciones_ordenadas': canciones_ordenadas,
+        'puntos': linea_tiempo.puntos_actuales,
+        'completado_10': linea_tiempo.completado_10,
+        'karaoke_realizado': linea_tiempo.karaoke_realizado,
+        'puntos_karaoke': linea_tiempo.puntos_karaoke,
+        'necesita_karaoke': linea_tiempo.completado_10 and not linea_tiempo.karaoke_realizado
     }

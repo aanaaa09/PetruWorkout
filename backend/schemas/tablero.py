@@ -12,7 +12,7 @@ class JugadorIndividual(BaseModel):
 
 
 class MiembroPareja(BaseModel):
-    tipo: str
+    tipo: str  # 'registrado' o 'invitado'
     nombre: str
     email: Optional[str] = None
     token: Optional[str] = None
@@ -20,9 +20,10 @@ class MiembroPareja(BaseModel):
 
 
 class Pareja(BaseModel):
-    nombre_pareja: str
+    nombre_pareja: str  # Nombre de la pareja
     miembro1: MiembroPareja
     miembro2: MiembroPareja
+    puntos: int = 0  # Puntos acumulados de la pareja
 
 
 class ConfiguracionJugadores(BaseModel):
@@ -39,28 +40,39 @@ class IniciarPartidaRequest(BaseModel):
 class ColocarCancionRequest(BaseModel):
     partida_id: int
     jugador_index: int
-    posicion: int  # Posición en el TreeMap donde se coloca
+    posicion: int  # Posición donde se quiere insertar (índice)
     titulo: Optional[str] = None
     artista: Optional[str] = None
+
+
+class CrearCasillaRequest(BaseModel):
+    partida_id: int
+    jugador_index: int
+    posicion: int  # 0=al inicio, -1=al final, n=después de índice n
 
 
 class KaraokeRequest(BaseModel):
     partida_id: int
     jugador_index: int
-    puntos_karaoke: int  # Entre 0 y 20
+    audio_base64: str  # Audio grabado del karaoke
 
 
-class CancionTreeMap(BaseModel):
+class ReiniciarPartidaRequest(BaseModel):
+    partida_id: int
+    mismos_jugadores: bool
+
+
+class CancionLineaTiempo(BaseModel):
     titulo: str
     artista: str
     anio: int
-    correcta: bool
     spotify_id: str
     spotify_url: str
 
 
-class EstadoTreeMap(BaseModel):
-    canciones: List[CancionTreeMap]
+class EstadoLineaTiempo(BaseModel):
+    canciones_ordenadas: List[CancionLineaTiempo]  # Lista ordenada por año
     puntos: int
     completado_10: bool
     karaoke_realizado: bool
+    necesita_karaoke: bool

@@ -11,8 +11,15 @@
             👥 {{ jugadorTurno.nombre_pareja }}
           </span>
         </div>
-        <div v-if="jugadorTurno?.tipo === 'individual'" class="jugador-puntos">
-          ⭐ {{ jugadorTurno.puntos }} puntos
+
+        <!-- Puntos de la partida actual -->
+        <div class="jugador-puntos">
+          <div class="puntos-partida">
+            🎯 {{ puntosPartidaActual }} pts (esta partida)
+          </div>
+          <div v-if="jugadorTurno?.tipo === 'individual'" class="puntos-totales">
+            ⭐ {{ jugadorTurno.puntos }} pts totales
+          </div>
         </div>
       </div>
 
@@ -23,59 +30,61 @@
 
     <!-- Audio Player -->
     <div v-if="!esperandoRespuesta && cancion" class="audio-section">
-      <h3>🎧 Escucha y coloca la canción en el TreeMap</h3>
+      <h3>🎧 Escucha y coloca la canción en la Línea de Tiempo</h3>
+      <p class="instruccion">Ordena por año ascendente (del más antiguo al más reciente)</p>
       <audio v-if="cancion.preview_url" controls :src="cancion.preview_url" class="audio-player"></audio>
     </div>
 
-    <!-- TreeMap Visual -->
-    <div class="treemap-container">
-      <h3>📊 TreeMap - Ordena por año (ascendente)</h3>
+    <!-- Línea de Tiempo Visual -->
+    <div class="linea-tiempo-container">
+      <h3>📊 Línea de Tiempo Musical</h3>
+      <p class="orden-explicacion">⬆️ Más recientes arriba | ⬇️ Más antiguas abajo</p>
 
-      <div class="treemap-lista">
+      <div class="linea-tiempo-lista">
         <!-- Casilla inicial (si está vacío) -->
-        <div v-if="treemap.length === 0" class="treemap-casilla vacia" @click="seleccionarPosicion(0)">
+        <div v-if="lineaTiempoInvertida.length === 0" class="linea-casilla vacia" @click="seleccionarPosicion(0)">
           <div class="casilla-numero">1</div>
-          <div class="casilla-placeholder">Haz clic para colocar aquí</div>
+          <div class="casilla-placeholder">🎵 Primera canción - Haz clic aquí</div>
         </div>
 
-        <!-- Casillas con canciones -->
-        <template v-for="(cancion, idx) in treemap" :key="idx">
-          <!-- Botón para insertar ANTES -->
+        <!-- Casillas con canciones (INVERTIDAS) -->
+        <template v-for="(item, idx) in lineaTiempoInvertida" :key="`cancion-${item.posicionOriginal}`">
+          <!-- Botón para insertar ANTES (en la vista invertida) -->
           <button
             v-if="!esperandoRespuesta"
             class="btn-insertar"
-            @click="seleccionarPosicion(idx)"
+            @click="seleccionarPosicion(item.posicionOriginal)"
             :disabled="esperandoRespuesta"
           >
             ➕ Insertar aquí
           </button>
 
           <!-- Canción existente -->
-          <div class="treemap-casilla ocupada">
-            <div class="casilla-numero">{{ idx + 1 }}</div>
+          <div class="linea-casilla ocupada">
+            <div class="casilla-numero">{{ lineaTiempoInvertida.length - idx }}</div>
             <div class="casilla-contenido">
-              <div class="cancion-titulo">{{ cancion.titulo }}</div>
-              <div class="cancion-artista">{{ cancion.artista }}</div>
-              <div class="cancion-anio" :class="{ mostrar: esperandoRespuesta }">
-                📅 {{ cancion.anio }}
+              <div class="cancion-titulo">{{ item.cancion.titulo }}</div>
+              <div class="cancion-artista">{{ item.cancion.artista }}</div>
+              <div class="cancion-anio visible">
+                📅 {{ item.cancion.anio }}
               </div>
             </div>
           </div>
         </template>
 
-        <!-- Botón para insertar AL FINAL -->
+        <!-- Botón para insertar AL FINAL (más antigua = abajo) -->
         <button
-          v-if="!esperandoRespuesta && treemap.length > 0"
+          v-if="!esperandoRespuesta && lineaTiempo.length > 0"
           class="btn-insertar"
-          @click="seleccionarPosicion(treemap.length)"
+          @click="seleccionarPosicion(lineaTiempo.length)"
           :disabled="esperandoRespuesta"
         >
-          ➕ Insertar al final
+          ➕ Insertar aquí (más antigua)
         </button>
       </div>
 
       <div v-if="posicionSeleccionada !== null && !esperandoRespuesta" class="posicion-seleccionada">
-        ✅ Posición seleccionada: {{ posicionSeleccionada + 1 }}
+        ✅ Posición seleccionada: {{ obtenerTextoMensajePosicion() }}
       </div>
     </div>
 
@@ -162,7 +171,8 @@ export default {
     return {
       cargando: false,
       cancion: null,
-      treemap: [],
+      lineaTiempo: [], // Lista original ordenada ascendentemente por año
+      puntosPartidaActual: 0, // ✅ Puntos de esta partida
       posicionSeleccionada: null,
       tituloUsuario: '',
       artistaUsuario: '',
@@ -172,6 +182,17 @@ export default {
       turnoActual: 0,
       jugadorTurno: null,
       jugadorIndex: 0
+    }
+  },
+  computed: {
+    // ✅ Invertir la línea de tiempo para mostrar más recientes arriba
+    lineaTiempoInvertida() {
+      return this.lineaTiempo
+        .map((cancion, idx) => ({
+          cancion,
+          posicionOriginal: idx
+        }))
+        .reverse()
     }
   },
   mounted() {
@@ -189,6 +210,7 @@ export default {
 
         if (dataCancion.error) {
           alert(dataCancion.error)
+          this.cargando = false
           return
         }
 
@@ -196,11 +218,17 @@ export default {
         this.jugadorTurno = dataCancion.jugador_info
         this.turnoActual = dataCancion.turno_actual
 
-        // Determinar el jugador_index actual
+        // ✅ CORRECCIÓN: Asegurarse de que jugadorIndex esté definido antes de cargar
         this.jugadorIndex = this.turnoActual
 
-        // Cargar TreeMap del jugador actual
-        await this.cargarTreeMap()
+        console.log('🎮 Turno cargado:', {
+          turno: this.turnoActual,
+          jugadorIndex: this.jugadorIndex,
+          jugador: this.jugadorTurno
+        })
+
+        // Cargar Línea de Tiempo del jugador actual
+        await this.cargarLineaTiempo()
 
       } catch (error) {
         console.error('Error cargando turno:', error)
@@ -210,14 +238,33 @@ export default {
       }
     },
 
-    async cargarTreeMap() {
+    async cargarLineaTiempo() {
       try {
-        const resp = await fetch(`http://localhost:5000/api/tablero/${this.partidaId}/treemap/${this.jugadorIndex}`)
+        const resp = await fetch(`http://localhost:5000/api/tablero/${this.partidaId}/linea-tiempo/${this.jugadorIndex}`)
         const data = await resp.json()
 
-        this.treemap = data.canciones || []
+        console.log('📦 Línea de tiempo cargada:', data)
+
+        // ✅ CORRECCIÓN: Usar "canciones_ordenadas" en lugar de "canciones"
+        this.lineaTiempo = data.canciones_ordenadas || []
+
+        // ✅ Cargar puntos de la partida actual
+        this.puntosPartidaActual = data.puntos || 0
+
       } catch (error) {
-        console.error('Error cargando TreeMap:', error)
+        console.error('Error cargando línea de tiempo:', error)
+      }
+    },
+
+    obtenerTextoMensajePosicion() {
+      if (this.posicionSeleccionada === 0) {
+        return 'Al inicio (más reciente)'
+      } else if (this.posicionSeleccionada === this.lineaTiempo.length) {
+        return 'Al final (más antigua)'
+      } else {
+        const anioAnterior = this.lineaTiempo[this.posicionSeleccionada - 1]?.anio
+        const anioSiguiente = this.lineaTiempo[this.posicionSeleccionada]?.anio
+        return `Entre ${anioSiguiente} y ${anioAnterior}`
       }
     },
 
@@ -227,80 +274,93 @@ export default {
     },
 
     async validarRespuesta() {
-  if (this.validando) return
+      if (this.validando) return
 
-  if (!this.tituloUsuario.trim() || !this.artistaUsuario.trim()) {
-    alert('Por favor completa título y artista')
-    return
-  }
+      if (!this.tituloUsuario.trim() || !this.artistaUsuario.trim()) {
+        alert('Por favor completa título y artista')
+        return
+      }
 
-  this.validando = true
+      this.validando = true
 
-  try {
-    const resp = await fetch('http://localhost:5000/api/tablero/colocar-cancion', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        partida_id: this.partidaId,
-        jugador_index: this.jugadorIndex,
-        posicion: this.posicionSeleccionada,
-        titulo: this.tituloUsuario.trim(),
-        artista: this.artistaUsuario.trim()
-      })
-    })
+      try {
+        const resp = await fetch('http://localhost:5000/api/tablero/colocar-cancion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            partida_id: this.partidaId,
+            jugador_index: this.jugadorIndex,
+            posicion: this.posicionSeleccionada,
+            titulo: this.tituloUsuario.trim(),
+            artista: this.artistaUsuario.trim()
+          })
+        })
 
-    if (!resp.ok) {
-      const errorData = await resp.json()
-      alert(`Error: ${errorData.detail || 'Error al validar'}`)
-      return
-    }
+        if (!resp.ok) {
+          const errorData = await resp.json()
+          alert(`Error: ${errorData.detail || 'Error al validar'}`)
+          return
+        }
 
-    const data = await resp.json()
+        const data = await resp.json()
 
-    console.log('Respuesta del servidor:', data) // 👈 Para debug
+        console.log('✅ Respuesta del servidor:', data)
 
-    // Actualizar TreeMap
-    this.treemap = data.treemap_actualizado || []
+        // ✅ CORRECCIÓN CRÍTICA: Usar "canciones_ordenadas"
+        this.lineaTiempo = data.canciones_ordenadas || []
 
-    // Mostrar resultado
-    let mensaje = ''
-    let tipo = 'incorrecto'
+        // ✅ Actualizar puntos de la partida actual
+        this.puntosPartidaActual = data.puntos_totales || 0
 
-    if (data.correcto_anio && data.correcto_titulo && data.correcto_artista) {
-      tipo = 'correcto'
-      mensaje = `🎉 ¡Perfecto! +${data.puntos_ganados} puntos<br>`
-      mensaje += `<strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
-    } else if (data.correcto_anio && (data.correcto_titulo || data.correcto_artista)) {
-      tipo = 'parcial'
-      mensaje = `⚡ Año correcto pero `
-      if (!data.correcto_titulo) mensaje += 'el título no. '
-      if (!data.correcto_artista) mensaje += 'el artista no. '
-      mensaje += `+${data.puntos_ganados} puntos<br>`
-      mensaje += `Era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
-    } else if (data.correcto_anio) {
-      tipo = 'parcial'
-      mensaje = `📅 Solo el año es correcto. +${data.puntos_ganados} punto<br>`
-      mensaje += `Era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
-    } else {
-      mensaje = `❌ Posición incorrecta en el TreeMap<br>`
-      mensaje += `La canción era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
-    }
+        // Mostrar resultado
+        let mensaje = ''
+        let tipo = 'incorrecto'
 
-    this.resultado = {
-      tipo,
-      mensaje,
-      qr: data.qr_code || null
-    }
+        if (data.correcto_anio && data.correcto_titulo && data.correcto_artista) {
+          tipo = 'correcto'
+          mensaje = `🎉 ¡Perfecto! +${data.puntos_ganados} puntos<br>`
+          mensaje += `<strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
+        } else if (data.correcto_anio && (data.correcto_titulo || data.correcto_artista)) {
+          tipo = 'parcial'
+          mensaje = `⚡ `
+          if (data.correcto_titulo) {
+            mensaje += 'Título correcto, pero '
+          }
+          if (data.correcto_artista) {
+            mensaje += 'Artista correcto, pero '
+          }
+          if (!data.correcto_titulo) {
+            mensaje += 'título incorrecto. '
+          }
+          if (!data.correcto_artista) {
+            mensaje += 'artista incorrecto. '
+          }
+          mensaje += `Año bien colocado. +${data.puntos_ganados} puntos<br>`
+          mensaje += `Era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
+        } else if (data.correcto_anio) {
+          tipo = 'parcial'
+          mensaje = `📅 Solo el año es correcto (+${data.puntos_ganados} punto)<br>`
+          mensaje += `Era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
+        } else {
+          mensaje = `❌ Año mal colocado (0 puntos)<br>`
+          mensaje += `La canción era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
+        }
 
-    this.esperandoRespuesta = true
+        this.resultado = {
+          tipo,
+          mensaje,
+          qr: data.qr_code || null
+        }
 
-  } catch (error) {
-    console.error('Error validando respuesta:', error)
-    alert('Error de conexión al validar la respuesta')
-  } finally {
-    this.validando = false
-  }
-},
+        this.esperandoRespuesta = true
+
+      } catch (error) {
+        console.error('Error validando respuesta:', error)
+        alert('Error de conexión al validar la respuesta')
+      } finally {
+        this.validando = false
+      }
+    },
 
     async siguienteTurno() {
       this.cargando = true
@@ -340,10 +400,7 @@ export default {
 </script>
 
 <style scoped>
-.resultado-container.parcial {
-  background: linear-gradient(135deg, #f39c12, #f1c40f);
-  border: 2px solid #f39c12;
-}
+/* Todos los estilos anteriores se mantienen igual */
 .game-tablero {
   display: flex;
   flex-direction: column;
@@ -351,7 +408,6 @@ export default {
   animation: fadeIn 0.5s ease;
 }
 
-/* Header del turno */
 .header-turno {
   display: flex;
   justify-content: space-between;
@@ -371,9 +427,30 @@ export default {
 }
 
 .jugador-puntos {
-  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.puntos-partida {
+  font-size: 1.3rem;
+  color: #00c851;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 200, 81, 0.3);
+}
+
+.puntos-totales {
+  font-size: 1rem;
   color: #ffd700;
   font-weight: 600;
+}
+
+.orden-explicacion {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: -0.5rem 0 1rem 0;
+  font-style: italic;
 }
 
 .turno-info {
@@ -384,7 +461,6 @@ export default {
   color: white;
 }
 
-/* Audio */
 .audio-section {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
   border-radius: 24px;
@@ -396,8 +472,14 @@ export default {
 
 .audio-section h3 {
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 1.2rem;
+}
+
+.instruccion {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
 .audio-player {
@@ -406,22 +488,21 @@ export default {
   border-radius: 16px;
 }
 
-/* TreeMap */
-.treemap-container {
+.linea-tiempo-container {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 24px;
   padding: 2rem;
   border: 2px solid rgba(156, 39, 176, 0.3);
 }
 
-.treemap-container h3 {
+.linea-tiempo-container h3 {
   color: white;
   margin-bottom: 1.5rem;
   text-align: center;
   font-size: 1.3rem;
 }
 
-.treemap-lista {
+.linea-tiempo-lista {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -449,7 +530,7 @@ export default {
   cursor: not-allowed;
 }
 
-.treemap-casilla {
+.linea-casilla {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -460,19 +541,19 @@ export default {
   transition: all 0.3s ease;
 }
 
-.treemap-casilla.vacia {
+.linea-casilla.vacia {
   border-style: dashed;
   cursor: pointer;
   min-height: 80px;
   justify-content: center;
 }
 
-.treemap-casilla.vacia:hover {
+.linea-casilla.vacia:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: #9c27b0;
 }
 
-.treemap-casilla.ocupada {
+.linea-casilla.ocupada {
   border-color: rgba(156, 39, 176, 0.5);
 }
 
@@ -514,15 +595,15 @@ export default {
   color: #ffd700;
   font-weight: 600;
   margin-top: 0.5rem;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.cancion-anio.mostrar {
+.cancion-anio.visible {
   opacity: 1;
-  max-height: 50px;
+  max-height: none;
 }
 
 .posicion-seleccionada {
@@ -535,7 +616,6 @@ export default {
   border-radius: 12px;
 }
 
-/* Formulario */
 .form-respuesta {
   background: linear-gradient(135deg, #ffd6a5, #ffb6b9);
   border-radius: 24px;
@@ -572,7 +652,6 @@ export default {
   box-shadow: 0 0 0 4px rgba(156, 39, 176, 0.2);
 }
 
-/* Resultado */
 .resultado-container {
   padding: 2rem;
   border-radius: 20px;
@@ -583,6 +662,11 @@ export default {
 .resultado-container.correcto {
   background: linear-gradient(135deg, #27ae60, #2ecc71);
   border: 2px solid #27ae60;
+}
+
+.resultado-container.parcial {
+  background: linear-gradient(135deg, #f39c12, #f1c40f);
+  border: 2px solid #f39c12;
 }
 
 .resultado-container.incorrecto {
@@ -609,14 +693,12 @@ export default {
   padding: 1rem;
 }
 
-/* Controles */
 .controles {
   display: flex;
   gap: 1rem;
   justify-content: center;
 }
 
-/* Loading */
 .loading-overlay {
   position: fixed;
   top: 0;
