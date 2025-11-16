@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..config.database import get_db
+from ..models.juego_tablero import TreeMapJugador
 from ..schemas.tablero import (
     IniciarPartidaRequest,
     ColocarCancionRequest,
@@ -129,3 +130,45 @@ def finalizar_partida(partida_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=resultado['error'])
 
     return resultado
+@router.post("/{partida_id}/crear-casilla")
+def crear_casilla(
+    partida_id: int,
+    data: dict,
+    db: Session = Depends(get_db)
+):
+    """Crea una nueva casilla en el TreeMap (endpoint informativo)"""
+    resultado = tablero_service.crear_casilla_treemap(
+        db,
+        partida_id,
+        data['jugador_index'],
+        data['posicion']
+    )
+
+    if 'error' in resultado:
+        raise HTTPException(status_code=400, detail=resultado['error'])
+
+    return resultado
+
+
+@router.get("/{partida_id}/treemap/{jugador_index}")
+def obtener_treemap(
+    partida_id: int,
+    jugador_index: int,
+    db: Session = Depends(get_db)
+):
+    """Obtiene el TreeMap de un jugador"""
+    treemap = db.query(TreeMapJugador).filter(
+        TreeMapJugador.partida_id == partida_id,
+        TreeMapJugador.jugador_index == jugador_index
+    ).first()
+
+    if not treemap:
+        raise HTTPException(status_code=404, detail="TreeMap no encontrado")
+
+    return {
+        'canciones': treemap.canciones or [],
+        'puntos': treemap.puntos_actuales,
+        'completado_10': treemap.completado_10,
+        'karaoke_realizado': treemap.karaoke_realizado,
+        'necesita_karaoke': treemap.completado_10 and not treemap.karaoke_realizado
+    }

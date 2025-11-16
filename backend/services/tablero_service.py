@@ -191,6 +191,212 @@ class TableroService:
         }
 
     @staticmethod
+    def colocar_cancion_treemap(
+            db: Session,
+            partida_id: int,
+            jugador_index: int,
+            posicion: int,
+            titulo_usuario: str,
+            artista_usuario: str
+    ):
+        """Coloca una canción en el TreeMap del jugador y valida"""
+
+        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
+        if not partida:
+            return {'error': 'Partida no encontrada'}
+
+        # Obtener la canción actual de la partida
+        if not partida.cancion_actual:
+            return {'error': 'No hay canción actual'}
+
+        cancion = partida.cancion_actual
+
+        treemap = db.query(TreeMapJugador).filter(
+            TreeMapJugador.partida_id == partida_id,
+            TreeMapJugador.jugador_index == jugador_index
+        ).first()
+
+        if not treemap:
+            return {'error': 'TreeMap no encontrado'}
+
+        # Validar título y artista
+        resultado_titulo = verificar_respuesta_solo_titulo(
+            cancion['titulo'],
+            titulo_usuario
+        )
+        resultado_artista = verificar_respuesta_solo_artista(
+            cancion['artista'],
+            artista_usuario
+        )
+
+        titulo_correcto = resultado_titulo['correcto']
+        artista_correcto = resultado_artista['correcto']
+
+        # Calcular puntos
+        puntos_ganados = 0
+
+        # Obtener la lista de canciones actual (TreeMap en Python = lista ordenada)
+        canciones_actuales = treemap.canciones or []
+
+        # Verificar si el año está en la posición correcta
+        anio_correcto = TableroService._verificar_posicion_anio(
+            canciones_actuales,
+            posicion,
+            cancion['anio']
+        )
+
+        if anio_correcto:
+            puntos_ganados += 1  # 1 punto por año correcto
+
+        if titulo_correcto and artista_correcto:
+            puntos_ganados += 5  # 5 puntos por título y artista
+
+        # Actualizar TreeMap solo si el año es correcto
+        if anio_correcto:
+            nueva_cancion = {
+                'titulo': cancion['titulo'],
+                'artista': cancion['artista'],
+                'anio': cancion['anio'],
+                'spotify_id': cancion['spotify_id'],
+                'spotify_url': cancion['spotify_url'],
+                'correcta': True
+            }
+
+            # Insertar en la posición indicada
+            canciones_actuales.insert(posicion, nueva_cancion)
+            treemap.canciones = canciones_actuales
+        else:
+            # Si no es correcto, no se añade al TreeMap
+            pass
+
+        treemap.puntos_actuales += puntos_ganados
+
+        # Verificar si completó 10 canciones correctas
+        if len(treemap.canciones) >= 10 and not treemap.completado_10:
+            treemap.completado_10 = True
+
+        db.commit()
+
+        # Generar QR si acertó todo
+        qr_code = None
+        if titulo_correcto and artista_correcto:
+            qr_code = generar_qr_base64(cancion['spotify_url'])
+
+        return {
+            'correcto_anio': anio_correcto,
+            'correcto_titulo': titulo_correcto,
+            'correcto_artista': artista_correcto,
+            'puntos_ganados': puntos_ganados,
+            'puntos_totales': treemap.puntos_actuales,
+            'treemap_actualizado': treemap.canciones,
+            'completado_10': treemap.completado_10,
+            'necesita_karaoke': treemap.completado_10 and not treemap.karaoke_realizado,
+            'titulo_real': cancion['titulo'],
+            'artista_real': cancion['artista'],
+            'anio_real': cancion['anio'],
+            'qr_code': qr_code,
+            'spotify_url': cancion['spotify_url'] if (titulo_correcto and artista_correcto) else None
+        }
+
+    @staticmethod
+    def _verificar_posicion_anio(canciones: list, posicion: int, anio: int) -> bool:
+        """
+        Verifica si el año está en la posición correcta del TreeMap
+        El TreeMap debe estar ordenado ascendentemente por año
+        """
+        if not canciones:
+            # Si está vacío, cualquier posición es válida
+            return True
+
+        # Verificar límites de posición
+        if posicion < 0 or posicion > len(canciones):
+            return False
+
+        # Si se inserta al principio
+        if posicion == 0:
+            # El año debe ser menor o igual al primer elemento
+            return anio <= canciones[0]['anio']
+
+        # Si se inserta al final
+        if posicion == len(canciones):
+            # El año debe ser mayor o igual al último elemento
+            return anio >= canciones[-1]['anio']
+
+        # Si se inserta en medio
+        # Debe ser mayor o igual al anterior Y menor o igual al siguiente
+        return canciones[posicion - 1]['anio'] <= anio <= canciones[posicion]['anio']
+
+    @staticmethod
+    def crear_casilla_treemap(db: Session, partida_id: int, jugador_index: int, posicion: int):
+        """
+        Crea una nueva casilla vacía en el TreeMap
+        (En realidad solo devuelve info, ya que el TreeMap es dinámico)
+        """
+        treemap = db.query(TreeMapJugador).filter(
+            TreeMapJugador.partida_id == partida_id,
+            TreeMapJugador.jugador_index == jugador_index
+        ).first()
+
+        if not treemap:
+            return {'error': 'TreeMap no encontrado'}
+
+        canciones = treemap.canciones or []
+
+        return {
+            'success': True,
+            'casillas_totales': len(canciones) + 1,
+            'mensaje': 'Puedes colocar la canción en esta posición'
+        }
+
+    @staticmethod
+    def avanzar_turno(db: Session, partida_id: int):
+        """Avanza al siguiente turno"""
+        partida = db.query(PartidaTablero).filter(PartidaTablero.id == partida_id).first()
+        if not partida:
+            return {'error': 'Partida no encontrada'}
+
+        configuracion = partida.jugadores
+        num_jugadores = len(
+            configuracion.get('jugadores_individuales', [])
+            if partida.tipo_juego == 'individual'
+            else configuracion.get('parejas', [])
+        )
+
+        partida.turno_actual = (partida.turno_actual + 1) % num_jugadores
+
+        # Limpiar canción actual
+        partida.cancion_actual = None
+
+        db.commit()
+
+        return {
+            'turno_actual': partida.turno_actual,
+            'jugador_turno': TableroService._obtener_info_jugador_turno(partida)
+        }
+
+    @staticmethod
+    def _obtener_info_jugador_turno(partida: PartidaTablero):
+        """Obtiene información del jugador en turno"""
+        configuracion = partida.jugadores
+        turno = partida.turno_actual
+
+        if partida.tipo_juego == 'individual':
+            jugador = configuracion['jugadores_individuales'][turno]
+            return {
+                'tipo': 'individual',
+                'nombre': jugador['nombre'],
+                'puntos': jugador.get('puntos', 0)
+            }
+        else:
+            pareja = configuracion['parejas'][turno]
+            return {
+                'tipo': 'pareja',
+                'nombre_pareja': pareja['nombre_pareja'],
+                'miembro1': pareja['miembro1']['nombre'],
+                'miembro2': pareja['miembro2']['nombre']
+            }
+
+    @staticmethod
     def _obtener_info_jugador_actual(partida: PartidaTablero):
         """Obtiene la info del jugador/pareja actual"""
 
