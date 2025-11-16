@@ -275,6 +275,7 @@ class TableroService:
         }
 
     @staticmethod
+    @staticmethod
     def colocar_cancion(
             db: Session,
             partida_id: int,
@@ -307,22 +308,29 @@ class TableroService:
         if not linea_tiempo:
             return {'error': 'Línea de tiempo no encontrada'}
 
-        # ✅ USAR FUZZY MATCHING igual que modo individual
-        resultado_titulo = verificar_respuesta_solo_titulo(
-            cancion['titulo'],
-            titulo_usuario
-        )
-        resultado_artista = verificar_respuesta_solo_artista(
-            cancion['artista'],
-            artista_usuario
-        )
+        # ✅ Detectar si es validación solo de año
+        solo_anio = not titulo_usuario.strip() and not artista_usuario.strip()
 
-        titulo_correcto = resultado_titulo['correcto']
-        artista_correcto = resultado_artista['correcto']
+        # ✅ Validar título y artista solo si se proporcionaron
+        titulo_correcto = False
+        artista_correcto = False
 
-        # ✅ Mostrar similitud en logs para debug
-        logger.info(
-            f"Validación - Título: {resultado_titulo['similitud']}% | Artista: {resultado_artista['similitud']}%")
+        if not solo_anio:
+            resultado_titulo = verificar_respuesta_solo_titulo(
+                cancion['titulo'],
+                titulo_usuario
+            )
+            resultado_artista = verificar_respuesta_solo_artista(
+                cancion['artista'],
+                artista_usuario
+            )
+
+            titulo_correcto = resultado_titulo['correcto']
+            artista_correcto = resultado_artista['correcto']
+
+            logger.info(
+                f"Validación - Título: {resultado_titulo['similitud']}% | Artista: {resultado_artista['similitud']}%"
+            )
 
         # Cargar SortedDict actual
         canciones_dict = SortedDict(linea_tiempo.canciones_por_anio or {})
@@ -351,7 +359,8 @@ class TableroService:
                 'spotify_url': cancion['spotify_url']
             }
 
-        if titulo_correcto and artista_correcto:
+        # ✅ Solo sumar puntos de título/artista si NO es validación solo de año
+        if not solo_anio and titulo_correcto and artista_correcto:
             puntos_ganados += 5  # 5 puntos por título y artista
 
         # Actualizar línea de tiempo
@@ -364,10 +373,8 @@ class TableroService:
 
         db.commit()
 
-        # Generar QR si acertó todo
-        qr_code = None
-        if titulo_correcto and artista_correcto:
-            qr_code = generar_qr_base64(cancion['spotify_url'])
+        # ✅ Generar QR SIEMPRE (tanto si valida todo como solo año)
+        qr_code = generar_qr_base64(cancion['spotify_url'])
 
         # Convertir SortedDict a lista ordenada para el response
         canciones_ordenadas = [
@@ -381,22 +388,24 @@ class TableroService:
             for anio, info in canciones_dict.items()
         ]
         canciones_ordenadas.reverse()
+
         return {
             'correcto_anio': anio_correcto,
-            'correcto_titulo': titulo_correcto,
-            'correcto_artista': artista_correcto,
-            'similitud_titulo': resultado_titulo['similitud'],  # ✅ Para debug
-            'similitud_artista': resultado_artista['similitud'],  # ✅ Para debug
+            'correcto_titulo': titulo_correcto if not solo_anio else False,
+            'correcto_artista': artista_correcto if not solo_anio else False,
+            'similitud_titulo': resultado_titulo['similitud'] if not solo_anio else 0,
+            'similitud_artista': resultado_artista['similitud'] if not solo_anio else 0,
             'puntos_ganados': puntos_ganados,
             'puntos_totales': linea_tiempo.puntos_actuales,
-            'canciones_ordenadas': canciones_ordenadas,  # ✅ Nombre consistente
+            'canciones_ordenadas': canciones_ordenadas,
             'completado_10': linea_tiempo.completado_10,
             'necesita_karaoke': linea_tiempo.completado_10 and not linea_tiempo.karaoke_realizado,
             'titulo_real': cancion['titulo'],
             'artista_real': cancion['artista'],
             'anio_real': cancion['anio'],
             'qr_code': qr_code,
-            'spotify_url': cancion['spotify_url'] if (titulo_correcto and artista_correcto) else None
+            'spotify_url': cancion['spotify_url'],  # ✅ Siempre enviar la URL
+            'solo_anio': solo_anio  # ✅ Indicar al frontend que fue validación solo de año
         }
 
     @staticmethod

@@ -88,34 +88,48 @@
     </div>
 
     <!-- Formulario de respuesta -->
-    <div v-if="posicionSeleccionada !== null && !esperandoRespuesta" class="form-respuesta">
-      <h3>¿Cuál es el título y el artista?</h3>
+<div v-if="posicionSeleccionada !== null && !esperandoRespuesta" class="form-respuesta">
+  <h3>¿Cuál es el título y el artista?</h3>
 
-      <div class="form-inputs">
-        <input
-          v-model="tituloUsuario"
-          type="text"
-          placeholder="Título de la canción"
-          class="input-respuesta"
-          @keypress.enter="validarRespuesta"
-        />
-        <input
-          v-model="artistaUsuario"
-          type="text"
-          placeholder="Artista"
-          class="input-respuesta"
-          @keypress.enter="validarRespuesta"
-        />
-      </div>
+  <div class="form-inputs">
+    <input
+      v-model="tituloUsuario"
+      type="text"
+      placeholder="Título de la canción"
+      class="input-respuesta"
+      @keypress.enter="validarRespuesta"
+    />
+    <input
+      v-model="artistaUsuario"
+      type="text"
+      placeholder="Artista"
+      class="input-respuesta"
+      @keypress.enter="validarRespuesta"
+    />
+  </div>
 
-      <button
-        class="btn btn-verificar"
-        @click="validarRespuesta"
-        :disabled="!tituloUsuario.trim() || !artistaUsuario.trim() || validando"
-      >
-        {{ validando ? '⏳ Validando...' : '✅ Validar y Colocar' }}
-      </button>
-    </div>
+  <div class="botones-validacion">
+    <button
+      class="btn btn-verificar"
+      @click="validarRespuesta"
+      :disabled="!tituloUsuario.trim() || !artistaUsuario.trim() || validando"
+    >
+      {{ validando ? '⏳ Validando...' : '✅ Validar Todo' }}
+    </button>
+
+    <button
+      class="btn btn-solo-anio"
+      @click="validarSoloAnio"
+      :disabled="validando"
+    >
+      📅 Solo validar año
+    </button>
+  </div>
+
+  <p class="nota-solo-anio">
+    💡 Si no sabes el título o artista, puedes validar solo el año
+  </p>
+</div>
 
     <!-- Resultado -->
     <div v-if="resultado" class="resultado-container" :class="resultado.tipo">
@@ -236,6 +250,68 @@ export default {
         this.cargando = false
       }
     },
+    async validarSoloAnio() {
+  if (this.validando) return
+
+  this.validando = true
+
+  try {
+    const resp = await fetch('http://localhost:5000/api/tablero/colocar-cancion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        partida_id: this.partidaId,
+        jugador_index: this.jugadorIndex,
+        posicion: this.posicionSeleccionada,
+        titulo: '',  // ✅ Enviar vacío
+        artista: ''  // ✅ Enviar vacío
+      })
+    })
+
+    if (!resp.ok) {
+      const errorData = await resp.json()
+      alert(`Error: ${errorData.detail || 'Error al validar'}`)
+      return
+    }
+
+    const data = await resp.json()
+
+    console.log('✅ Respuesta del servidor (solo año):', data)
+
+    // ✅ Actualizar línea de tiempo
+    this.lineaTiempo = data.canciones_ordenadas || []
+
+    // ✅ Actualizar puntos de la partida actual
+    this.puntosPartidaActual = data.puntos_totales || 0
+
+    // Mostrar resultado
+    let mensaje = ''
+    let tipo = 'incorrecto'
+
+    if (data.correcto_anio) {
+      tipo = 'parcial'
+      mensaje = `📅 Año colocado correctamente (+${data.puntos_ganados} punto)<br>`
+      mensaje += `La canción era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
+    } else {
+      mensaje = `❌ Año mal colocado (0 puntos)<br>`
+      mensaje += `La canción era: <strong>${data.titulo_real}</strong> - ${data.artista_real} (${data.anio_real})`
+    }
+
+    this.resultado = {
+      tipo,
+      mensaje,
+      qr: data.qr_code || null
+    }
+
+    this.esperandoRespuesta = true
+
+  } catch (error) {
+    console.error('Error validando solo año:', error)
+    alert('Error de conexión al validar')
+  } finally {
+    this.validando = false
+  }
+},
 
     async cargarLineaTiempo() {
       try {
@@ -372,6 +448,8 @@ export default {
       }
     },
 
+
+
     async siguienteTurno() {
       this.cargando = true
 
@@ -404,7 +482,8 @@ export default {
       this.artistaUsuario = ''
       this.resultado = null
       this.esperandoRespuesta = false
-    }
+    },
+
   }
 }
 </script>
@@ -767,5 +846,51 @@ export default {
     flex-direction: column;
     gap: 1rem;
   }
+  .botones-validacion {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.botones-validacion .btn {
+  flex: 1;
+}
+
+.btn-solo-anio {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(243, 156, 18, 0.3);
+}
+
+.btn-solo-anio:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(243, 156, 18, 0.4);
+}
+
+.btn-solo-anio:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nota-solo-anio {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .botones-validacion {
+    flex-direction: column;
+  }
+}
 }
 </style>

@@ -36,23 +36,57 @@
         </template>
 
         <!-- Tablero -->
-        <template v-else-if="modoSeleccionado === 'tablero'">
-          <div class="proximamente-banner">
-            🚧 PRÓXIMAMENTE 🚧
-          </div>
-          <h3>🎲 Características futuras:</h3>
-          <ul>
-            <li>Tablero interactivo con casillas especiales</li>
-            <li>Modo multijugador local (hasta 4 jugadores)</li>
-            <li>Casillas con retos y bonificaciones</li>
-            <li>Preguntas de diferentes tipos</li>
-            <li>Sistema de turnos y puntuación</li>
-          </ul>
-          <p class="proximamente-info">
-            Estamos trabajando en esta modalidad. ¡Vuelve pronto!
-          </p>
-        </template>
+<template v-else-if="modoSeleccionado === 'tablero'">
+  <div class="instrucciones-grid">
+    <div class="seccion-instrucciones">
+      <h4>👥 Jugadores</h4>
+      <ul>
+        <li>Individual (hasta 4) o Parejas (hasta 3)</li>
+        <li>Registrados o invitados</li>
+      </ul>
+    </div>
 
+    <div class="seccion-instrucciones">
+      <h4>🎵 Juego</h4>
+      <ul>
+        <li>Coloca canciones por orden cronológico</li>
+        <li>Crea casillas entre canciones</li>
+      </ul>
+    </div>
+
+    <div class="seccion-instrucciones">
+      <h4>🎯 Puntos</h4>
+      <ul>
+        <li>+1 punto si aciertas el año</li>
+        <li>+5 puntos si aciertas título y artista</li>
+      </ul>
+    </div>
+
+    <div class="seccion-instrucciones destacada">
+      <h4>🎤 Karaoke</h4>
+      <ul>
+        <li>Al completar 10 canciones</li>
+        <li>La IA te evalúa (hasta +20 puntos)</li>
+      </ul>
+    </div>
+
+    <div class="seccion-instrucciones">
+      <h4>🏆 Final</h4>
+      <ul>
+        <li>Gana quien tenga más puntos</li>
+        <li>Puntos se guardan si estás registrado</li>
+      </ul>
+    </div>
+
+    <div class="seccion-instrucciones">
+      <h4>💡 Consejo</h4>
+      <ul>
+        <li>Organiza las canciones por décadas</li>
+        <li>Valida solo el año si no sabes la canción</li>
+      </ul>
+    </div>
+  </div>
+</template>
         <!-- Online -->
         <template v-else-if="modoSeleccionado === 'online'">
           <div class="proximamente-banner">
@@ -184,6 +218,67 @@ export default {
 @media (max-width: 968px) {
   .selector-container {
     flex-direction: column;
+  }
+}
+
+/* Secciones de instrucciones */
+.seccion-instrucciones {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  border-left: 3px solid rgba(156, 39, 176, 0.5);
+}
+
+.seccion-instrucciones.destacada {
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.05));
+  border-left-color: #f39c12;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2);
+}
+
+.seccion-instrucciones h4 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  color: white;
+  font-weight: 700;
+}
+
+.seccion-instrucciones.destacada h4 {
+  color: #f39c12;
+  text-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+.seccion-instrucciones ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.seccion-instrucciones li {
+  padding: 0.4rem 0;
+  line-height: 1.5;
+}
+
+.seccion-instrucciones strong {
+  color: #9c27b0;
+  font-weight: 700;
+}
+
+.seccion-instrucciones.destacada strong {
+  color: #f39c12;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .seccion-instrucciones {
+    padding: 0.75rem;
+  }
+
+  .seccion-instrucciones h4 {
+    font-size: 0.95rem;
+  }
+
+  .seccion-instrucciones li {
+    font-size: 0.9rem;
   }
 }
 </style>

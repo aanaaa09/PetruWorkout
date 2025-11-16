@@ -4,6 +4,7 @@
 
     <AppHeader
       :usuario-logueado="!!usuarioActual"
+      :en-juego="!!modoYPlaylist"
       @mostrar-ranking="mostrarRanking = true"
       @mostrar-añadir-cancion="modalAñadirCancion = true"
     />
