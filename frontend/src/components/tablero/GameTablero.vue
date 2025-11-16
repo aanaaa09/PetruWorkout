@@ -38,8 +38,7 @@
     <!-- Línea de Tiempo Visual -->
     <div class="linea-tiempo-container">
       <h3>📊 Línea de Tiempo Musical</h3>
-      <p class="orden-explicacion">⬆️ Más recientes arriba | ⬇️ Más antiguas abajo</p>
-
+      <p class="orden-explicacion">COLOCACIÓN: ⬆️ Más antiguas abajo | ⬇️ Más recientes arriba</p>
       <div class="linea-tiempo-lista">
         <!-- Casilla inicial (si está vacío) -->
         <div v-if="lineaTiempoInvertida.length === 0" class="linea-casilla vacia" @click="seleccionarPosicion(0)">
@@ -192,7 +191,7 @@ export default {
           cancion,
           posicionOriginal: idx
         }))
-        .reverse()
+
     }
   },
   mounted() {
@@ -256,22 +255,33 @@ export default {
       }
     },
 
-    obtenerTextoMensajePosicion() {
-      if (this.posicionSeleccionada === 0) {
-        return 'Al inicio (más reciente)'
-      } else if (this.posicionSeleccionada === this.lineaTiempo.length) {
-        return 'Al final (más antigua)'
-      } else {
-        const anioAnterior = this.lineaTiempo[this.posicionSeleccionada - 1]?.anio
-        const anioSiguiente = this.lineaTiempo[this.posicionSeleccionada]?.anio
-        return `Entre ${anioSiguiente} y ${anioAnterior}`
-      }
-    },
+   obtenerTextoMensajePosicion() {
+  // Como el array viene invertido del backend, la lógica es:
+  // posicion alta en BD = se ve abajo (antigua)
+  // posicion baja en BD = se ve arriba (reciente)
+
+  if (this.posicionSeleccionada === this.lineaTiempo.length) {
+    return 'Abajo del todo (más antigua)'
+  } else if (this.posicionSeleccionada === 0) {
+    return 'Arriba del todo (más reciente)'
+  } else {
+    // Calcular años según posición en BD
+    const posVisual = this.lineaTiempo.length - this.posicionSeleccionada
+    const anioSuperior = this.lineaTiempo[posVisual - 1]?.anio
+    const anioInferior = this.lineaTiempo[posVisual]?.anio
+    return `Entre ${anioSuperior} (arriba) y ${anioInferior} (abajo)`
+  }
+},
 
     seleccionarPosicion(pos) {
-      this.posicionSeleccionada = pos
-      this.resultado = null
-    },
+  // Convertir posición visual a posición en array del backend
+  // Visual: [0=arriba más reciente, n=abajo más antigua]
+  // Backend: [0=más antigua, n=más reciente]
+  const posicionBackend = this.lineaTiempo.length - pos
+
+  this.posicionSeleccionada = posicionBackend
+  this.resultado = null
+},
 
     async validarRespuesta() {
       if (this.validando) return

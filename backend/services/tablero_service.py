@@ -354,7 +354,7 @@ class TableroService:
             }
             for anio, info in canciones_dict.items()
         ]
-
+        canciones_ordenadas.reverse()
         return {
             'correcto_anio': anio_correcto,
             'correcto_titulo': titulo_correcto,
@@ -377,9 +377,12 @@ class TableroService:
     def _verificar_posicion_correcta(anios_actuales: list, posicion: int, anio_nuevo: int) -> bool:
         """
         Verifica si el año se colocaría en la posición correcta
-        anios_actuales: lista de años (strings) ya colocados, ordenados
+        anios_actuales: lista de años (strings) ya colocados, ordenados ASCENDENTEMENTE
         posicion: índice donde el usuario quiere colocar (0, 1, 2, ...)
         anio_nuevo: año de la nueva canción (int)
+
+        IMPORTANTE: El frontend muestra INVERTIDO (más reciente arriba)
+        pero internamente guardamos ASCENDENTE (más antiguo primero)
         """
         if not anios_actuales:
             # Si está vacío, cualquier posición es válida
@@ -392,16 +395,19 @@ class TableroService:
         if posicion < 0 or posicion > len(anios_int):
             return False
 
-        # Si se inserta al principio
+        # Si se inserta al principio (posición 0)
+        # Debe ser MENOR O IGUAL que el primer año (más antiguo)
         if posicion == 0:
             return anio_nuevo <= anios_int[0]
 
         # Si se inserta al final
+        # Debe ser MAYOR O IGUAL que el último año (más reciente)
         if posicion == len(anios_int):
             return anio_nuevo >= anios_int[-1]
 
         # Si se inserta en medio
-        # Debe ser >= al anterior Y <= al siguiente
+        # Debe estar ENTRE el año anterior y el siguiente
+        # anios_int[posicion-1] <= anio_nuevo <= anios_int[posicion]
         return anios_int[posicion - 1] <= anio_nuevo <= anios_int[posicion]
 
     @staticmethod

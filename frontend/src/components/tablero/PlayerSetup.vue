@@ -22,23 +22,23 @@
       </div>
 
       <!-- Paso 2: Cantidad -->
-      <div v-else-if="paso === 'cantidad'" class="paso-cantidad">
-        <button class="btn-volver-pequeno" @click="volverPaso">← Volver</button>
+<div v-else-if="paso === 'cantidad'" class="paso-cantidad">
+  <button class="btn-volver-pequeno" @click="volverPaso">← Volver</button>
 
-        <h2>{{ tipoJuego === 'individual' ? '👥 ¿Cuántos jugadores?' : '👥 ¿Cuántas parejas?' }}</h2>
-        <p class="advertencia">⚠️ Máximo {{ maxCantidad }}</p>
+  <h2>{{ tipoJuego === 'individual' ? '👥 ¿Cuántos jugadores?' : '👥 ¿Cuántas parejas?' }}</h2>
+  <p class="advertencia">⚠️ De {{ minCantidad }} a {{ maxCantidad }}</p>
 
-        <div class="cantidad-selector">
-          <button
-            v-for="n in maxCantidad"
-            :key="n"
-            class="btn-cantidad"
-            @click="seleccionarCantidad(n)"
-          >
-            {{ n }}
-          </button>
-        </div>
-      </div>
+  <div class="cantidad-selector">
+    <button
+      v-for="n in cantidadesPermitidas"
+      :key="n"
+      class="btn-cantidad"
+      @click="seleccionarCantidad(n)"
+    >
+      {{ n }}
+    </button>
+  </div>
+</div>
 
       <!-- Paso 3: Registro Individual -->
       <div v-else-if="paso === 'registro-individual'" class="paso-registro">
@@ -216,10 +216,9 @@ export default {
       required: true
     },
     token: {
-    type: String,
-    required: true
-  }
-
+      type: String,
+      required: true
+    }
   },
   data() {
     return {
@@ -259,13 +258,21 @@ export default {
     }
   },
   computed: {
-  maxCantidad() {
-    return this.tipoJuego === 'individual' ? 4 : 3
+    maxCantidad() {
+      return this.tipoJuego === 'individual' ? 4 : 3
+    },
+    minCantidad() {
+      return 2 // Mínimo 2 jugadores/parejas
+    },
+    cantidadesPermitidas() {
+      const max = this.maxCantidad
+      const min = this.minCantidad
+      return Array.from({ length: max - min + 1 }, (_, i) => i + min)
+    },
+    jugadoresLista() {
+      return this.tipoJuego === 'individual' ? this.jugadoresIndividuales : this.parejas
+    }
   },
-  jugadoresLista() {
-    return this.tipoJuego === 'individual' ? this.jugadoresIndividuales : this.parejas
-  }
-},
   methods: {
     // ========== Navegación ==========
     seleccionarTipo(tipo) {
@@ -420,35 +427,33 @@ export default {
 
     // ========== Invitado ==========
     registrarInvitado() {
-    this.mostrarModalInvitado = true
-    this.nombreInvitado = ''
-    this.errorInvitado = ''
+      this.mostrarModalInvitado = true
+      this.nombreInvitado = ''
+      this.errorInvitado = ''
 
-    // Auto-focus en el input después de que se renderice
-    this.$nextTick(() => {
-      if (this.$refs.inputInvitado) {
-        this.$refs.inputInvitado.focus()
+      // Auto-focus en el input después de que se renderice
+      this.$nextTick(() => {
+        if (this.$refs.inputInvitado) {
+          this.$refs.inputInvitado.focus()
+        }
+      })
+    },
+
+    confirmarInvitado() {
+      if (!this.nombreInvitado.trim()) {
+        this.errorInvitado = 'Por favor ingresa tu nombre'
+        return
       }
-    })
-  },
 
-  confirmarInvitado() {
-    if (!this.nombreInvitado.trim()) {
-      this.errorInvitado = 'Por favor ingresa tu nombre'
-      return
-    }
+      this.agregarJugador({
+        tipo: 'invitado',
+        nombre: this.nombreInvitado.trim(),
+        puntos: 0
+      })
 
-    this.agregarJugador({
-      tipo: 'invitado',
-      nombre: this.nombreInvitado.trim(),
-      puntos: 0
-    })
-
-    this.cerrarModales()
-    this.avanzarJugador()
-  },
-
-
+      this.cerrarModales()
+      this.avanzarJugador()
+    },
 
     // ========== Lógica de Jugadores ==========
     agregarJugador(datosJugador) {
@@ -552,14 +557,14 @@ export default {
 
     limpiarFormularios() {
       this.loginEmail = ''
-    this.loginPassword = ''
-    this.registroNombre = ''
-    this.registroEmail = ''
-    this.registroPassword = ''
-    this.nombreInvitado = ''
-    this.errorLogin = ''
-    this.errorRegistro = ''
-    this.errorInvitado = ''
+      this.loginPassword = ''
+      this.registroNombre = ''
+      this.registroEmail = ''
+      this.registroPassword = ''
+      this.nombreInvitado = ''
+      this.errorLogin = ''
+      this.errorRegistro = ''
+      this.errorInvitado = ''
     },
 
     obtenerNombreJugador(jugador) {

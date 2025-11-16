@@ -206,6 +206,9 @@ def obtener_linea_tiempo(
         for anio, info in canciones_dict.items()
     ]
 
+    # ✅ INVERTIR para enviar más recientes primero
+    canciones_ordenadas.reverse()
+
     return {
         'canciones_ordenadas': canciones_ordenadas,
         'puntos': linea_tiempo.puntos_actuales,
