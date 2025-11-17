@@ -173,21 +173,20 @@ class TableroService:
             return {'error': 'No hay canciones disponibles'}
 
         # Inicializar canciones_servidas si no existe
-        if not partida.canciones_servidas:
-            partida.canciones_servidas = []
+        canciones_servidas_set = set(partida.canciones_servidas)
 
-        # ✅ NUEVO: Obtener años ya usados por este jugador
+        # ✅ OBTENER años ya usados por el jugador actual
         linea_tiempo = db.query(LineaTiempoJugador).filter(
             LineaTiempoJugador.partida_id == partida_id,
             LineaTiempoJugador.jugador_index == partida.turno_actual
         ).first()
 
+        # ✅ Extraer años del SortedDict y guardar en SET (O(1) para búsqueda)
         anios_usados_jugador = set()
         if linea_tiempo and linea_tiempo.canciones_por_anio:
-            # Extraer años del SortedDict
             anios_usados_jugador = {
-                int(info['anio'])
-                for info in linea_tiempo.canciones_por_anio.values()
+                int(anio)
+                for anio in linea_tiempo.canciones_por_anio.keys()
             }
 
         # ✅ FILTRAR: canciones con año que:
