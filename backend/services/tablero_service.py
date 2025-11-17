@@ -172,21 +172,51 @@ class TableroService:
         if not canciones:
             return {'error': 'No hay canciones disponibles'}
 
-        # ✅ CAMBIO: Usar canciones_servidas de la partida (compartidas entre todos)
+        # Inicializar canciones_servidas si no existe
         if not partida.canciones_servidas:
             partida.canciones_servidas = []
 
-        # ✅ Filtrar canciones con año que NO hayan sido servidas en TODA la partida
+        # ✅ NUEVO: Obtener años ya usados por este jugador
+        linea_tiempo = db.query(LineaTiempoJugador).filter(
+            LineaTiempoJugador.partida_id == partida_id,
+            LineaTiempoJugador.jugador_index == partida.turno_actual
+        ).first()
+
+        anios_usados_jugador = set()
+        if linea_tiempo and linea_tiempo.canciones_por_anio:
+            # Extraer años del SortedDict
+            anios_usados_jugador = {
+                int(info['anio'])
+                for info in linea_tiempo.canciones_por_anio.values()
+            }
+
+        # ✅ FILTRAR: canciones con año que:
+        # 1. No hayan sido servidas en toda la partida (compartido)
+        # 2. El año NO esté ya usado por este jugador
         disponibles = [
             c for c in canciones
-            if c.anio is not None and c.id not in partida.canciones_servidas
+            if c.anio is not None
+               and c.id not in partida.canciones_servidas
+               and c.anio not in anios_usados_jugador  # ✅ Nueva condición
         ]
 
-        # Resetear si no quedan (todas ya fueron usadas)
+        # ✅ Si NO quedan canciones disponibles para este jugador
         if not disponibles:
-            logger.info(f"🔄 Reseteando canciones servidas en partida {partida_id}")
-            partida.canciones_servidas = []
-            disponibles = [c for c in canciones if c.anio is not None]
+            logger.info(f"🔄 No quedan canciones con años únicos para jugador {partida.turno_actual}")
+
+            # Opción A: Resetear solo para este jugador
+            # (permitir canciones con años repetidos pero no servidas aún)
+            disponibles = [
+                c for c in canciones
+                if c.anio is not None
+                   and c.id not in partida.canciones_servidas
+            ]
+
+            # Si aún así no hay disponibles, resetear las servidas
+            if not disponibles:
+                logger.info(f"🔄 Reseteando canciones servidas en partida {partida_id}")
+                partida.canciones_servidas = []
+                disponibles = [c for c in canciones if c.anio is not None]
 
         if not disponibles:
             return {'error': 'No hay canciones con año'}
@@ -208,10 +238,11 @@ class TableroService:
 
             if preview_url:
                 cancion_seleccionada = cancion
-                logger.info(f"✅ Preview encontrado para: {cancion.titulo} - {cancion.artista}")
+                logger.info(f"✅ Preview encontrado para: {cancion.titulo} - {cancion.artista} ({cancion.anio})")
             else:
                 logger.warning(
-                    f"⚠️ No se encontró preview para: {cancion.titulo} - {cancion.artista}, intentando otra...")
+                    f"⚠️ No se encontró preview para: {cancion.titulo} - {cancion.artista}, intentando otra..."
+                )
                 # Marcar como servida para no repetirla
                 partida.canciones_servidas.append(cancion.id)
                 # Remover de disponibles
@@ -220,7 +251,11 @@ class TableroService:
                 if not disponibles:
                     # Resetear y volver a intentar
                     partida.canciones_servidas = []
-                    disponibles = [c for c in canciones if c.anio is not None]
+                    disponibles = [
+                        c for c in canciones
+                        if c.anio is not None
+                           and c.anio not in anios_usados_jugador  # ✅ Mantener filtro de años
+                    ]
 
             intentos += 1
 
@@ -237,7 +272,7 @@ class TableroService:
             'spotify_url': cancion_seleccionada.spotify_url or f"https://open.spotify.com/track/{cancion_seleccionada.spotify_id}"
         }
 
-        # ✅ Marcar como servida en la partida (para TODOS los jugadores)
+        # Marcar como servida en la partida (para TODOS los jugadores)
         if cancion_seleccionada.id not in partida.canciones_servidas:
             partida.canciones_servidas.append(cancion_seleccionada.id)
 
@@ -247,8 +282,9 @@ class TableroService:
             'preview_url': preview_url,
             'turno_actual': partida.turno_actual,
             'jugador_info': TableroService._obtener_info_jugador_actual(partida),
-            'canciones_servidas': len(partida.canciones_servidas),  # ✅ Info adicional
-            'canciones_totales': len(canciones)
+            'canciones_servidas': len(partida.canciones_servidas),
+            'canciones_totales': len(canciones),
+            'anios_usados_jugador': len(anios_usados_jugador)  # ✅ Info adicional
         }
 
     @staticmethod
@@ -274,7 +310,6 @@ class TableroService:
             'mensaje': f'Tienes {num_casillas} canciones. Puedes añadir en cualquier posición.'
         }
 
-    @staticmethod
     @staticmethod
     def colocar_cancion(
             db: Session,
@@ -308,10 +343,10 @@ class TableroService:
         if not linea_tiempo:
             return {'error': 'Línea de tiempo no encontrada'}
 
-        # ✅ Detectar si es validación solo de año
+        # Detectar si es validación solo de año
         solo_anio = not titulo_usuario.strip() and not artista_usuario.strip()
 
-        # ✅ Validar título y artista solo si se proporcionaron
+        # Validar título y artista solo si se proporcionaron
         titulo_correcto = False
         artista_correcto = False
 
@@ -337,6 +372,17 @@ class TableroService:
         anios_actuales = list(canciones_dict.keys())
         anio_cancion = str(cancion['anio'])
 
+        # ✅ VALIDACIÓN EXTRA: Verificar que el año no exista ya
+        if anio_cancion in canciones_dict:
+            return {
+                'error': f"Ya tienes una canción del año {anio_cancion} en tu línea de tiempo",
+                'correcto_anio': False,
+                'puntos_ganados': 0,
+                'titulo_real': cancion['titulo'],
+                'artista_real': cancion['artista'],
+                'anio_real': cancion['anio']
+            }
+
         # Verificar si la posición es correcta
         anio_correcto = TableroService._verificar_posicion_correcta(
             anios_actuales,
@@ -350,7 +396,7 @@ class TableroService:
         if anio_correcto:
             puntos_ganados += 1  # 1 punto por año correcto
 
-            # Solo añadir a la línea de tiempo si el año es correcto
+            # Añadir a la línea de tiempo (año como string)
             canciones_dict[anio_cancion] = {
                 'titulo': cancion['titulo'],
                 'artista': cancion['artista'],
@@ -359,7 +405,7 @@ class TableroService:
                 'spotify_url': cancion['spotify_url']
             }
 
-        # ✅ Solo sumar puntos de título/artista si NO es validación solo de año
+        # Solo sumar puntos de título/artista si NO es validación solo de año
         if not solo_anio and titulo_correcto and artista_correcto:
             puntos_ganados += 5  # 5 puntos por título y artista
 
@@ -373,7 +419,7 @@ class TableroService:
 
         db.commit()
 
-        # ✅ Generar QR SIEMPRE (tanto si valida todo como solo año)
+        # Generar QR
         qr_code = generar_qr_base64(cancion['spotify_url'])
 
         # Convertir SortedDict a lista ordenada para el response
@@ -404,8 +450,8 @@ class TableroService:
             'artista_real': cancion['artista'],
             'anio_real': cancion['anio'],
             'qr_code': qr_code,
-            'spotify_url': cancion['spotify_url'],  # ✅ Siempre enviar la URL
-            'solo_anio': solo_anio  # ✅ Indicar al frontend que fue validación solo de año
+            'spotify_url': cancion['spotify_url'],
+            'solo_anio': solo_anio
         }
 
     @staticmethod
@@ -415,12 +461,8 @@ class TableroService:
         anios_actuales: lista de años (strings) ya colocados, ordenados ASCENDENTEMENTE
         posicion: índice donde el usuario quiere colocar (0, 1, 2, ...)
         anio_nuevo: año de la nueva canción (int)
-
-        IMPORTANTE: El frontend muestra INVERTIDO (más reciente arriba)
-        pero internamente guardamos ASCENDENTE (más antiguo primero)
         """
         if not anios_actuales:
-            # Si está vacío, cualquier posición es válida
             return True
 
         # Convertir años a enteros
@@ -442,7 +484,6 @@ class TableroService:
 
         # Si se inserta en medio
         # Debe estar ENTRE el año anterior y el siguiente
-        # anios_int[posicion-1] <= anio_nuevo <= anios_int[posicion]
         return anios_int[posicion - 1] <= anio_nuevo <= anios_int[posicion]
 
     @staticmethod

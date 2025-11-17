@@ -51,15 +51,15 @@ class GameServiceRondas:
                 logger.error(f"No se pudieron obtener canciones para {playlist_key}")
                 return {}
 
-        # Inicializar servidas
-        if playlist_key not in settings.SERVIDAS:
-            settings.SERVIDAS[playlist_key] = set()
-
-        # Inicializar servidas en ronda
+        # ✅ USAR SET para las canciones servidas en la ronda
         if 'canciones_ronda' not in ronda:
             ronda['canciones_ronda'] = set()
 
-        # Filtrar disponibles
+        # Convertir a set si es necesario (por si viene de otra estructura)
+        if not isinstance(ronda['canciones_ronda'], set):
+            ronda['canciones_ronda'] = set(ronda['canciones_ronda'])
+
+        # ✅ Filtrar disponibles usando el set (O(1))
         disponibles = [
             c for c in canciones
             if f"{c.titulo}|{c.artista}" not in ronda['canciones_ronda']
@@ -67,10 +67,11 @@ class GameServiceRondas:
 
         # Resetear si no quedan
         if not disponibles:
-            logger.warning(f"No quedan canciones en {playlist_key}")
+            logger.warning(f"🔄 No quedan canciones en {playlist_key}, reseteando...")
             ronda['canciones_ronda'].clear()
             disponibles = canciones[:]
 
+        # ✅ Barajar todas las canciones disponibles
         random.shuffle(disponibles)
 
         # Tipos de pregunta
@@ -82,38 +83,78 @@ class GameServiceRondas:
         tipo_pregunta = random.choice(tipos_disponibles if tipos_disponibles else tipos_pregunta)
         ronda['tipo_pregunta_actual'] = tipo_pregunta
 
-        # Buscar canción con preview
-        for cancion in disponibles:
+        # ✅ Intentar hasta 10 canciones para encontrar preview
+        max_intentos = min(10, len(disponibles))
+        preview_url = None
+        cancion_seleccionada = None
+
+        from ..services.itunes_service import ITunesService
+
+        for i in range(max_intentos):
+            if i >= len(disponibles):
+                break
+
+            cancion = disponibles[i]
+
             # Si es año, verificar que tenga
             if tipo_pregunta == 'solo_anio' and not cancion.anio:
                 continue
 
-            preview = ITunesService.buscar_preview(cancion.titulo, cancion.artista)
+            clave = f"{cancion.titulo}|{cancion.artista}"
 
-            if preview:
-                clave = f"{cancion.titulo}|{cancion.artista}"
+            # ✅ Verificación con set (O(1))
+            if clave in ronda['canciones_ronda']:
+                logger.warning(f"⚠️ Canción {cancion.titulo} ya servida en ronda, saltando...")
+                continue
 
-                # Marcar como servida
-                ronda['canciones_ronda'].add(clave)
-                settings.SERVIDAS[playlist_key].add(clave)
+            # Buscar preview
+            preview_url = ITunesService.buscar_preview(cancion.titulo, cancion.artista)
 
-                # Guardar actual
-                settings.CANCION_ACTUAL[playlist_key] = cancion
+            if preview_url:
+                cancion_seleccionada = cancion
+                logger.info(f"✅ Preview encontrado para: {cancion.titulo} - {cancion.artista}, Tipo: {tipo_pregunta}")
+                break
+            else:
+                logger.warning(f"⚠️ No se encontró preview para: {cancion.titulo} - {cancion.artista}")
 
-                logger.info(f"Canción servida: {cancion.titulo} - {cancion.artista}, Tipo: {tipo_pregunta}")
+        if not preview_url or not cancion_seleccionada:
+            logger.warning(f"No se encontró preview para {playlist_key}")
+            return {}
 
-                return {
-                    'preview_url': preview,
-                    'playlist': playlist_key,
-                    'tipo_pregunta': tipo_pregunta,
-                    'pregunta_numero': ronda['preguntas_respondidas'] + 1,
-                    'total_preguntas': settings.PREGUNTAS_POR_RONDA,
-                    'puntos_actuales': ronda['puntos_acumulados'],
-                    'racha_actual': ronda['racha_actual']
-                }
+        clave_seleccionada = f"{cancion_seleccionada.titulo}|{cancion_seleccionada.artista}"
 
-        logger.warning(f"No se encontró preview para {playlist_key}")
-        return {}
+        # ✅ VALIDACIÓN FINAL con set
+        if clave_seleccionada in ronda['canciones_ronda']:
+            logger.error(f"🚨 CRÍTICO: Intentando servir canción duplicada: {cancion_seleccionada.titulo}")
+            return {'error': 'Error interno: canción duplicada detectada'}
+
+        # ✅ Añadir al set (garantiza unicidad)
+        ronda['canciones_ronda'].add(clave_seleccionada)
+
+        # También añadir a SERVIDAS global (para no repetir en modo libre)
+        if playlist_key not in settings.SERVIDAS:
+            settings.SERVIDAS[playlist_key] = set()
+
+        if not isinstance(settings.SERVIDAS[playlist_key], set):
+            settings.SERVIDAS[playlist_key] = set(settings.SERVIDAS[playlist_key])
+
+        settings.SERVIDAS[playlist_key].add(clave_seleccionada)
+
+        # Guardar actual
+        settings.CANCION_ACTUAL[playlist_key] = cancion_seleccionada
+
+        logger.info(f"🎵 Canción servida en ronda: {cancion_seleccionada.titulo} - {cancion_seleccionada.artista}")
+        logger.info(f"📊 Canciones servidas en ronda: {len(ronda['canciones_ronda'])}")
+
+        return {
+            'preview_url': preview_url,
+            'playlist': playlist_key,
+            'tipo_pregunta': tipo_pregunta,
+            'pregunta_numero': ronda['preguntas_respondidas'] + 1,
+            'total_preguntas': settings.PREGUNTAS_POR_RONDA,
+            'puntos_actuales': ronda['puntos_acumulados'],
+            'racha_actual': ronda['racha_actual']
+        }
 
     @staticmethod
     def iniciar_ronda(playlist_key: str, usuario_id: int):
@@ -124,14 +165,14 @@ class GameServiceRondas:
             'puntos_acumulados': 0,
             'racha_actual': 0,
             'tipo_pregunta_actual': None,
-            'canciones_ronda': set()
+            'canciones_ronda': set()  # ✅ Inicializar como set
         }
         logger.info(f"Ronda iniciada para usuario {usuario_id} en {playlist_key}")
         return True
 
     @staticmethod
     def verificar_respuesta_ronda(db: Session, playlist_key: str, titulo_usuario: str,
-                                   artista_usuario: str, anio_usuario: str):
+                                  artista_usuario: str, anio_usuario: str):
         """Verifica la respuesta del usuario en la ronda"""
         if playlist_key not in settings.RONDAS_ACTIVAS:
             return {'error': 'No hay ronda activa'}
@@ -172,7 +213,6 @@ class GameServiceRondas:
             correcto_final = resultado_fuzzy['correcto']
             similitud = resultado_fuzzy['similitud']
 
-            # DESPUÉS:
             if correcto_final:
                 puntos_ganados = settings.PUNTOS_ARTISTA
                 mensaje = f"✅ ¡Correcto! ({int(similitud)}% similitud)<br><strong>{titulo_real}</strong> - {artista_real}"

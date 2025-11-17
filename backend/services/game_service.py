@@ -61,7 +61,7 @@ class GameService:
 
     @staticmethod
     def obtener_cancion_para_adivinar(db, playlist_key: str):
-        """Obtiene una canción aleatoria con preview"""
+        """Obtiene una canción aleatoria con preview (MODO LIBRE)"""
         if playlist_key not in settings.PLAYLISTS:
             logger.error(f"Playlist {playlist_key} no encontrada")
             return {}
@@ -79,34 +79,55 @@ class GameService:
                 logger.error(f"No se pudieron obtener canciones para {playlist_key}")
                 return {}
 
-        # Inicializar servidas
+        # ✅ USAR SET para servidas (modo libre)
         if playlist_key not in settings.SERVIDAS:
             settings.SERVIDAS[playlist_key] = set()
 
-        # Filtrar disponibles
+        # Convertir a set si no lo es
+        if not isinstance(settings.SERVIDAS[playlist_key], set):
+            settings.SERVIDAS[playlist_key] = set(settings.SERVIDAS[playlist_key])
+
+        servidas_set = settings.SERVIDAS[playlist_key]
+
+        # ✅ Filtrar disponibles usando set (O(1))
         disponibles = [
             c for c in canciones
-            if f"{c.titulo}|{c.artista}" not in settings.SERVIDAS[playlist_key]
+            if f"{c.titulo}|{c.artista}" not in servidas_set
         ]
 
         # Resetear si no quedan
         if not disponibles:
-            logger.info(f"Reseteando canciones servidas de {playlist_key}")
-            settings.SERVIDAS[playlist_key].clear()
+            logger.info(f"🔄 Reseteando canciones servidas de {playlist_key}")
+            servidas_set.clear()
             disponibles = canciones[:]
 
+        # ✅ Barajar todas las canciones
         random.shuffle(disponibles)
 
-        # Buscar preview
-        for cancion in disponibles:
+        # ✅ Buscar preview en hasta 10 canciones
+        max_intentos = min(10, len(disponibles))
+
+        for i in range(max_intentos):
+            if i >= len(disponibles):
+                break
+
+            cancion = disponibles[i]
+            clave = f"{cancion.titulo}|{cancion.artista}"
+
+            # ✅ Verificar con set (O(1))
+            if clave in servidas_set:
+                logger.warning(f"⚠️ Canción {cancion.titulo} ya servida, saltando...")
+                continue
+
             preview = ITunesService.buscar_preview(cancion.titulo, cancion.artista)
 
             if preview:
-                clave = f"{cancion.titulo}|{cancion.artista}"
-                settings.SERVIDAS[playlist_key].add(clave)
+                # ✅ Añadir al set (garantiza unicidad)
+                servidas_set.add(clave)
                 settings.CANCION_ACTUAL[playlist_key] = cancion
 
-                logger.info(f"Canción servida: {cancion.titulo} - {cancion.artista}")
+                logger.info(f"🎵 Canción servida (modo libre): {cancion.titulo} - {cancion.artista}")
+                logger.info(f"📊 Total servidas: {len(servidas_set)}")
 
                 return {
                     'preview_url': preview,
@@ -118,7 +139,7 @@ class GameService:
 
     @staticmethod
     def verificar_respuesta(playlist_key: str, titulo_usuario: str, artista_usuario: str):
-        """Verifica la respuesta del usuario"""
+        """Verifica la respuesta del usuario (MODO LIBRE)"""
         if playlist_key not in settings.CANCION_ACTUAL:
             return {'error': 'No hay canción activa', 'correcto': False}
 
@@ -159,7 +180,7 @@ class GameService:
 
     @staticmethod
     def rendirse(playlist_key: str):
-        """El usuario se rinde"""
+        """El usuario se rinde (MODO LIBRE)"""
         if playlist_key not in settings.CANCION_ACTUAL:
             return {'error': 'No hay canción activa'}
 
