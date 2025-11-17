@@ -154,7 +154,80 @@
         ⬅️ Volver al Menú
       </button>
     </div>
+    <!-- ✅ AÑADIR ESTA SECCIÓN DESPUÉS DEL RESULTADO Y ANTES DE LOS CONTROLES -->
 
+<!-- Karaoke Section -->
+<div v-if="mostrarKaraoke" class="karaoke-container">
+  <div class="karaoke-header">
+    <h2>🎤 ¡Prueba de Karaoke!</h2>
+    <p>Has completado 10 canciones. Canta y gana hasta 20 puntos extra</p>
+  </div>
+
+  <div class="cancion-karaoke">
+    <h3>{{ cancionKaraoke.titulo }}</h3>
+    <p>{{ cancionKaraoke.artista }}</p>
+  </div>
+
+  <div v-if="!grabando && !evaluandoKaraoke" class="karaoke-instrucciones">
+    <p>📱 Presiona el botón para grabar tu interpretación</p>
+    <button class="btn btn-grabar" @click="iniciarGrabacion">
+      🎤 Comenzar a Grabar
+    </button>
+  </div>
+
+  <div v-if="grabando" class="grabando-estado">
+    <div class="grabando-indicador"></div>
+    <p>🔴 Grabando...</p>
+    <button class="btn btn-detener" @click="detenerGrabacion">
+      ⏹️ Detener Grabación
+    </button>
+  </div>
+
+  <div v-if="audioGrabado && !evaluandoKaraoke" class="audio-grabado">
+    <audio controls :src="audioGrabado" class="audio-player"></audio>
+    <div class="botones-karaoke">
+      <button class="btn btn-regrabar" @click="regrabar">
+        🔄 Grabar de Nuevo
+      </button>
+      <button class="btn btn-enviar-karaoke" @click="enviarKaraoke">
+        ✅ Enviar para Evaluación
+      </button>
+    </div>
+  </div>
+
+  <div v-if="evaluandoKaraoke" class="evaluando-container">
+    <div class="loading-spinner"></div>
+    <p>🤖 La IA está evaluando tu interpretación...</p>
+  </div>
+
+  <div v-if="resultadoKaraoke" class="resultado-karaoke">
+    <h3>📊 Resultado del Karaoke</h3>
+
+    <div class="puntos-karaoke">
+      <span class="puntos-numero">+{{ resultadoKaraoke.puntos }}</span>
+      <span class="puntos-label">puntos</span>
+    </div>
+
+    <div v-if="resultadoKaraoke.desglose" class="desglose">
+      <div class="desglose-item">
+        <span>📝 Letra:</span>
+        <span>{{ resultadoKaraoke.desglose.letra }}/10</span>
+      </div>
+      <div class="desglose-item">
+        <span>🎵 Ritmo:</span>
+        <span>{{ resultadoKaraoke.desglose.ritmo }}/10</span>
+      </div>
+    </div>
+
+    <div class="feedback-ia">
+      {{ resultadoKaraoke.feedback }}
+    </div>
+
+    <button class="btn btn-continuar-karaoke" @click="continuarDespuesKaraoke">
+      ➡️ Continuar Partida
+    </button>
+  </div>
+</div>
     <!-- Loading -->
     <div v-if="cargando" class="loading-overlay">
       <div class="loading-spinner"></div>
@@ -194,7 +267,15 @@ export default {
       resultado: null,
       turnoActual: 0,
       jugadorTurno: null,
-      jugadorIndex: 0
+      jugadorIndex: 0,
+      mostrarKaraoke: false,
+      cancionKaraoke: null,
+      grabando: false,
+      audioGrabado: null,
+      mediaRecorder: null,
+      audioChunks: [],
+      evaluandoKaraoke: false,
+      resultadoKaraoke: null
     }
   },
   computed: {
@@ -212,6 +293,7 @@ export default {
     this.cargarTurno()
   },
   methods: {
+
     async cargarTurno() {
       this.cargando = true
       this.limpiarEstado()
@@ -250,6 +332,7 @@ export default {
         this.cargando = false
       }
     },
+
     async validarSoloAnio() {
   if (this.validando) return
 
@@ -313,23 +396,141 @@ export default {
   }
 },
 
-    async cargarLineaTiempo() {
-      try {
-        const resp = await fetch(`http://localhost:5000/api/tablero/${this.partidaId}/linea-tiempo/${this.jugadorIndex}`)
+     async cargarLineaTiempo() {
+    try {
+      const resp = await fetch(`http://localhost:5000/api/tablero/${this.partidaId}/linea-tiempo/${this.jugadorIndex}`)
+      const data = await resp.json()
+
+      this.lineaTiempo = data.canciones_ordenadas || []
+      this.puntosPartidaActual = data.puntos || 0
+
+      // ✅ DETECTAR SI NECESITA KARAOKE
+      if (data.necesita_karaoke) {
+        this.mostrarKaraoke = true
+        // Usar la última canción agregada para el karaoke
+        if (this.cancion) {
+          this.cancionKaraoke = {
+            titulo: this.cancion.titulo_real || this.cancion.titulo,
+            artista: this.cancion.artista_real || this.cancion.artista
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error('Error cargando línea de tiempo:', error)
+    }
+  },
+    async iniciarGrabacion() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+      this.mediaRecorder = new MediaRecorder(stream)
+      this.audioChunks = []
+
+      this.mediaRecorder.ondataavailable = (event) => {
+        this.audioChunks.push(event.data)
+      }
+
+      this.mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
+        this.audioGrabado = URL.createObjectURL(audioBlob)
+      }
+
+      this.mediaRecorder.start()
+      this.grabando = true
+
+    } catch (error) {
+      console.error('Error accediendo al micrófono:', error)
+      alert('No se pudo acceder al micrófono. Verifica los permisos.')
+    }
+  },
+
+  detenerGrabacion() {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop()
+
+      // Detener todos los tracks del stream
+      this.mediaRecorder.stream.getTracks().forEach(track => track.stop())
+
+      this.grabando = false
+    }
+  },
+
+  regrabar() {
+    this.audioGrabado = null
+    this.audioChunks = []
+  },
+
+  async enviarKaraoke() {
+    if (!this.audioGrabado) {
+      alert('No hay audio grabado')
+      return
+    }
+
+    this.evaluandoKaraoke = true
+
+    try {
+      // Convertir audio a base64
+      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
+      const reader = new FileReader()
+
+      reader.onloadend = async () => {
+        const base64Audio = reader.result.split(',')[1] // Remover prefijo data:audio/webm;base64,
+
+        // Enviar al backend
+        const resp = await fetch('http://localhost:5000/api/tablero/karaoke', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            partida_id: this.partidaId,
+            jugador_index: this.jugadorIndex,
+            audio_base64: base64Audio
+          })
+        })
+
+        if (!resp.ok) {
+          const errorData = await resp.json()
+          throw new Error(errorData.detail || 'Error al procesar karaoke')
+        }
+
         const data = await resp.json()
 
-        console.log('📦 Línea de tiempo cargada:', data)
+        console.log('✅ Resultado karaoke:', data)
 
-        // ✅ CORRECCIÓN: Usar "canciones_ordenadas" en lugar de "canciones"
-        this.lineaTiempo = data.canciones_ordenadas || []
+        // Actualizar puntos
+        this.puntosPartidaActual = data.puntos_totales || this.puntosPartidaActual
 
-        // ✅ Cargar puntos de la partida actual
-        this.puntosPartidaActual = data.puntos || 0
+        // Mostrar resultado
+        this.resultadoKaraoke = {
+          puntos: data.puntos_karaoke || 0,
+          desglose: data.evaluacion_ia?.desglose,
+          feedback: data.evaluacion_ia?.feedback || data.mensaje
+        }
 
-      } catch (error) {
-        console.error('Error cargando línea de tiempo:', error)
+        this.evaluandoKaraoke = false
+
       }
-    },
+
+      reader.readAsDataURL(audioBlob)
+
+    } catch (error) {
+      console.error('Error enviando karaoke:', error)
+      alert('Error al evaluar el karaoke: ' + error.message)
+      this.evaluandoKaraoke = false
+    }
+  },
+
+  continuarDespuesKaraoke() {
+    // Limpiar estado del karaoke
+    this.mostrarKaraoke = false
+    this.cancionKaraoke = null
+    this.audioGrabado = null
+    this.audioChunks = []
+    this.resultadoKaraoke = null
+
+    // Continuar al siguiente turno
+    this.siguienteTurno()
+  },
 
    obtenerTextoMensajePosicion() {
   // Como el array viene invertido del backend, la lógica es:
@@ -890,6 +1091,300 @@ export default {
 @media (max-width: 768px) {
   .botones-validacion {
     flex-direction: column;
+  }
+}
+  /* ========== ESTILOS KARAOKE ========== */
+
+.karaoke-container {
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.1));
+  border: 2px solid rgba(243, 156, 18, 0.5);
+  border-radius: 24px;
+  padding: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.karaoke-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.karaoke-header h2 {
+  color: #f39c12;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.karaoke-header p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+}
+
+.cancion-karaoke {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cancion-karaoke h3 {
+  color: white;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cancion-karaoke p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.karaoke-instrucciones {
+  text-align: center;
+}
+
+.karaoke-instrucciones p {
+  color: white;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.btn-grabar {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 1.25rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(231, 76, 60, 0.4);
+}
+
+.btn-grabar:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(231, 76, 60, 0.6);
+}
+
+.grabando-estado {
+  text-align: center;
+  padding: 2rem;
+}
+
+.grabando-indicador {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #e74c3c;
+  margin: 0 auto 1rem;
+  animation: pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(231, 76, 60, 0.6);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+.grabando-estado p {
+  color: #e74c3c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.btn-detener {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+  color: white;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-detener:hover {
+  background: linear-gradient(135deg, #2c3e50, #1a252f);
+  transform: translateY(-2px);
+}
+
+.audio-grabado {
+  text-align: center;
+}
+
+.audio-grabado .audio-player {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
+  border-radius: 16px;
+}
+
+.botones-karaoke {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-regrabar {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: white;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-regrabar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(149, 165, 166, 0.4);
+}
+
+.btn-enviar-karaoke {
+  background: linear-gradient(135deg, #00c851, #007e33);
+  color: white;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 200, 81, 0.3);
+}
+
+.btn-enviar-karaoke:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 200, 81, 0.5);
+}
+
+.evaluando-container {
+  text-align: center;
+  padding: 3rem;
+}
+
+.evaluando-container .loading-spinner {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.5rem;
+}
+
+.evaluando-container p {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.resultado-karaoke {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.resultado-karaoke h3 {
+  color: white;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.puntos-karaoke {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.puntos-numero {
+  font-size: 4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00c851, #00ff6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.puntos-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.desglose {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.desglose-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.desglose-item span:first-child {
+  font-size: 1.5rem;
+}
+
+.desglose-item span:last-child {
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.feedback-ia {
+  background: rgba(243, 156, 18, 0.2);
+  border: 1px solid rgba(243, 156, 18, 0.4);
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: white;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.btn-continuar-karaoke {
+  background: linear-gradient(135deg, #9c27b0, #673ab7);
+  color: white;
+  padding: 1.25rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(156, 39, 176, 0.3);
+}
+
+.btn-continuar-karaoke:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(156, 39, 176, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .karaoke-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .botones-karaoke {
+    flex-direction: column;
+  }
+
+  .desglose {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .puntos-numero {
+    font-size: 3rem;
   }
 }
 }

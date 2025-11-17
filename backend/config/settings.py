@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     SPOTIFY_CLIENT_SECRET: str
     SPOTIFY_REFRESH_TOKEN: str = ""
     SPOTIFY_USER_TOKEN: str = ""
-
+    
+    OPENAI_API_KEY: str = ""
     # Sesiones
     SESSION_DURATION_DAYS: int = 7
 

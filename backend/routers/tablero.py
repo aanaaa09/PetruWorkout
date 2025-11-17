@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from ..config.database import get_db
-from ..models.juego_tablero import LineaTiempoJugador
+from ..models.juego_tablero import LineaTiempoJugador, PartidaTablero
 from ..schemas.tablero import (
     IniciarPartidaRequest,
     ColocarCancionRequest,
@@ -9,7 +9,7 @@ from ..schemas.tablero import (
     KaraokeRequest,
     ReiniciarPartidaRequest
 )
-from ..services.tablero_service import tablero_service
+from ..services.tablero_service import tablero_service, logger
 
 router = APIRouter(prefix="/api/tablero", tags=["tablero"])
 
@@ -217,3 +217,52 @@ def obtener_linea_tiempo(
         'puntos_karaoke': linea_tiempo.puntos_karaoke,
         'necesita_karaoke': linea_tiempo.completado_10 and not linea_tiempo.karaoke_realizado
     }
+
+
+@router.post("/karaoke")
+def procesar_karaoke(data: KaraokeRequest, db: Session = Depends(get_db)):
+    """
+    Procesa el resultado del karaoke evaluando con IA
+    """
+    from ..services.karaoke_ia_service import KaraokeIAService
+
+    # Obtener información de la canción actual
+    partida = db.query(PartidaTablero).filter(
+        PartidaTablero.id == data.partida_id
+    ).first()
+
+    if not partida or not partida.cancion_actual:
+        return {'error': 'No hay canción activa'}
+
+    cancion = partida.cancion_actual
+
+    # Evaluar karaoke con IA
+    logger.info(f"Evaluando karaoke para: {cancion['titulo']} - {cancion['artista']}")
+
+    resultado_ia = KaraokeIAService.evaluar_karaoke(
+        audio_base64=data.audio_base64,
+        titulo_cancion=cancion['titulo'],
+        artista=cancion['artista']
+    )
+
+    puntos_karaoke = resultado_ia['puntos']
+
+    # Procesar resultado en el servicio
+    resultado = tablero_service.procesar_karaoke(
+        db,
+        data.partida_id,
+        data.jugador_index,
+        puntos_karaoke
+    )
+
+    if 'error' in resultado:
+        raise HTTPException(status_code=400, detail=resultado['error'])
+
+    # Añadir información de la IA
+    resultado['evaluacion_ia'] = {
+        'transcripcion': resultado_ia.get('transcripcion', ''),
+        'desglose': resultado_ia.get('desglose', {}),
+        'feedback': resultado_ia.get('feedback', '¡Buen trabajo!')
+    }
+
+    return resultado
