@@ -222,11 +222,16 @@ export default {
 }
 
 /* Secciones de instrucciones */
+.instrucciones-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
 .seccion-instrucciones {
   background: rgba(255, 255, 255, 0.03);
   padding: 1rem;
   border-radius: 12px;
-  margin-bottom: 1rem;
   border-left: 3px solid rgba(156, 39, 176, 0.5);
 }
 
