@@ -3,6 +3,7 @@
     <Navbar @scroll-to="scrollToSection" />
     <HeroSection />
     <SocialProof />
+    <VideoSection id="video" />
     <AboutSection id="sobre-mi" />
     <ServicesSection id="servicios" />
     <ResultsSection id="resultados" />
@@ -15,7 +16,7 @@
 </template>
 
 <script>
-import Navbar from "./Navbar.vue"
+import Navbar from "./NavBar.vue"
 import HeroSection from "./HeroSection.vue"
 import SocialProof from "./SocialProof.vue"
 import AboutSection from "./AboutSection.vue"
@@ -26,6 +27,7 @@ import TestimonialsSection from "./TestimonialsSection.vue"
 import CalendlySection from "./CalendlySection.vue"
 import ContactForm from "./ContactForm.vue"
 import Footer from "./Footer.vue"
+import VideoSection from "./VideoSection.vue";
 
 export default {
   name: 'LandingView',
@@ -33,6 +35,7 @@ export default {
     Navbar,
     HeroSection,
     SocialProof,
+    VideoSection,
     AboutSection,
     ServicesSection,
     ResultsSection,
