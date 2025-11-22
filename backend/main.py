@@ -5,29 +5,33 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from backend.models import get_modelo_cancion
-from .routers import auth,resenas, consultas
-from .config.database import init_db, Base, engine
+# ELIMINA ESTA LÍNEA:
+# from backend.models import get_modelo_cancion
 
+from .routers import auth, resenas, consultas
+from .config.database import init_db, Base, engine
 
 # --------------------------
 # Logging
 # --------------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-# Crear modelos dinámicos para cada playlist que tengas
-playlists = ["juego_clasico", "urban_hits", "ochenta_noventa", "flamenco_rumba", "pop_espanol"]
-for key in playlists:
-    get_modelo_cancion(key)
+
+# ELIMINA TODO ESTE BLOQUE:
+# # Crear modelos dinámicos para cada playlist que tengas
+# playlists = ["juego_clasico", "urban_hits", "ochenta_noventa", "flamenco_rumba", "pop_espanol"]
+# for key in playlists:
+#     get_modelo_cancion(key)
 
 # Ahora sí creamos las tablas
 Base.metadata.create_all(bind=engine)
+
 # --------------------------
 # Crear app FastAPI
 # --------------------------
 app = FastAPI(
-    title="SongByte API",
-    description="API del juego SongByte",
+    title="PetruWorkout API",
+    description="API de PetruWorkout",
     version="2.0"
 )
 
@@ -56,12 +60,12 @@ app.include_router(consultas.router)
 # --------------------------
 @app.get("/api")
 async def api_info():
-    return {"message": "SongByte Game API", "version": "2.0"}
+    return {"message": "PetruWorkout API", "version": "2.0"}
 
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": "songbyte"}
+    return {"status": "healthy", "service": "petruworkout"}
 
 
 # --------------------------
@@ -76,7 +80,6 @@ if os.path.isdir(frontend_dist):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
         logger.info(f"✅ Frontend assets montados desde {assets_dir}")
 
-
     # Servir favicon
     @app.get("/favicon.svg")
     async def favicon():
@@ -85,7 +88,6 @@ if os.path.isdir(frontend_dist):
             return FileResponse(favicon_path)
         return {"error": "Favicon no encontrado"}
 
-
     # Servir index.html para la raíz
     @app.get("/")
     async def serve_root():
@@ -93,7 +95,6 @@ if os.path.isdir(frontend_dist):
         if os.path.exists(index_file):
             return FileResponse(index_file)
         return {"message": "Frontend no encontrado"}
-
 
     # SPA fallback para client-side routing (DEBE SER EL ÚLTIMO)
     @app.get("/{full_path:path}")

@@ -11,23 +11,24 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
 
-
-
     # Email (para enviar códigos de registro, notificaciones)
     EMAIL_HOST: str = ""
     EMAIL_PORT: int = 587
     EMAIL_USER: str = ""
     EMAIL_PASSWORD: str = ""
     EMAIL_FROM: str = ""
-    EMAIL_API: str=""
-
-
-
+    EMAIL_API: str = ""
 
     # Calendly
     CALENDLY_API_KEY: str = ""
     CALENDLY_USER_URI: str = ""
     CALENDLY_EVENT_URL: str = ""
+
+    # AÑADE ESTOS CAMPOS QUE FALTAN:
+    SPOTIFY_CLIENT_ID: str = ""
+    SPOTIFY_CLIENT_SECRET: str = ""
+    SPOTIFY_REFRESH_TOKEN: str = ""
+    OPENAI_API_KEY: str = ""
 
     @property
     def DATABASE_URL(self) -> str:
@@ -36,6 +37,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
         case_sensitive = True
+        extra = "allow"
 
 
 settings = Settings()

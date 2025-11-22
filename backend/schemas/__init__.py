@@ -5,10 +5,6 @@ from .auth import (
     VerificarRequest,
     ActualizarPuntosRequest
 )
-from .game import (
-    VerificarRespuestaRequest,
-    VerificarRespuestaRondaRequest
-)
 
 __all__ = [
     "RegistroRequest",
@@ -16,6 +12,4 @@ __all__ = [
     "LogoutRequest",
     "VerificarRequest",
     "ActualizarPuntosRequest",
-    "VerificarRespuestaRequest",
-    "VerificarRespuestaRondaRequest"
 ]

@@ -1,19 +1,8 @@
 <template>
   <section id="hero" class="hero-section">
-    <!-- Video/Image Background -->
+
     <div class="hero-bg">
-      <iframe
-        v-if="useVideo"
-        class="hero-video"
-        width="100%"
-        height="100%"
-        src="https://www.youtube.com/embed/yCDxpnd_Dz0?autoplay=1&mute=1&loop=1&playlist=yCDxpnd_Dz0&controls=0&showinfo=0&rel=0"
-        title="Fondo de vídeo"
-        frameborder="0"
-        allow="autoplay; encrypted-media; fullscreen"
-        allowfullscreen
-      ></iframe>
-      <div class="hero-overlay"></div>
+  <div class="hero-overlay"></div>
     </div>
 
     <div class="hero-content">
@@ -115,18 +104,9 @@ export default {
   right: 0;
   bottom: 0;
   z-index: 0;
+  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95) 0%, rgba(26, 26, 26, 0.90) 100%);
 }
 
-.hero-video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-  z-index: -1;
-}
 
 .hero-overlay {
   position: absolute;
