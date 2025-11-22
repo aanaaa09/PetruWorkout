@@ -1,106 +1,49 @@
 <template>
   <div class="app-container">
-    <div class="blur-layer"></div>
-
     <AppHeader
       :usuario-logueado="!!usuarioActual"
-      :en-juego="!!modoYPlaylist"
-      @mostrar-ranking="mostrarRanking = true"
-      @mostrar-añadir-cancion="modalAñadirCancion = true"
+      @mostrar-login="mostrarLogin = true"
+      @logout="cerrarSesion"
     />
 
     <div class="main-content">
-      <Auth v-if="!usuarioActual" @login="iniciarSesion" />
-
-      <Ranking v-else-if="mostrarRanking" @cerrar="mostrarRanking = false" />
-
-      <template v-else>
-        <!-- 👇 SOLO mostrar UserInfo si NO estamos en tablero -->
-        <UserInfo
-          v-if="!partidaTablero"
-          :usuario="usuarioActual"
-          @logout="cerrarSesion"
-        />
-
-        <!-- Selector de modo y playlist -->
-        <PlaylistSelector
-          v-if="!modoYPlaylist"
-          @select="seleccionarModoYPlaylist"
-        />
-
-        <!-- Setup de jugadores para tablero -->
-        <PlayerSetup
-  v-else-if="modoYPlaylist.modo === 'tablero' && !partidaTablero"
-  :playlist="modoYPlaylist.playlist"
-  :token="token"
-  @partida-iniciada="iniciarPartidaTablero"
-/>
-
-        <!-- Juego Tablero -->
-        <GameTablero
-          v-else-if="modoYPlaylist.modo === 'tablero' && partidaTablero"
-          :partida-id="partidaTablero.partida_id"
-          :configuracion="partidaTablero.configuracion"
-          :playlist="modoYPlaylist.playlist"
-          :token="token"
-          @volver="volverSeleccion"
-        />
-
-        <!-- Juego Individual (Rondas) -->
-        <GameRondas
-          v-else-if="modoYPlaylist.modo === 'individual'"
-          :playlist="modoYPlaylist.playlist"
-          :token="token"
-          :usuario="usuarioActual"
-          @volver="volverSeleccion"
-          @actualizar-usuario="usuarioActual = $event"
-        />
-      </template>
+      <LandingView v-if="!usuarioActual" />
+      <DashboardView v-else :usuario="usuarioActual" />
     </div>
 
-    <AñadirCancionModal
-      :mostrar="modalAñadirCancion"
-      @cerrar="modalAñadirCancion = false"
+    <Auth
+      v-if="mostrarLogin && !usuarioActual"
+      @login="iniciarSesion"
+      @close="mostrarLogin = false"
     />
   </div>
 </template>
+
 <script>
 import AppHeader from './components/layout/AppHeader.vue'
-import UserInfo from './components/layout/UserInfo.vue'
+import LandingView from './views/LandingView.vue'
+import DashboardView from './views/DashboardView.vue'
 import Auth from './components/auth/Auth.vue'
-import PlaylistSelector from './components/playlist/PlaylistSelector.vue'
-import PlayerSetup from './components/tablero/PlayerSetup.vue'
-import GameTablero from './components/tablero/GameTablero.vue'
-import GameRondas from './components/game/GameRondas.vue'
-import Ranking from './components/ranking/Ranking.vue'
-import AñadirCancionModal from './components/AñadirCancionModal.vue'
 
 export default {
   components: {
     AppHeader,
-    UserInfo,
-    Auth,
-    PlaylistSelector,
-    PlayerSetup,
-    GameTablero,
-    GameRondas,
-    Ranking,
-    AñadirCancionModal
+    LandingView,
+    DashboardView,
+    Auth
   },
   data() {
     return {
       usuarioActual: null,
       token: null,
-      modoYPlaylist: null,
-      partidaTablero: null,
-      mostrarRanking: false,
-      modalAñadirCancion: false
+      mostrarLogin: false
     }
   },
   methods: {
     iniciarSesion(data) {
       this.usuarioActual = data.usuario
       this.token = data.token
+      this.mostrarLogin = false
     },
 
     async cerrarSesion() {
@@ -117,30 +60,10 @@ export default {
       }
       this.usuarioActual = null
       this.token = null
-      this.modoYPlaylist = null
-      this.partidaTablero = null
-      this.mostrarRanking = false
-    },
-
-    seleccionarModoYPlaylist(data) {
-      console.log('🎮 Modo y playlist seleccionados:', data)
-      this.modoYPlaylist = data
-    },
-
-    iniciarPartidaTablero(data) {
-      console.log('🎲 Partida de tablero iniciada:', data)
-      this.partidaTablero = data
-    },
-
-    volverSeleccion() {
-      this.modoYPlaylist = null
-      this.partidaTablero = null
     }
   }
 }
 </script>
-
-
 
 <style>
 * {
@@ -150,25 +73,33 @@ export default {
 }
 
 body, html {
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-family);
   height: 100vh;
   overflow-x: hidden;
-  color: white;
-  background: linear-gradient(135deg, #2c1a4a 0%, #4a2cd4 50%, #2c1a4a 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  color: var(--color-text-primary);
+  background: var(--bg-primary);
   position: relative;
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Fondo con textura sutil */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(230, 57, 70, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(43, 45, 66, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 #app {
   height: 100vh;
   position: relative;
+  z-index: 1;
 }
 
 .app-container {
@@ -176,140 +107,112 @@ body, html {
   display: flex;
   flex-direction: column;
   width: 100%;
-  backdrop-filter: blur(20px);
-   position: relative;
-}
-
-.blur-layer {
-  position: fixed;
-  inset: 0;
-  backdrop-filter: blur(20px);
-  z-index: 0;
-  pointer-events: none;
+  position: relative;
 }
 
 .main-content {
   position: relative;
-  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  max-width: 1400px;
   width: 100%;
-  margin: 0 auto;
-  gap: 1.5rem;
 }
 
+/* Botones globales */
 .btn {
   padding: 0.875rem 2rem;
   border: none;
-  border-radius: 16px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-base);
   text-transform: none;
   letter-spacing: -0.01em;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
 }
 
 .btn::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
 }
 
 .btn:hover::before {
-  opacity: 1;
+  left: 100%;
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
 }
 
 .btn:active {
   transform: translateY(0);
 }
 
-.btn-verificar {
-  background: linear-gradient(135deg, #00c851, #007e33);
+.btn-primary {
+  background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 8px 32px rgba(0, 200, 81, 0.3);
+  box-shadow: var(--shadow-accent);
 }
 
-.btn-rendirse {
-  background: linear-gradient(135deg, #ff4444, #cc0000);
-  color: white;
-  box-shadow: 0 8px 32px rgba(255, 68, 68, 0.3);
+.btn-primary:hover {
+  box-shadow: 0 12px 40px rgba(230, 57, 70, 0.5);
 }
 
-.btn-siguiente {
-  background: linear-gradient(135deg, #9c27b0, #673ab7);
+.btn-secondary {
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
   color: white;
-  box-shadow: 0 8px 32px rgba(156, 39, 176, 0.3);
+  backdrop-filter: var(--glass-blur);
 }
 
-.btn-volver {
-  background: linear-gradient(135deg, #2196f3, #0d47a1);
-  color: white;
-  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.3);
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-secondary-light);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .main-content {
-    padding: 1rem 0.75rem;
-    gap: 1rem;
-  }
-
   .btn {
     padding: 0.75rem 1.5rem;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
   }
 }
 
 @media (max-width: 480px) {
-  .main-content {
-    padding: 0.75rem 0.5rem;
-    gap: 0.875rem;
-  }
-
   .btn {
     padding: 0.625rem 1.25rem;
-    font-size: 0.85rem;
-    border-radius: 12px;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+    font-size: var(--font-size-sm);
   }
 }
 </style>
