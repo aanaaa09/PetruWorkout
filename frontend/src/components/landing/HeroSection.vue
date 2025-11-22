@@ -1,51 +1,98 @@
 <template>
-  <section class="hero-section">
+  <section id="hero" class="hero-section">
+    <!-- Video/Image Background -->
+    <div class="hero-bg">
+      <iframe
+        v-if="useVideo"
+        class="hero-video"
+        width="100%"
+        height="100%"
+        src="https://www.youtube.com/embed/yCDxpnd_Dz0?autoplay=1&mute=1&loop=1&playlist=yCDxpnd_Dz0&controls=0&showinfo=0&rel=0"
+        title="Fondo de vídeo"
+        frameborder="0"
+        allow="autoplay; encrypted-media; fullscreen"
+        allowfullscreen
+      ></iframe>
+      <div class="hero-overlay"></div>
+    </div>
+
     <div class="hero-content">
       <div class="hero-text">
+        <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
+
         <h1 class="hero-title">
-          <span class="brand-name">PETRU</span>WORKOUT
+          Consigue menos de <span class="highlight">20% de grasa</span>
+          y <span class="highlight">+3kg de músculo</span> en
+          <span class="accent">90 Días</span>
         </h1>
-        <h2 class="hero-headline">
-          Consigue menos de 20% de grasa y +3kg de músculo en 90 Días
-        </h2>
-        <p class="hero-guarantee">
-          SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO – FIRMADO POR CONTRATO
+
+        <p class="hero-subtitle">
+          Con Calistenia y mi método probado de entrenamiento personalizado
         </p>
+
+        <div class="guarantee-box">
+          <div class="guarantee-icon">🛡️</div>
+          <div class="guarantee-text">
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+            <span>FIRMADO POR CONTRATO</span>
+          </div>
+        </div>
+
         <div class="hero-cta">
           <a href="#calendly" class="btn btn-primary">
             📅 Agendar Llamada Gratuita
           </a>
-          <a href="#testimonios" class="btn btn-secondary">
-            ⭐ Ver Testimonios
+          <a href="#resultados" class="btn btn-secondary">
+            Ver Transformaciones →
           </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-number">1000+</span>
+            <span class="stat-label">Clientes Transformados</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">5+</span>
+            <span class="stat-label">Años de Experiencia</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">98%</span>
+            <span class="stat-label">Tasa de Éxito</span>
+          </div>
         </div>
       </div>
 
       <div class="hero-image">
         <img
-          src="/images/petru-hero.jpg"
+          src="/images/petru-hero.png"
           alt="Petru - Entrenador Personal de Calistenia"
-          class="petru-photo"
+          @error="handleImageError"
         />
-        <div class="stats-badge">
-          <div class="stat-item">
-            <span class="stat-number">1000+</span>
-            <span class="stat-label">Clientes Transformados</span>
-          </div>
-        </div>
+        <div class="image-decoration"></div>
       </div>
     </div>
 
-    <!-- Social Proof -->
-    <div class="social-proof">
-      <p class="proof-text">Personas que han confiado en mí</p>
+    <div class="scroll-indicator">
+      <span>Descubre más</span>
+      <div class="scroll-arrow">↓</div>
     </div>
   </section>
 </template>
 
 <script>
 export default {
-  name: 'HeroSection'
+  name: 'HeroSection',
+  data() {
+    return {
+      useVideo: true // Cambia a false si quieres mostrar solo overlay sin vídeo
+    }
+  },
+  methods: {
+    handleImageError(e) {
+      e.target.style.display = 'none'
+    }
+  }
 }
 </script>
 
@@ -54,18 +101,53 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 2rem;
+  align-items: center;
   position: relative;
+  padding: 6rem 2rem 4rem;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.hero-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: -1;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(13, 13, 13, 0.95) 0%,
+    rgba(26, 26, 26, 0.85) 50%,
+    rgba(13, 13, 13, 0.9) 100%
+  );
 }
 
 .hero-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
   max-width: 1400px;
   width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
   align-items: center;
   position: relative;
   z-index: 1;
@@ -77,107 +159,199 @@ export default {
   gap: 1.5rem;
 }
 
+.hero-badge {
+  display: inline-block;
+  background: rgba(230, 57, 70, 0.15);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  width: fit-content;
+}
+
 .hero-title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.1;
+  color: white;
   margin: 0;
-  color: var(--color-text-primary);
-  letter-spacing: -0.03em;
 }
 
-.brand-name {
+.hero-title .highlight {
+  color: white;
+  background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-title .accent {
   color: var(--color-accent);
-  display: block;
-  text-transform: uppercase;
+  -webkit-text-fill-color: var(--color-accent);
 }
 
-.hero-headline {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
+.hero-subtitle {
+  font-size: 1.25rem;
   color: var(--color-text-secondary);
-  line-height: 1.3;
+  line-height: 1.6;
   margin: 0;
 }
 
-.hero-guarantee {
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
-  font-weight: 700;
-  color: var(--color-accent);
-  line-height: 1.5;
-  text-transform: uppercase;
-  padding: 1rem;
+.guarantee-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   background: rgba(230, 57, 70, 0.1);
-  border-left: 4px solid var(--color-accent);
-  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.guarantee-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.guarantee-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.guarantee-text strong {
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.guarantee-text span {
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 .hero-cta {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
-.hero-image {
-  position: relative;
-  animation: fadeIn 1s ease 0.3s both;
+.btn {
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.petru-photo {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 8px 30px rgba(230, 57, 70, 0.4);
 }
 
-.stats-badge {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  right: 2rem;
-  padding: 1.5rem;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(230, 57, 70, 0.5);
 }
 
-.stat-item {
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.25rem;
 }
 
 .stat-number {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--color-accent);
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  text-align: center;
-}
-
-.social-proof {
-  margin-top: 4rem;
-  text-align: center;
-}
-
-.proof-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
 
-/* Responsive */
-@media (max-width: 968px) {
+.hero-image {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  max-height: 600px;
+  border-radius: 20px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.image-decoration {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  bottom: 20px;
+  left: 20px;
+  border: 3px solid var(--color-accent);
+  border-radius: 20px;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  animation: bounce 2s infinite;
+}
+
+.scroll-arrow {
+  font-size: 1.5rem;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(10px); }
+}
+
+@media (max-width: 1024px) {
   .hero-content {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -188,24 +362,33 @@ export default {
     align-items: center;
   }
 
-  .hero-cta {
-    justify-content: center;
-  }
-
   .hero-image {
     order: -1;
   }
 
-  .stats-badge {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    margin-top: -2rem;
+  .hero-image img {
+    max-height: 400px;
+  }
+
+  .hero-stats {
+    justify-content: center;
+  }
+
+  .hero-cta {
+    justify-content: center;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+  .hero-section {
+    padding: 5rem 1rem 3rem;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
   .hero-cta {
     flex-direction: column;
     width: 100%;
@@ -213,6 +396,16 @@ export default {
 
   .btn {
     width: 100%;
+    justify-content: center;
+  }
+
+  .guarantee-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .scroll-indicator {
+    display: none;
   }
 }
 </style>
