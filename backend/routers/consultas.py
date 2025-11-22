@@ -53,7 +53,10 @@ def enviar_consulta(data: EnviarConsultaRequest, db: Session = Depends(get_db)):
 def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
     """
     Envía email a Petru usando la API de Brevo (SendinBlue)
-    El remitente será el email del usuario
+
+    IMPORTANTE:
+    - El sender DEBE ser un email verificado en tu cuenta de Brevo
+    - Usa replyTo para que Petru pueda responder directamente al usuario
     """
     try:
         url = "https://api.brevo.com/v3/smtp/email"
@@ -64,11 +67,16 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
             "content-type": "application/json"
         }
 
-        # El email viene desde el usuario que rellena el formulario
+        # El remitente es tu bot (email verificado en Brevo)
+        # El replyTo es el email del usuario para poder responderle
         payload = {
             "sender": {
-                "name": data.nombre,
-                "email": data.email
+                "name": "PetruWorkout Bot",
+                "email": "petruworkout@gmail.com"  # ← DEBE estar verificado en Brevo
+            },
+            "replyTo": {
+                "email": data.email,  # Email del usuario
+                "name": data.nombre
             },
             "to": [
                 {
@@ -76,7 +84,7 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
                     "name": "Petru"
                 }
             ],
-            "subject": f"📬 Nueva consulta: {data.asunto}",
+            "subject": f"📬 Nueva consulta de {data.nombre}: {data.asunto}",
             "htmlContent": f"""
                 <!DOCTYPE html>
                 <html>
@@ -89,10 +97,10 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
                         <!-- Header -->
                         <div style="background: linear-gradient(135deg, #e63946 0%, #d62828 100%); padding: 30px; text-align: center;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
-                                💬 Nueva Consulta
+                                🤖 PetruWorkout Bot
                             </h1>
                             <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
-                                PetruWorkout
+                                Nueva consulta desde el formulario web
                             </p>
                         </div>
 
@@ -101,7 +109,7 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
                             <!-- Información del remitente -->
                             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #e63946; margin-bottom: 25px;">
                                 <h2 style="margin: 0 0 15px 0; color: #333333; font-size: 18px; font-weight: 600;">
-                                    📋 Información del contacto
+                                    👤 Datos del contacto
                                 </h2>
                                 <table style="width: 100%; border-collapse: collapse;">
                                     <tr>
@@ -126,7 +134,7 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
                             <!-- Mensaje -->
                             <div style="margin-bottom: 25px;">
                                 <h2 style="margin: 0 0 15px 0; color: #333333; font-size: 18px; font-weight: 600;">
-                                    📝 Mensaje
+                                    💬 Mensaje
                                 </h2>
                                 <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; line-height: 1.6; color: #333333; white-space: pre-wrap; font-size: 15px;">
 {data.mensaje}
@@ -139,6 +147,14 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
                                    style="display: inline-block; background: linear-gradient(135deg, #e63946 0%, #d62828 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);">
                                     ↩️ Responder a {data.nombre}
                                 </a>
+                            </div>
+
+                            <!-- Nota importante -->
+                            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                                <p style="margin: 0; color: #856404; font-size: 14px;">
+                                    💡 <strong>Tip:</strong> Puedes responder directamente a este email, 
+                                    tu respuesta llegará automáticamente a <strong>{data.email}</strong>
+                                </p>
                             </div>
                         </div>
 
