@@ -5,7 +5,7 @@ from ..schemas.auth import (
     RegistroRequest, LoginRequest, LogoutRequest,
     VerificarRequest
 )
-from ..services.AuthService import AuthService
+from ..services.auth_service import AuthService
 from ..crud.sesion import sesion_crud
 
 router = APIRouter(tags=["auth"])
