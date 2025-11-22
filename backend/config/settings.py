@@ -12,8 +12,6 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
 
 
-    # Sesiones
-    SESSION_DURATION_DAYS: int = 7
 
     # Email (para enviar códigos de registro, notificaciones)
     EMAIL_HOST: str = ""
@@ -21,6 +19,7 @@ class Settings(BaseSettings):
     EMAIL_USER: str = ""
     EMAIL_PASSWORD: str = ""
     EMAIL_FROM: str = ""
+    EMAIL_API: str=""
 
 
 
