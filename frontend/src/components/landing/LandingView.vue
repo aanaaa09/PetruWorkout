@@ -1,17 +1,29 @@
 <template>
   <div class="landing-page">
-    <Navbar @scroll-to="scrollToSection" />
-    <HeroSection />
-    <SocialProof />
-    <VideoSection id="video" />
-    <AboutSection id="sobre-mi" />
-    <ServicesSection id="servicios" />
-    <ResultsSection id="resultados" />
-    <GuaranteeSection />
-    <TestimonialsSection id="testimonios" />
-    <CalendlySection id="calendly" />
-    <ContactForm id="contacto" />
-    <Footer />
+    <!-- Páginas legales (se muestran en pantalla completa) -->
+    <PrivacyPolicy v-if="showPrivacy" @close="closePrivacy" />
+    <LegalNotice v-if="showLegal" @close="closeLegal" />
+    <TermsConditions v-if="showTerms" @close="closeTerms" />
+
+    <!-- Landing normal (oculto cuando hay página legal abierta) -->
+    <div v-show="!showPrivacy && !showLegal && !showTerms">
+      <Navbar @scroll-to="scrollToSection" />
+      <HeroSection />
+      <SocialProof />
+      <VideoSection id="video" />
+      <AboutSection id="sobre-mi" />
+      <ServicesSection id="servicios" />
+      <ResultsSection id="resultados" />
+      <GuaranteeSection />
+      <TestimonialsSection id="testimonios" />
+      <CalendlySection id="calendly" />
+      <ContactForm id="contacto" />
+      <Footer
+        @show-privacy="openPrivacy"
+        @show-legal="openLegal"
+        @show-terms="openTerms"
+      />
+    </div>
   </div>
 </template>
 
@@ -27,7 +39,10 @@ import TestimonialsSection from "./TestimonialsSection.vue"
 import CalendlySection from "./CalendlySection.vue"
 import ContactForm from "./ContactForm.vue"
 import Footer from "./Footer.vue"
-import VideoSection from "./VideoSection.vue";
+import VideoSection from "./VideoSection.vue"
+import PrivacyPolicy from "../legal/PrivacyPolicy.vue"
+import LegalNotice from "../legal/LegalNotice.vue"
+import TermsConditions from "../legal/TermsConditions.vue"
 
 export default {
   name: 'LandingView',
@@ -43,7 +58,17 @@ export default {
     TestimonialsSection,
     CalendlySection,
     ContactForm,
-    Footer
+    Footer,
+    PrivacyPolicy,
+    LegalNotice,
+    TermsConditions
+  },
+  data() {
+    return {
+      showPrivacy: false,
+      showLegal: false,
+      showTerms: false
+    }
   },
   methods: {
     scrollToSection(sectionId) {
@@ -51,6 +76,42 @@ export default {
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
+    },
+    openPrivacy() {
+      console.log('Opening Privacy Policy')
+      this.showPrivacy = true
+      this.showLegal = false
+      this.showTerms = false
+      window.scrollTo(0, 0)
+    },
+    openLegal() {
+      console.log('Opening Legal Notice')
+      this.showPrivacy = false
+      this.showLegal = true
+      this.showTerms = false
+      window.scrollTo(0, 0)
+    },
+    openTerms() {
+      console.log('Opening Terms & Conditions')
+      this.showPrivacy = false
+      this.showLegal = false
+      this.showTerms = true
+      window.scrollTo(0, 0)
+    },
+    closePrivacy() {
+      console.log('Closing Privacy Policy')
+      this.showPrivacy = false
+      window.scrollTo(0, 0)
+    },
+    closeLegal() {
+      console.log('Closing Legal Notice')
+      this.showLegal = false
+      window.scrollTo(0, 0)
+    },
+    closeTerms() {
+      console.log('Closing Terms & Conditions')
+      this.showTerms = false
+      window.scrollTo(0, 0)
     }
   }
 }

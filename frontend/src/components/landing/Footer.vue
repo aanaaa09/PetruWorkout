@@ -30,9 +30,9 @@
 
           <div class="link-group">
             <h4>Legal</h4>
-            <a href="#">Política de Privacidad</a>
-            <a href="#">Aviso Legal</a>
-            <a href="#">Términos y Condiciones</a>
+            <a href="#" @click.prevent="handlePrivacyClick">Política de Privacidad</a>
+            <a href="#" @click.prevent="handleLegalClick">Aviso Legal</a>
+            <a href="#" @click.prevent="handleTermsClick">Términos y Condiciones</a>
           </div>
         </div>
       </div>
@@ -63,6 +63,20 @@ export default {
   computed: {
     currentYear() {
       return new Date().getFullYear()
+    }
+  },
+  methods: {
+    handlePrivacyClick() {
+      console.log('Privacy clicked')
+      this.$emit('show-privacy')
+    },
+    handleLegalClick() {
+      console.log('Legal clicked')
+      this.$emit('show-legal')
+    },
+    handleTermsClick() {
+      console.log('Terms clicked')
+      this.$emit('show-terms')
     }
   }
 }
@@ -134,6 +148,7 @@ export default {
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s ease;
+  cursor: pointer;
 }
 
 .link-group a:hover {
