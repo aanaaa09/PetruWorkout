@@ -12,11 +12,7 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
 
     # Email (para enviar códigos de registro, notificaciones)
-    EMAIL_HOST: str = ""
-    EMAIL_PORT: int = 587
-    EMAIL_USER: str = ""
-    EMAIL_PASSWORD: str = ""
-    EMAIL_FROM: str = ""
+
     EMAIL_API: str = ""
 
     # Calendly

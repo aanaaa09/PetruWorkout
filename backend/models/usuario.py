@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum as SQLEnum, func
+from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum, func
 from sqlalchemy.orm import relationship
 from backend.config.database import Base
 import bcrypt
@@ -7,9 +7,9 @@ import enum
 
 class TipoUsuario(enum.Enum):
     """Tipos de usuario en la aplicación"""
-    REGISTRADO = "registrado"  # Usuario registrado básico
-    CLIENTE = "cliente"  # Usuario con código de acceso válido
-    ADMIN = "admin"  # Administrador (Petru)
+    NO_CLIENTE = "no_cliente"  # Usuario registrado pero no cliente
+    CLIENTE = "cliente"        # Cliente activo de Petru
+    ADMIN = "admin"            # Administrador (Petru)
 
 
 class Usuario(Base):
@@ -19,14 +19,15 @@ class Usuario(Base):
 
     # Datos básicos
     nombre = Column(String(100), nullable=False)
-    apellidos = Column(String(200), nullable=False)
+    apellidos = Column(String(200), nullable=False, default="")
     email = Column(String(255), unique=True, nullable=False, index=True)
+    nombre_usuario = Column(String(100), unique=True, nullable=True, index=True)
     password_hash = Column(String(255), nullable=False)
 
     # Tipo de usuario
     tipo_usuario = Column(
         SQLEnum(TipoUsuario),
-        default=TipoUsuario.REGISTRADO,
+        default=TipoUsuario.NO_CLIENTE,
         nullable=False,
         index=True
     )
@@ -37,7 +38,6 @@ class Usuario(Base):
 
     # Relaciones
     sesiones = relationship("Sesion", back_populates="usuario", cascade="all, delete-orphan")
-    cliente = relationship("Cliente", back_populates="usuario", uselist=False, cascade="all, delete-orphan")
 
     @staticmethod
     def hash_password(password: str) -> str:
@@ -50,7 +50,7 @@ class Usuario(Base):
 
     def es_cliente(self) -> bool:
         """Verifica si el usuario es cliente activo"""
-        return self.tipo_usuario == TipoUsuario.CLIENTE and self.cliente is not None
+        return self.tipo_usuario == TipoUsuario.CLIENTE
 
     def es_admin(self) -> bool:
         """Verifica si el usuario es administrador"""

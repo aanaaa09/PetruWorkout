@@ -24,11 +24,15 @@ class UsuarioCRUD:
         """Crea un nuevo usuario"""
         password_hash = self.hash_password(password)
 
+        # Generar nombre_usuario del email si no se proporciona
+        nombre_usuario = email.split('@')[0].lower()
+
         usuario = Usuario(
             nombre=nombre,
+            apellidos="",
             email=email.lower(),
-            password_hash=password_hash,
-            puntos=0
+            nombre_usuario=nombre_usuario,
+            password_hash=password_hash
         )
 
         db.add(usuario)
@@ -65,19 +69,6 @@ class UsuarioCRUD:
         if usuario:
             usuario.ultima_conexion = datetime.now()
             db.commit()
-
-    def add_points(self, db: Session, usuario_id: int, puntos: int):
-        """Agrega puntos a un usuario"""
-        usuario = self.get_by_id(db, usuario_id)
-        if usuario:
-            usuario.puntos += puntos
-            db.commit()
-            db.refresh(usuario)
-
-    def get_ranking(self, db: Session, limit: int = 10):
-        """Obtiene ranking de usuarios"""
-        usuarios = db.query(Usuario).order_by(Usuario.puntos.desc()).limit(limit).all()
-        return [{'nombre': u.nombre, 'puntos': u.puntos} for u in usuarios]
 
 
 usuario_crud = UsuarioCRUD()

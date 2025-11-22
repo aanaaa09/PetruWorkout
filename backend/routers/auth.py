@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from ..config.database import get_db
 from ..schemas.auth import (
     RegistroRequest, LoginRequest, LogoutRequest,
-    VerificarRequest, ActualizarPuntosRequest
+    VerificarRequest
 )
-from ..services.auth_service import AuthService
+from ..services.AuthService import AuthService
 from ..crud.sesion import sesion_crud
 
-router = APIRouter(tags=["auth"])  # quitar el prefix
+router = APIRouter(tags=["auth"])
 
 
 @router.post("/registro")
@@ -65,26 +65,8 @@ def verificar_sesion(data: VerificarRequest, db: Session = Depends(get_db)):
     return {'valida': True, 'usuario': resultado['usuario']}
 
 
-@router.post("/actualizar-puntos")
-def actualizar_puntos(data: ActualizarPuntosRequest, db: Session = Depends(get_db)):
-    """Actualiza los puntos de un usuario"""
-    resultado = AuthService.actualizar_puntos(db, data.token, data.puntos)
-
-    if not resultado['success']:
-        raise HTTPException(status_code=401, detail=resultado['error'])
-
-    return {'success': True, 'puntos': resultado['puntos']}
-
-
-@router.get("/ranking")
-def obtener_ranking(limit: int = 10, db: Session = Depends(get_db)):
-    """Obtiene el ranking de usuarios"""
-    resultado = AuthService.obtener_ranking(db, limit)
-    return {'success': True, 'ranking': resultado['ranking']}
-
-
 @router.post("/limpiar-sesiones-expiradas")
 def limpiar_sesiones_expiradas(db: Session = Depends(get_db)):
-    """Limpia sesiones expiradas"""
+    """Limpia sesiones expiradas (endpoint de mantenimiento)"""
     eliminadas = sesion_crud.clean_expired(db)
     return {'success': True, 'mensaje': f'{eliminadas} sesiones expiradas eliminadas'}
