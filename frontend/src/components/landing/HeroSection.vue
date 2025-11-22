@@ -38,7 +38,7 @@
 
         <div class="hero-stats">
           <div class="stat">
-            <span class="stat-number">1000+</span>
+            <span class="stat-number">50+</span>
             <span class="stat-label">Clientes Transformados</span>
           </div>
           <div class="stat">
@@ -297,15 +297,7 @@ export default {
 }
 
 .image-decoration {
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  bottom: 20px;
-  left: 20px;
-  border: 3px solid var(--color-accent);
-  border-radius: 20px;
-  z-index: 0;
-  opacity: 0.5;
+  display: none;
 }
 
 .scroll-indicator {

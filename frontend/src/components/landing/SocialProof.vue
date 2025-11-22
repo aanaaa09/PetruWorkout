@@ -8,10 +8,10 @@
           <div class="avatar" v-for="n in 5" :key="n" :style="{ '--i': n }">
             <span>{{ getInitial(n) }}</span>
           </div>
-          <div class="avatar-more">+997</div>
+          <div class="avatar-more">+47</div>
         </div>
         <div class="proof-text">
-          <span class="count">+1000</span>
+          <span class="count">+50</span>
           <span class="label">transformaciones exitosas</span>
         </div>
       </div>

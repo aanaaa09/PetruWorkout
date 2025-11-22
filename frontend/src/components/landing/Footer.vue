@@ -15,6 +15,7 @@
         <div class="footer-links">
           <div class="link-group">
             <h4>Navegación</h4>
+            <a href="#video">Video</a>
             <a href="#sobre-mi">Sobre mí</a>
             <a href="#servicios">Servicios</a>
             <a href="#resultados">Resultados</a>
