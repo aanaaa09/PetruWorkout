@@ -78,8 +78,13 @@
 export default {
   name: 'AboutSection',
   methods: {
-    handleImageError(e) {
-      e.target.src = 'https://via.placeholder.com/500x600/1a1a1a/e63946?text=PETRU'
+     handleImageError(e) {
+      // Evitar loops infinitos de error
+      if (e.target.dataset.errorHandled) return;
+      e.target.dataset.errorHandled = 'true';
+
+      // Usar data URI en lugar de placeholder externo
+      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E';
     }
   }
 }

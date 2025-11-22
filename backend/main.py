@@ -63,11 +63,9 @@ app.include_router(consultas.router)
 async def api_info():
     return {"message": "PetruWorkout API", "version": "2.0"}
 
-
 @app.get("/health")
 async def health():
     return {"status": "healthy", "service": "petruworkout"}
-
 
 # --------------------------
 # Montar frontend SPA
@@ -75,37 +73,30 @@ async def health():
 frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
 
 if os.path.isdir(frontend_dist):
+    # Montar SPA y fallback automático de index.html
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+    logger.info(f"✅ Frontend SPA montado desde {frontend_dist}")
+
+    # Montar carpeta assets
     assets_dir = os.path.join(frontend_dist, "assets")
     if os.path.isdir(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
-        logger.info(f"✅ Frontend assets montados desde {assets_dir}")
+        logger.info(f"✅ Assets montados desde {assets_dir}")
 
-    @app.get("/favicon.svg")
-    async def favicon():
-        favicon_path = os.path.join(frontend_dist, "favicon.svg")
-        if os.path.exists(favicon_path):
+    # Montar carpeta images
+    images_dir = os.path.join(frontend_dist, "images")
+    if os.path.isdir(images_dir):
+        app.mount("/images", StaticFiles(directory=images_dir), name="images")
+        logger.info(f"✅ Imágenes montadas desde {images_dir}")
+
+    # Favicon
+    favicon_path = os.path.join(frontend_dist, "favicon.svg")
+    if os.path.exists(favicon_path):
+        @app.get("/favicon.svg")
+        async def favicon():
             return FileResponse(favicon_path)
-        return {"error": "Favicon no encontrado"}
-
-    @app.get("/")
-    async def serve_root():
-        index_file = os.path.join(frontend_dist, "index.html")
-        if os.path.exists(index_file):
-            return FileResponse(index_file)
-        return {"message": "Frontend no encontrado"}
-
-    @app.get("/{full_path:path}")
-    async def spa_fallback(full_path: str):
-        if full_path.startswith("api/"):
-            return {"error": "Ruta API no encontrada"}, 404
-
-        index_file = os.path.join(frontend_dist, "index.html")
-        if os.path.exists(index_file):
-            return FileResponse(index_file)
-        return {"message": "Página no encontrada"}, 404
 else:
     logger.warning(f"⚠️ Frontend no encontrado en {frontend_dist}")
-
 
 # --------------------------
 # Arrancar servidor
