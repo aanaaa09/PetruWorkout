@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://CAMBIAR-POR-TU-URL-DE-VERCEL.vercel.app/sitemap.xml
+Sitemap: https://petruworkout.vercel.app/sitemap.xml/
