@@ -28,9 +28,14 @@
         </div>
 
         <div class="hero-cta">
-          <a href="#calendly" class="btn btn-primary">
-            📅 Agendar Llamada Gratuita
-          </a>
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+        class="btn btn-primary"
+        >
+        📅 Agendar Llamada Gratuita
+      </a>
           <a href="#resultados" class="btn btn-secondary">
             Ver Transformaciones →
           </a>
