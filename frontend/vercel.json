@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://petru-workout.vercel.app/$1",
+      "permanent": true
+    }
+  ]
+}
