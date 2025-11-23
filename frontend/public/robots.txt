@@ -1,5 +1,4 @@
-
 User-agent: *
 Allow: /
 
-Sitemap: https://petru-workout.vercel.app/sitemap.xml/
+Sitemap: https://petru-workout.vercel.app/sitemap.xml
