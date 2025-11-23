@@ -4,7 +4,124 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PetruWorkout</title>
+
+    <!-- TÍTULO Y META PARA SEO -->
+    <title><%= VITE_SITE_NAME %> - <%= VITE_SITE_DESCRIPTION %></title>
+    <meta name="description" content="<%= VITE_SITE_DESCRIPTION %>">
+    <meta name="keywords" content="calistenia, entrenador personal calistenia, entrenamiento calistenia online, cambio físico, transformación física, perder grasa, ganar músculo, entrenador personal online, street workout, calistenia Madrid, entrenamiento sin gimnasio">
+    <meta name="author" content="Adrián Petru Oltean">
+    <meta name="robots" content="index, follow">
+
+    <!-- META TAGS PARA REDES SOCIALES -->
+    <meta property="og:title" content="<%= VITE_SITE_NAME %> - <%= VITE_SITE_DESCRIPTION %>">
+    <meta property="og:description" content="<%= VITE_SITE_DESCRIPTION %>">
+    <meta property="og:image" content="<%= VITE_SITE_URL %>/images/petru-hero.png">
+    <meta property="og:url" content="<%= VITE_SITE_URL %>">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= VITE_SITE_NAME %> - <%= VITE_SITE_DESCRIPTION %>">
+    <meta name="twitter:description" content="<%= VITE_SITE_DESCRIPTION %>">
+    <meta name="twitter:image" content="<%= VITE_SITE_URL %>/images/petru-hero.png">
+
+    <!-- GEOLOCALIZACIÓN (Madrid) -->
+    <meta name="geo.region" content="ES-MD">
+    <meta name="geo.placename" content="Madrid">
+
+    <!-- CANONICAL -->
+    <link rel="canonical" href="<%= VITE_SITE_URL %>">
+
+    <!-- SCHEMA LocalBusiness -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "<%= VITE_SITE_NAME %>",
+      "description": "<%= VITE_SITE_DESCRIPTION %>",
+      "email": "<%= VITE_CONTACT_EMAIL %>",
+      "telephone": "<%= VITE_CONTACT_PHONE %>",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Madrid",
+        "addressRegion": "Madrid",
+        "addressCountry": "ES"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "40.4168",
+        "longitude": "-3.7038"
+      },
+      "priceRange": "€€",
+      "openingHours": "Mo-Su 09:00-21:00",
+      "sameAs": [
+        "https://www.instagram.com/petruworkout",
+        "https://www.youtube.com/@petruworkout",
+        "https://www.tiktok.com/@petruworkout"
+      ]
+    }
+    </script>
+
+    <!-- Schema Persona -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Adrián Petru Oltean",
+      "jobTitle": "Entrenador Personal de Calistenia",
+      "sameAs": [
+        "https://www.instagram.com/petruworkout",
+        "https://www.youtube.com/@petruworkout",
+        "https://www.tiktok.com/@petruworkout"
+      ],
+      "knowsAbout": ["Calistenia", "Street Workout", "Nutrición Deportiva", "Transformación Física"]
+    }
+    </script>
+
+    <!-- Schema Servicios -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "Entrenamiento Personal de Calistenia",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "<%= VITE_SITE_NAME %>"
+      },
+      "areaServed": "ES",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Planes de Entrenamiento",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Plan Básico - 4 Semanas",
+              "description": "Rutina personalizada semanal y plan de nutrición básico"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Plan Pro - 90 Días",
+              "description": "Seguimiento personalizado con garantía de resultados"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Plan Elite - 6 Meses",
+              "description": "Coaching 1 a 1 semanal con transformación completa"
+            }
+          }
+        ]
+      }
+    }
+    </script>
+
   </head>
   <body>
     <div id="app"></div>

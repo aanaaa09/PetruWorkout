@@ -1,0 +1,5 @@
+
+User-agent: *
+Allow: /
+
+Sitemap: https://CAMBIAR-POR-TU-URL-DE-VERCEL.vercel.app/sitemap.xml
