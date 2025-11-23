@@ -74,7 +74,7 @@ export default {
   name: 'HeroSection',
   data() {
     return {
-      useVideo: true // Cambia a false si quieres mostrar solo overlay sin vídeo
+      useVideo: true
     }
   },
   methods: {
@@ -106,7 +106,6 @@ export default {
   z-index: 0;
   background: linear-gradient(135deg, rgba(13, 13, 13, 0.95) 0%, rgba(26, 26, 26, 0.90) 100%);
 }
-
 
 .hero-overlay {
   position: absolute;
@@ -141,8 +140,8 @@ export default {
 
 .hero-badge {
   display: inline-block;
-  background: rgba(230, 57, 70, 0.15);
-  border: 1px solid rgba(230, 57, 70, 0.3);
+  background: rgba(6, 214, 160, 0.15);
+  border: 1px solid rgba(6, 214, 160, 0.3);
   padding: 0.5rem 1rem;
   border-radius: 50px;
   font-size: 0.9rem;
@@ -183,7 +182,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: rgba(230, 57, 70, 0.1);
+  background: rgba(6, 214, 160, 0.1);
   border: 2px solid var(--color-accent);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
@@ -236,12 +235,12 @@ export default {
 .btn-primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 8px 30px rgba(230, 57, 70, 0.4);
+  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(230, 57, 70, 0.5);
+  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.5);
 }
 
 .btn-secondary {

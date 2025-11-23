@@ -7,9 +7,9 @@
   /* ===== COLORES PRINCIPALES ===== */
   --color-primary: #1a1a1a;
   --color-primary-dark: #0d0d0d;
-  --color-accent: #e63946;
-  --color-accent-dark: #d62828;
-  --color-accent-light: #ff6b7a;
+  --color-accent: #06d6a0;
+  --color-accent-dark: #05b589;
+  --color-accent-light: #4dffb8;
 
   /* ===== COLORES SECUNDARIOS ===== */
   --color-secondary: #2b2d42;
@@ -38,18 +38,18 @@
   --glass-blur: blur(20px);
 
   /* ===== GRADIENTES ===== */
-  --gradient-primary: linear-gradient(135deg, #e63946 0%, #d62828 100%);
+  --gradient-primary: linear-gradient(135deg, #06d6a0 0%, #05b589 100%);
   --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
   --gradient-overlay: linear-gradient(180deg, rgba(13, 13, 13, 0) 0%, rgba(13, 13, 13, 0.8) 100%);
-  --gradient-accent: linear-gradient(135deg, #e63946 0%, #ff6b7a 100%);
+  --gradient-accent: linear-gradient(135deg, #06d6a0 0%, #4dffb8 100%);
 
   /* ===== SOMBRAS ===== */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
-  --shadow-accent: 0 8px 32px rgba(230, 57, 70, 0.3);
-  --shadow-accent-lg: 0 12px 40px rgba(230, 57, 70, 0.4);
+  --shadow-accent: 0 8px 32px rgba(6, 214, 160, 0.3);
+  --shadow-accent-lg: 0 12px 40px rgba(6, 214, 160, 0.4);
 
   /* ===== BORDES REDONDEADOS ===== */
   --radius-sm: 8px;

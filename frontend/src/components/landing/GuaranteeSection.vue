@@ -66,9 +66,9 @@ export default {
 <style scoped>
 .guarantee-section {
   padding: 6rem 2rem;
-  background: linear-gradient(135deg, rgba(230, 57, 70, 0.15) 0%, rgba(230, 57, 70, 0.05) 100%);
-  border-top: 1px solid rgba(230, 57, 70, 0.2);
-  border-bottom: 1px solid rgba(230, 57, 70, 0.2);
+  background: linear-gradient(135deg, rgba(6, 214, 160, 0.15) 0%, rgba(6, 214, 160, 0.05) 100%);
+  border-top: 1px solid rgba(6, 214, 160, 0.2);
+  border-bottom: 1px solid rgba(6, 214, 160, 0.2);
 }
 
 .guarantee-container {
@@ -89,7 +89,7 @@ export default {
   height: 180px;
   background: var(--gradient-primary);
   border-radius: 50%;
-  box-shadow: 0 20px 50px rgba(230, 57, 70, 0.4);
+  box-shadow: 0 20px 50px rgba(6, 214, 160, 0.4);
   position: relative;
 }
 
