@@ -67,12 +67,11 @@ export default {
     return {
       results: [
         {
-          name: 'Carlos M.',
-          before: '/images/results/carlos-before.jpg',
-          after: '/images/results/carlos-after.jpg',
-          weightLost: '-12',
+          before: '/images/results/npc1antes.png',
+          after: '/images/results/npc1despues.png',
+          weightLost: '-6',
           muscleGained: '+4',
-          duration: '12',
+          duration: '9',
           quote: 'Nunca pensé que podría conseguir esto con calistenia'
         },
         {
