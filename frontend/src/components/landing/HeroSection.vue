@@ -30,12 +30,13 @@
         <div class="hero-cta">
           <a
             href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
-        class="btn btn-primary"
-        >
-        📅 Agendar Llamada Gratuita
-      </a>
+  target="_blank"
+  rel="noopener noreferrer"
+  class="btn btn-primary"
+  @click="trackButtonClick('Agendar Llamada')"
+>
+  📅 Agendar Llamada Gratuita
+</a>
           <a href="#resultados" class="btn btn-secondary">
             Ver Transformaciones →
           </a>
@@ -85,7 +86,15 @@ export default {
   methods: {
     handleImageError(e) {
       e.target.style.display = 'none'
+    },
+  trackButtonClick(buttonName) {
+    if (window.gtag) {
+      gtag('event', 'button_click', {
+        'button_name': buttonName,
+        'page_path': window.location.pathname
+      });
     }
+  }
   }
 }
 </script>
