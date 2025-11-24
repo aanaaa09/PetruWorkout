@@ -49,7 +49,6 @@ export default {
   components: {
     Navbar,
     HeroSection,
-    SocialProof,
     VideoSection,
     AboutSection,
     ServicesSection,
