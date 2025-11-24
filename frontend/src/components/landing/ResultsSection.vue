@@ -75,11 +75,10 @@ export default {
           quote: 'Nunca pensé que podría conseguir esto con calistenia'
         },
         {
-          name: 'María G.',
-          before: '/images/results/maria-before.jpg',
-          after: '/images/results/maria-after.jpg',
-          weightLost: '-8',
-          muscleGained: '+3',
+          before: '/images/results/npc2antes.png',
+          after: '/images/results/npc2despues.png',
+          weightLost: '-1',
+          muscleGained: '+5',
           duration: '10',
           quote: 'El seguimiento de Petru fue clave para mis resultados'
         },
