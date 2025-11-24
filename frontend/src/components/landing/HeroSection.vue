@@ -87,14 +87,16 @@ export default {
     handleImageError(e) {
       e.target.style.display = 'none'
     },
-  trackButtonClick(buttonName) {
-    if (window.gtag) {
-      gtag('event', 'button_click', {
-        'button_name': buttonName,
-        'page_path': window.location.pathname
-      });
+    trackButtonClick(buttonName) {
+      if (window.gtag) {
+        window.gtag('event', 'button_click', {
+          'button_name': buttonName,
+          'page_path': window.location.pathname
+        });
+      } else {
+        console.log('gtag no disponible');
+      }
     }
-  }
   }
 }
 </script>
