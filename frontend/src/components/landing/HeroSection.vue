@@ -44,10 +44,6 @@
 
         <div class="hero-stats">
           <div class="stat">
-            <span class="stat-number">50+</span>
-            <span class="stat-label">Clientes Transformados</span>
-          </div>
-          <div class="stat">
             <span class="stat-number">5+</span>
             <span class="stat-label">Años de Experiencia</span>
           </div>
@@ -167,7 +163,7 @@ export default {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 900;
   line-height: 1.1;
   color: white;
@@ -304,7 +300,7 @@ export default {
 .hero-image img {
   max-width: 100%;
   height: auto;
-  max-height: 600px;
+  max-height: 450px;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   position: relative;

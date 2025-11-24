@@ -45,10 +45,6 @@
               <span class="check">✓</span>
               Experto en Nutrición Deportiva
             </li>
-            <li>
-              <span class="check">✓</span>
-              +1000 Transformaciones Exitosas
-            </li>
           </ul>
         </div>
 
