@@ -219,9 +219,7 @@ export default {
 }
 
 .result-info h4 {
-  font-size: 1.2rem;
-  color: white;
-  margin: 0 0 1rem 0;
+  display:none;
 }
 
 .result-stats {
