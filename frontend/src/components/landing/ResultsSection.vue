@@ -79,16 +79,15 @@ export default {
           after: '/images/results/npc2despues.png',
           weightLost: '-1',
           muscleGained: '+5',
-          duration: '10',
+          duration: '7',
           quote: 'El seguimiento de Petru fue clave para mis resultados'
         },
         {
-          name: 'Jorge L.',
-          before: '/images/results/jorge-before.jpg',
-          after: '/images/results/jorge-after.jpg',
-          weightLost: '-15',
+          before: '/images/results/npc3antes.png',
+          after: '/images/results/npc3despues.png',
+          weightLost: '-8',
           muscleGained: '+5',
-          duration: '16',
+          duration: '10',
           quote: 'Mi vida cambió completamente'
         }
       ]
