@@ -24,7 +24,6 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="es_ES">
 
-
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="PetruWorkout - Entrenador Personal de Calistenia Online">
     <meta name="twitter:description" content="Entrenador personal especializado en calistenia. Consigue menos de 20% de grasa y +3kg de músculo en 90 días.">
@@ -33,39 +32,34 @@
     <!-- GEOLOCALIZACIÓN (Madrid) -->
     <meta name="geo.region" content="ES-MD">
     <meta name="geo.placename" content="Madrid">
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DX7Q2MC11Z"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DX7Q2MC11Z');
-</script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DX7Q2MC11Z');
+    </script>
+
     <!-- CANONICAL -->
     <link rel="canonical" href="https://petrucalistenia.com/">
 
-    <!-- SCHEMA LocalBusiness -->
+    <!-- SCHEMA Organization (reemplaza LocalBusiness) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "LocalBusiness",
+      "@type": "Organization",
       "name": "PetruWorkout",
-        "logo": "https://petrucalistenia.com/logo.png",
+      "logo": "https://petrucalistenia.com/logo.png",
       "url": "https://petrucalistenia.com",
-      "description": "Entrenador personal especializado en calistenia y transformación física",
+      "description": "Entrenador personal online especializado en calistenia y transformación física",
       "email": "petruworkout@gmail.com",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Madrid",
-        "addressRegion": "Madrid",
-        "addressCountry": "ES"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "40.4168",
-        "longitude": "-3.7038"
-      },
-      "priceRange": "€€",
-      "openingHours": "Mo-Su 09:00-21:00",
+      "areaServed": [
+        "Yuncos",
+        "Madrid",
+        "Toledo",
+        "España"
+      ],
       "sameAs": [
         "https://www.instagram.com/petruworkout",
         "https://www.youtube.com/@petruworkout",
@@ -73,20 +67,22 @@
       ]
     }
     </script>
-      <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "PetruWorkout",
-  "logo": "https://petrucalistenia.com/logo.png",
-  "url": "https://petrucalistenia.com",
-  "sameAs": [
-    "https://www.instagram.com/petruworkout",
-    "https://www.youtube.com/@petruworkout",
-    "https://www.tiktok.com/@petruworkout"
-  ]
-}
-</script>
+
+    <!-- Schema Organization (tu segundo bloque, se mantiene igual) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "PetruWorkout",
+      "logo": "https://petrucalistenia.com/logo.png",
+      "url": "https://petrucalistenia.com",
+      "sameAs": [
+        "https://www.instagram.com/petruworkout",
+        "https://www.youtube.com/@petruworkout",
+        "https://www.tiktok.com/@petruworkout"
+      ]
+    }
+    </script>
 
     <!-- Schema Persona -->
     <script type="application/ld+json">
@@ -111,10 +107,15 @@
       "@type": "Service",
       "serviceType": "Entrenamiento Personal de Calistenia",
       "provider": {
-        "@type": "LocalBusiness",
+        "@type": "Organization",
         "name": "PetruWorkout"
       },
-      "areaServed": "ES",
+      "areaServed": [
+        "Yuncos",
+        "Madrid",
+        "Toledo",
+        "España"
+      ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Planes de Entrenamiento",
