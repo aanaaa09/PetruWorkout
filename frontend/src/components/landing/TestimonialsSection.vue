@@ -15,14 +15,14 @@
         <p>Cargando testimonios...</p>
       </div>
 
-      <!-- Video Testimonials -->
-      <div v-if="!loading" class="videos-grid">
-        <div
-          v-for="video in videoTestimonials"
-          :key="video.id"
-          class="video-card"
-        >
-          <div class="video-wrapper">
+      <template v-else>
+        <!-- Video Testimonials -->
+        <div class="videos-grid">
+          <div
+            v-for="video in videoTestimonials"
+            :key="video.id"
+            class="video-wrapper"
+          >
             <video
               :src="video.src"
               controls
@@ -33,44 +33,44 @@
             </video>
           </div>
         </div>
-      </div>
 
-      <!-- Empty state -->
-      <div v-else-if="testimonials.length === 0" class="empty-state">
-        <div class="empty-icon">💬</div>
-        <h3>Próximamente</h3>
-        <p>Las reseñas de mis clientes aparecerán aquí pronto.</p>
-        <p class="empty-note">
-          ¿Ya eres cliente? Pronto podrás dejar tu reseña.
-        </p>
-      </div>
+        <!-- Empty state -->
+        <div v-if="testimonials.length === 0" class="empty-state">
+          <div class="empty-icon">💬</div>
+          <h3>Próximamente</h3>
+          <p>Las reseñas de mis clientes aparecerán aquí pronto.</p>
+          <p class="empty-note">
+            ¿Ya eres cliente? Pronto podrás dejar tu reseña.
+          </p>
+        </div>
 
-      <!-- Testimonials grid -->
-      <div v-else class="testimonials-grid">
-        <div
-          v-for="testimonial in testimonials"
-          :key="testimonial.id"
-          class="testimonial-card"
-        >
-          <div class="testimonial-header">
-            <div class="avatar">
-              {{ getInitials(testimonial.nombre) }}
-            </div>
-            <div class="info">
-              <h4>{{ testimonial.nombre }}</h4>
-              <div class="stars">
-                <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= testimonial.valoracion }">
-                  ★
-                </span>
+        <!-- Testimonials grid -->
+        <div v-else class="testimonials-grid">
+          <div
+            v-for="testimonial in testimonials"
+            :key="testimonial.id"
+            class="testimonial-card"
+          >
+            <div class="testimonial-header">
+              <div class="avatar">
+                {{ getInitials(testimonial.nombre) }}
+              </div>
+              <div class="info">
+                <h4>{{ testimonial.nombre }}</h4>
+                <div class="stars">
+                  <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= testimonial.valoracion }">
+                    ★
+                  </span>
+                </div>
               </div>
             </div>
+
+            <p class="testimonial-text">"{{ testimonial.texto }}"</p>
+
+            <span class="testimonial-date">{{ formatDate(testimonial.fecha) }}</span>
           </div>
-
-          <p class="testimonial-text">"{{ testimonial.texto }}"</p>
-
-          <span class="testimonial-date">{{ formatDate(testimonial.fecha) }}</span>
         </div>
-      </div>
+      </template>
 
       <!-- Trust indicators -->
       <div class="trust-indicators">
@@ -251,20 +251,6 @@ export default {
   margin-bottom: 4rem;
 }
 
-.video-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 1rem;
-  transition: all 0.3s ease;
-}
-
-.video-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-5px);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
 .video-wrapper {
   border-radius: 12px;
   overflow: hidden;
@@ -402,10 +388,6 @@ export default {
 
   .testimonial-card {
     padding: 1.5rem;
-  }
-
-  .video-card {
-    padding: 0.75rem;
   }
 }
 </style>
