@@ -15,6 +15,26 @@
         <p>Cargando testimonios...</p>
       </div>
 
+      <!-- Video Testimonials -->
+      <div v-if="!loading" class="videos-grid">
+        <div
+          v-for="video in videoTestimonials"
+          :key="video.id"
+          class="video-card"
+        >
+          <div class="video-wrapper">
+            <video
+              :src="video.src"
+              controls
+              playsinline
+              preload="metadata"
+            >
+              Tu navegador no soporta el video.
+            </video>
+          </div>
+        </div>
+      </div>
+
       <!-- Empty state -->
       <div v-else-if="testimonials.length === 0" class="empty-state">
         <div class="empty-icon">💬</div>
@@ -77,7 +97,21 @@ export default {
   data() {
     return {
       testimonials: [],
-      loading: true
+      loading: true,
+      videoTestimonials: [
+        {
+          id: 1,
+          src: '/videos/video1.mp4'
+        },
+        {
+          id: 2,
+          src: '/videos/video2.mp4'
+        },
+        {
+          id: 3,
+          src: '/videos/video3.mp4'
+        }
+      ]
     }
   },
   mounted() {
@@ -209,6 +243,41 @@ export default {
   font-style: italic;
 }
 
+/* VIDEOS */
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.video-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.video-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.video-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* TESTIMONIALS */
 .testimonials-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -308,6 +377,12 @@ export default {
     max-width: 500px;
     margin: 0 auto;
   }
+
+  .videos-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -327,6 +402,10 @@ export default {
 
   .testimonial-card {
     padding: 1.5rem;
+  }
+
+  .video-card {
+    padding: 0.75rem;
   }
 }
 </style>
