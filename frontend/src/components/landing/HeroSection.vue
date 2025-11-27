@@ -16,7 +16,7 @@
         </h1>
         <div class="guarantee-box">
           <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO 🛡️</strong>
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
             <span>FIRMADO POR CONTRATO</span>
           </div>
         </div>
@@ -210,21 +210,29 @@ export default {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: rgba(6, 214, 160, 0.08);
-  border: 1px solid rgba(6, 214, 160, 0.25);
+  background: rgba(6, 214, 160, 0.06);
+  border: 1px solid rgba(6, 214, 160, 0.2);
   border-radius: 12px;
   padding: 1rem 1.5rem;
   margin: 0.5rem 0;
+}
+
+.guarantee-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
 }
 
 .guarantee-text strong {
   color: rgba(6, 214, 160, 0.85);
   font-size: 0.9rem;
   font-weight: 600;
+  line-height: 1.3;
 }
 
 .guarantee-text span {
-  color: rgba(6, 214, 160, 0.6);
+  color: rgba(6, 214, 160, 0.55);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.05em;
