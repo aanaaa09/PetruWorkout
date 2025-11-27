@@ -25,6 +25,7 @@
           >
             <video
               :src="video.src"
+              :poster="video.poster"
               controls
               playsinline
               preload="none"
@@ -101,15 +102,18 @@ export default {
       videoTestimonials: [
         {
           id: 1,
-          src: '/videos/video1.mp4'
+          src: '/videos/video1.mp4',
+          poster: '/videos/thumbs/thumb1.png'
         },
         {
           id: 2,
-          src: '/videos/video2.mp4'
+          src: '/videos/video2.mp4',
+          poster: '/videos/thumbs/thumb2.png'
         },
         {
           id: 3,
-          src: '/videos/video3.mp4'
+          src: '/videos/video3.mp4',
+          poster: '/videos/thumbs/thumb3.png'
         }
       ]
     }
