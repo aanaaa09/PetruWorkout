@@ -34,9 +34,15 @@
 
       <div class="results-cta">
         <p>¿Quieres ser el próximo?</p>
-        <a href="#calendly" class="btn btn-primary">
-          Empieza Tu Transformación →
+        <a
+          href="https://calendly.com/petruworkout/reunion"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-primary"
+          >
+        Empieza Tu Transformación →
         </a>
+
       </div>
     </div>
   </section>
