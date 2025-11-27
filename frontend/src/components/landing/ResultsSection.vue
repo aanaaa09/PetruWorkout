@@ -13,35 +13,13 @@
           class="result-card"
         >
           <div class="result-images">
-            <div class="before-after">
-              <div class="image-container before">
-                <img :src="result.before" :alt="'Antes - ' + result.name" @error="handleImageError" />
-                <span class="label">ANTES</span>
-              </div>
-              <div class="arrow">→</div>
-              <div class="image-container after">
-                <img :src="result.after" :alt="'Después - ' + result.name" @error="handleImageError" />
-                <span class="label">DESPUÉS</span>
-              </div>
-            </div>
+            <img :src="result.image" :alt="result.name" @error="handleImageError" />
           </div>
 
           <div class="result-info">
             <h4>{{ result.name }}</h4>
-            <div class="result-stats">
-              <div class="stat">
-                <span class="stat-value">{{ result.weightLost }}</span>
-                <span class="stat-label">Kg perdidos</span>
-              </div>
-              <div class="stat">
-                <span class="stat-value">{{ result.muscleGained }}</span>
-                <span class="stat-label">Kg músculo</span>
-              </div>
-              <div class="stat">
-                <span class="stat-value">{{ result.duration }}</span>
-                <span class="stat-label">Semanas</span>
-              </div>
-            </div>
+            <p class="result-stats-text">{{ result.stats }}</p>
+            <p class="result-duration">{{ result.duration }}</p>
             <p class="result-quote">"{{ result.quote }}"</p>
           </div>
         </div>
@@ -64,39 +42,40 @@ export default {
     return {
       results: [
         {
-          before: '/images/results/npc1antes.png',
-          after: '/images/results/npc1despues.png',
-          weightLost: '-6',
-          muscleGained: '+4',
-          duration: '9',
-          quote: 'Nunca pensé que podría conseguir esto con calistenia'
+          image: '/images/results/esteban.png',
+          name: 'Esteban',
+          stats: 'Antes 25% grasa, ahora 12% grasa',
+          duration: '2 semanas',
+          quote: 'Excelente, hasta he dejado de fumar. Estoy muy feliz por mis resultados, gracias a Petru por estar siempre pendiente.'
         },
         {
-          before: '/images/results/npc2antes.png',
-          after: '/images/results/npc2despues.png',
-          weightLost: '-1',
-          muscleGained: '+5',
-          duration: '7',
-          quote: 'El seguimiento de Petru fue clave para mis resultados'
+          image: '/images/results/sergio.png',
+          name: 'Sergio',
+          stats: '+2,5kg de músculo',
+          duration: '10 semanas',
+          quote: 'La dieta propuesta por Petru me ha sentado muy bien, y mediante los entrenamientos voy logrando progresos que no esperaba ver. Gracias al apoyo de Petru, es un gran entrenador, desearía haberle conocido antes.'
         },
         {
-          before: '/images/results/npc3antes.png',
-          after: '/images/results/npc3despues.png',
-          weightLost: '-8',
-          muscleGained: '+5',
-          duration: '10',
-          quote: 'Mi vida cambió completamente'
+          image: '/images/results/oscar.png',
+          name: 'Óscar',
+          stats: 'Antes 25% de grasa, ahora 16% de grasa',
+          duration: '12 semanas',
+          quote: 'Estoy muy agradecido por haber dado este paso, disfruto entrenando y cada día que pasa me siento mejor.'
+        },
+        {
+          image: '/images/results/pedro.png',
+          name: 'Pedro',
+          stats: 'Antes 22% de grasa, ahora 17% de grasa',
+          duration: '14 semanas',
+          quote: 'Agradecido de cambiar mis hábitos gracias a Petru, estoy mejorando constantemente y tratando de no salirme del camino. Su apoyo y motivación constantes han sido claves.'
         }
       ]
     }
   },
   methods: {
      handleImageError(e) {
-      // Evitar loops infinitos de error
       if (e.target.dataset.errorHandled) return;
       e.target.dataset.errorHandled = 'true';
-
-      // Usar data URI en lugar de placeholder externo
       e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E';
     }
   }
@@ -135,15 +114,9 @@ export default {
   margin: 0 0 1rem 0;
 }
 
-.section-subtitle {
-  font-size: 1.1rem;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
 }
 
@@ -165,47 +138,11 @@ export default {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.before-after {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.image-container {
-  position: relative;
-  flex: 1;
-}
-
-.image-container img {
+.result-images img {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
+  height: auto;
   border-radius: 10px;
-}
-
-.image-container .label {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-}
-
-.image-container.after .label {
-  background: var(--color-accent);
-}
-
-.arrow {
-  color: var(--color-accent);
-  font-size: 1.5rem;
-  font-weight: 700;
-  flex-shrink: 0;
+  object-fit: cover;
 }
 
 .result-info {
@@ -213,34 +150,24 @@ export default {
 }
 
 .result-info h4 {
-  display:none;
+  font-size: 1.5rem;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
 }
 
-.result-stats {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.stat {
-  flex: 1;
-  text-align: center;
-  padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.25rem;
-  font-weight: 800;
+.result-stats-text {
+  font-size: 1rem;
   color: var(--color-accent);
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
 }
 
-.stat-label {
-  font-size: 0.7rem;
+.result-duration {
+  font-size: 0.9rem;
   color: var(--color-text-muted);
-  text-transform: uppercase;
+  margin: 0 0 1rem 0;
+  font-weight: 500;
 }
 
 .result-quote {
@@ -287,7 +214,7 @@ export default {
 @media (max-width: 968px) {
   .results-grid {
     grid-template-columns: 1fr;
-    max-width: 450px;
+    max-width: 500px;
     margin: 0 auto;
   }
 }
@@ -299,10 +226,6 @@ export default {
 
   .section-title {
     font-size: 2rem;
-  }
-
-  .image-container img {
-    height: 150px;
   }
 
   .results-cta {
