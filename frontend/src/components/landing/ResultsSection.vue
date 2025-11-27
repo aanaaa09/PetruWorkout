@@ -4,9 +4,6 @@
       <div class="section-header">
         <span class="section-tag">RESULTADOS REALES</span>
         <h2 class="section-title">Transformaciones de mis clientes</h2>
-        <p class="section-subtitle">
-          Resultados verificados de personas que siguieron mi método
-        </p>
       </div>
 
       <div class="results-grid">
