@@ -33,9 +33,6 @@
           >
             📅 Agendar Llamada Gratuita
           </a>
-          <a href="#resultados" class="btn btn-secondary">
-            Ver Transformaciones →
-          </a>
         </div>
       </div>
 

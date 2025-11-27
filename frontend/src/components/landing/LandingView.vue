@@ -10,10 +10,10 @@
       <Navbar @scroll-to="scrollToSection" />
       <HeroSection />
       <SocialProof />
+      <ResultsSection id="resultados" />
       <VideoSection id="video" />
       <AboutSection id="sobre-mi" />
       <ServicesSection id="servicios" />
-      <ResultsSection id="resultados" />
       <GuaranteeSection />
       <TestimonialsSection id="testimonios" />
       <CalendlySection id="calendly" />

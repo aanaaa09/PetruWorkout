@@ -12,10 +12,10 @@
       </button>
 
       <ul class="nav-links" :class="{ 'open': menuOpen }">
-        <li><a href="#video" @click.prevent="navigateTo('video')">Video</a></li>
+        <li><a href="#resultados" @click.prevent="navigateTo('resultados')">Resultados</a></li>
+        <li><a href="#video" @click.prevent="navigateTo('video')">Mi método</a></li>
         <li><a href="#sobre-mi" @click.prevent="navigateTo('sobre-mi')">Sobre mí</a></li>
         <li><a href="#servicios" @click.prevent="navigateTo('servicios')">Servicios</a></li>
-        <li><a href="#resultados" @click.prevent="navigateTo('resultados')">Resultados</a></li>
         <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Testimonios</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
         <li class="nav-cta">
