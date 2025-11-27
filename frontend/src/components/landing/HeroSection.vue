@@ -14,6 +14,13 @@
           y <span class="highlight">+3kg de músculo</span> en
           <span class="accent">90 Días</span>
         </h1>
+        <div class="guarantee-box">
+          <div class="guarantee-icon">🛡️</div>
+          <div class="guarantee-text">
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+            <span>FIRMADO POR CONTRATO</span>
+          </div>
+        </div>
 
         <div class="hero-cta">
           <a
@@ -27,13 +34,6 @@
           </a>
         </div>
 
-        <div class="guarantee-box">
-          <div class="guarantee-icon">🛡️</div>
-          <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
-            <span>FIRMADO POR CONTRATO</span>
-          </div>
-        </div>
       </div>
 
       <div class="hero-image">
