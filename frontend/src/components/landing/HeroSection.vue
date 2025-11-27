@@ -133,12 +133,12 @@ export default {
   max-width: 1400px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+  grid-template-columns: 1.2fr 1fr; /* Cambiado de 1fr a dos columnas */
+  gap: 4rem; /* Cambiado de 0 a 4rem */
   align-items: center;
   position: relative;
   z-index: 1;
-  margin-top: -1rem;
+  margin-top: 0; /* Quitado el margin negativo */
 }
 
 .hero-text {
