@@ -32,7 +32,6 @@
         </div>
 
         <div class="service-card featured">
-          <div class="featured-badge">⭐ DISPONIBLE AHORA</div>
           <div class="card-header">
             <span class="card-icon">🤝</span>
             <h3>Clases Presenciales</h3>
