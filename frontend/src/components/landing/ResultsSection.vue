@@ -53,7 +53,7 @@ export default {
           name: 'Esteban',
           stats: 'Antes 25% grasa, ahora 12% grasa',
           duration: '12 semanas',
-          quote: 'Excelente, de hecho ya hasta dejé el cigarro. Fumaba 3-5 cigarros al día y esta semana ya no fumé en lo absoluto. Estoy haciendo un gran cambio en mi persona y se empieza a notar. Estoy feliz por mis resultados y con mayor ánimo de poder seguir dando el máximo. Muchas gracias por estar al pendiente.',
+          quote: 'Excelente, de hecho ya hasta dejé el tabaco. Fumaba 3-5 cigarros al día y esta semana ya no fumé en lo absoluto. Estoy haciendo un gran cambio en mi persona y se empieza a notar. Estoy feliz por mis resultados y con mayor ánimo de poder seguir dando el máximo. Muchas gracias por estar al pendiente.',
           time: '17:12'
         },
         {
