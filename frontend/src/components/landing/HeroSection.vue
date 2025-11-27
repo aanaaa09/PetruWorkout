@@ -34,9 +34,17 @@
           </div>
         </div>
 
+        <div class="hero-image-mobile">
+          <img
+            src="/images/petru-hero.png"
+            alt="Petru - Entrenador Personal de Calistenia"
+            @error="handleImageError"
+          />
+        </div>
+
       </div>
 
-      <div class="hero-image">
+      <div class="hero-image hero-image-desktop">
         <img
           src="/images/petru-hero.png"
           alt="Petru - Entrenador Personal de Calistenia"
@@ -250,7 +258,13 @@ export default {
   letter-spacing: 0.05em;
 }
 
-.hero-image {
+/* Imagen mobile - oculta por defecto */
+.hero-image-mobile {
+  display: none;
+}
+
+/* Imagen desktop */
+.hero-image-desktop {
   position: relative;
   display: flex;
   justify-content: center;
@@ -304,7 +318,7 @@ export default {
     align-items: center;
   }
 
-  .hero-image {
+  .hero-image-desktop {
     order: -1;
   }
 
@@ -322,57 +336,80 @@ export default {
 }
 
 @media (max-width: 640px) {
-   .hero-section {
-    padding: 3rem 1rem 2rem;
+  .hero-section {
+    padding: 5rem 1rem 2rem;
     min-height: 100vh;
   }
 
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
   .hero-text {
-    gap: 0.8rem;
+    gap: 1rem;
+    text-align: center;
+    align-items: center;
   }
 
   .hero-badge {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .hero-image img {
-    max-height: 160px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.9rem;
   }
 
   .hero-title {
-    font-size: 1.15rem;
-    line-height: 1.25;
-    margin-bottom: 0.3rem;
+    font-size: 1.4rem;
+    line-height: 1.3;
   }
 
   .hero-cta {
     flex-direction: column;
     width: 100%;
-    margin: 0.5rem 0;
+    margin: 0.8rem 0;
   }
 
   .btn {
     width: 100%;
     justify-content: center;
-    padding: 1.1rem 1.5rem;
+    padding: 1.2rem 1.5rem;
     font-size: 1rem;
     font-weight: 900;
   }
 
   .guarantee-box {
     text-align: center;
-    padding: 0.6rem 0.9rem;
-    margin: 0;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.5rem 0;
   }
 
   .guarantee-text strong {
-    font-size: 0.7rem;
-    line-height: 1.2;
+    font-size: 0.8rem;
+    line-height: 1.3;
   }
 
   .guarantee-text span {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  /* Ocultar imagen desktop */
+  .hero-image-desktop {
+    display: none;
+  }
+
+  /* Mostrar imagen mobile debajo de garantía */
+  .hero-image-mobile {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .hero-image-mobile img {
+    max-width: 90%;
+    height: auto;
+    max-height: 350px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   }
 
   .scroll-indicator {
