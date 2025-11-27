@@ -322,8 +322,8 @@ export default {
 }
 
 @media (max-width: 640px) {
-  .hero-section {
-    padding: 4rem 1rem 2rem;
+   .hero-section {
+    padding: 3rem 1rem 2rem;
     min-height: 100vh;
   }
 
