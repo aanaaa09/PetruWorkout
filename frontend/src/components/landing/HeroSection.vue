@@ -15,9 +15,8 @@
           <span class="accent">90 Días</span>
         </h1>
         <div class="guarantee-box">
-          <div class="guarantee-icon">🛡️</div>
           <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO 🛡️</strong>
             <span>FIRMADO POR CONTRATO</span>
           </div>
         </div>
@@ -211,33 +210,21 @@ export default {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(6, 214, 160, 0.08);
+  border: 1px solid rgba(6, 214, 160, 0.25);
   border-radius: 12px;
   padding: 1rem 1.5rem;
   margin: 0.5rem 0;
 }
 
-.guarantee-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.guarantee-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
 .guarantee-text strong {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(6, 214, 160, 0.85);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
 .guarantee-text span {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(6, 214, 160, 0.6);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.05em;
