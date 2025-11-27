@@ -346,8 +346,6 @@ export default {
   .hero-section {
     padding: 2rem 1rem 2rem;
     min-height: 100vh;
-    margin-top: -0.5rem;
-
   }
 
   .hero-content {

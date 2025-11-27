@@ -27,7 +27,7 @@
               :src="video.src"
               controls
               playsinline
-              preload="metadata"
+              preload="none"
             >
               Tu navegador no soporta el video.
             </video>
@@ -254,7 +254,7 @@ export default {
 .video-wrapper {
   border-radius: 12px;
   overflow: hidden;
-  background: #000;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .video-wrapper video {
@@ -368,6 +368,10 @@ export default {
     grid-template-columns: 1fr;
     max-width: 500px;
     margin: 0 auto;
+  }
+
+  .empty-state {
+    margin-top: 2rem;
   }
 }
 
