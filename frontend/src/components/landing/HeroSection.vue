@@ -2,7 +2,7 @@
   <section id="hero" class="hero-section">
 
     <div class="hero-bg">
-  <div class="hero-overlay"></div>
+      <div class="hero-overlay"></div>
     </div>
 
     <div class="hero-content">
@@ -15,10 +15,6 @@
           <span class="accent">90 Días</span>
         </h1>
 
-        <p class="hero-subtitle">
-          Con Calistenia y mi método probado de entrenamiento personalizado
-        </p>
-
         <div class="guarantee-box">
           <div class="guarantee-icon">🛡️</div>
           <div class="guarantee-text">
@@ -30,27 +26,16 @@
         <div class="hero-cta">
           <a
             href="https://calendly.com/petruworkout/reunion"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="btn btn-primary"
-  @click="trackButtonClick('Agendar Llamada')"
->
-  📅 Agendar Llamada Gratuita
-</a>
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary"
+            @click="trackButtonClick('Agendar Llamada')"
+          >
+            📅 Agendar Llamada Gratuita
+          </a>
           <a href="#resultados" class="btn btn-secondary">
             Ver Transformaciones →
           </a>
-        </div>
-
-        <div class="hero-stats">
-          <div class="stat">
-            <span class="stat-number">5+</span>
-            <span class="stat-label">Años de Experiencia</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">98%</span>
-            <span class="stat-label">Tasa de Éxito</span>
-          </div>
         </div>
       </div>
 
@@ -183,13 +168,6 @@ export default {
   -webkit-text-fill-color: var(--color-accent);
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-  margin: 0;
-}
-
 .guarantee-box {
   display: flex;
   align-items: center;
@@ -266,31 +244,6 @@ export default {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-.hero-stats {
-  display: flex;
-  gap: 3rem;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.stat-number {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--color-accent);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
 .hero-image {
   position: relative;
   display: flex;
@@ -337,7 +290,7 @@ export default {
 @media (max-width: 1024px) {
   .hero-content {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 2rem;
     text-align: center;
   }
 
@@ -350,15 +303,15 @@ export default {
   }
 
   .hero-image img {
-    max-height: 400px;
-  }
-
-  .hero-stats {
-    justify-content: center;
+    max-height: 280px;
   }
 
   .hero-cta {
     justify-content: center;
+  }
+
+  .hero-title {
+    font-size: clamp(1.4rem, 5vw, 2rem);
   }
 }
 
@@ -367,9 +320,13 @@ export default {
     padding: 5rem 1rem 3rem;
   }
 
-  .hero-stats {
-    flex-direction: column;
-    gap: 1.5rem;
+  .hero-image img {
+    max-height: 220px;
+  }
+
+  .hero-title {
+    font-size: 1.3rem;
+    line-height: 1.3;
   }
 
   .hero-cta {
@@ -380,11 +337,22 @@ export default {
   .btn {
     width: 100%;
     justify-content: center;
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
   }
 
   .guarantee-box {
     flex-direction: column;
     text-align: center;
+    padding: 1rem;
+  }
+
+  .guarantee-text strong {
+    font-size: 0.9rem;
+  }
+
+  .guarantee-text span {
+    font-size: 0.75rem;
   }
 
   .scroll-indicator {
