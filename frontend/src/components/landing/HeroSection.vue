@@ -72,7 +72,7 @@ export default {
   data() {
     return {
       desktopImage: '/images/petru-hero.png',
-      mobileImage: '/images/petru-hero-movil.png'
+      mobileImage: '/images/petru-hero-horizontalpng'
     }
   },
   methods: {
@@ -343,7 +343,7 @@ export default {
 
 @media (max-width: 640px) {
   .hero-section {
-    padding: 5rem 1rem 2rem;
+    padding: 3rem 1rem 2rem;
     min-height: 100vh;
   }
 
