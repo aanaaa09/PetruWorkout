@@ -354,52 +354,18 @@ export default {
   }
 }
 @media (max-width: 640px) {
-  .hero-section {
-    padding: 4rem 1rem 2rem; /* Reducir padding superior e inferior */
-  }
-
-  .hero-text {
-    gap: 1rem; /* Reducir espacio entre elementos */
-  }
-
-  .hero-image img {
-    max-height: 180px; /* Imagen más pequeña */
-  }
-
-  .hero-title {
-    font-size: 1.2rem; /* Título más pequeño */
-    line-height: 1.2;
-  }
-
-  .hero-badge {
-    font-size: 0.8rem; /* Badge más pequeño */
-    padding: 0.4rem 0.8rem;
-  }
-
-  .hero-cta {
-    flex-direction: column;
-    width: 100%;
-    margin: 0.5rem 0; /* Menos margen */
-  }
-
-  .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 1rem 1.5rem; /* Botón un poco más pequeño */
-    font-size: 0.9rem;
-  }
-
   .guarantee-box {
-    padding: 0.75rem 1rem; /* Caja más compacta */
+    padding: 0.6rem 0.8rem; /* Más compacto */
+    margin: 0.3rem 0; /* Menos margen */
   }
 
   .guarantee-text strong {
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* Texto más pequeño */
     line-height: 1.2;
   }
 
   .guarantee-text span {
-    font-size: 0.7rem;
+    font-size: 0.65rem; /* Subtexto más pequeño */
   }
 }
 </style>
