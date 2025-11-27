@@ -15,14 +15,6 @@
           <span class="accent">90 Días</span>
         </h1>
 
-        <div class="guarantee-box">
-          <div class="guarantee-icon">🛡️</div>
-          <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
-            <span>FIRMADO POR CONTRATO</span>
-          </div>
-        </div>
-
         <div class="hero-cta">
           <a
             href="https://calendly.com/petruworkout/reunion"
@@ -33,6 +25,14 @@
           >
             📅 Agendar Llamada Gratuita
           </a>
+        </div>
+
+        <div class="guarantee-box">
+          <div class="guarantee-icon">🛡️</div>
+          <div class="guarantee-text">
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+            <span>FIRMADO POR CONTRATO</span>
+          </div>
         </div>
       </div>
 
@@ -165,53 +165,18 @@ export default {
   -webkit-text-fill-color: var(--color-accent);
 }
 
-.guarantee-box {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(6, 214, 160, 0.1);
-  border: 2px solid var(--color-accent);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin: 0.5rem 0;
-}
-
-.guarantee-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
-}
-
-.guarantee-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.guarantee-text strong {
-  color: white;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.guarantee-text span {
-  color: var(--color-accent);
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
 .hero-cta {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 0.5rem;
+  margin: 1rem 0;
 }
 
 .btn {
-  padding: 1rem 2rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 1rem;
+  padding: 1.2rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.1rem;
   text-decoration: none;
   transition: all 0.3s ease;
   display: inline-flex;
@@ -222,12 +187,13 @@ export default {
 .btn-primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+  box-shadow: 0 10px 40px rgba(6, 214, 160, 0.5);
+  transform: scale(1.05);
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.5);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
 }
 
 .btn-secondary {
@@ -239,6 +205,42 @@ export default {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+.guarantee-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.guarantee-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.guarantee-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.guarantee-text strong {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.guarantee-text span {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 
 .hero-image {
