@@ -42,12 +42,12 @@
             📷 Sígueme en Instagram
           </a>
           <a
-            href="https://www.tiktok.com/@petruworkout"
+            href="https://linkedin.com/in/adrián-oltean-696a2236b"
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-tiktok"
+            class="btn btn-linkedin"
           >
-            🎵 Ver TikToks
+            💼 Conéctate en LinkedIn
           </a>
         </div>
       </div>
@@ -170,18 +170,16 @@ export default {
   box-shadow: 0 6px 30px rgba(253, 29, 29, 0.5);
 }
 
-.btn-tiktok {
-  background: #000000;
+.btn-linkedin {
+  background: #0077b5;
   color: white;
-  border: 2px solid #00f2ea;
-  box-shadow: 0 4px 20px rgba(0, 242, 234, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 119, 181, 0.3);
 }
 
-.btn-tiktok:hover {
+.btn-linkedin:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(0, 242, 234, 0.5);
-  background: #00f2ea;
-  color: #000;
+  box-shadow: 0 6px 30px rgba(0, 119, 181, 0.5);
+  background: #005885;
 }
 
 @media (max-width: 768px) {
