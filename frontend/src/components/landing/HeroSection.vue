@@ -14,12 +14,6 @@
           y <span class="highlight">+3kg de músculo</span> en
           <span class="accent">90 Días</span>
         </h1>
-        <div class="guarantee-box">
-          <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
-            <span>FIRMADO POR CONTRATO</span>
-          </div>
-        </div>
 
         <div class="hero-cta">
           <a
@@ -29,8 +23,15 @@
             class="btn btn-primary"
             @click="trackButtonClick('Agendar Llamada')"
           >
-            📅 AGENDAR LLAMADA GRATUITA !!
+            📅 AGENDAR LLAMADA GRATUITA
           </a>
+        </div>
+
+        <div class="guarantee-box">
+          <div class="guarantee-text">
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+            <span>FIRMADO POR CONTRATO</span>
+          </div>
         </div>
 
       </div>
@@ -168,7 +169,7 @@ export default {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
 }
 
 .btn {
@@ -180,6 +181,7 @@ export default {
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -188,11 +190,21 @@ export default {
   color: white;
   box-shadow: 0 10px 40px rgba(6, 214, 160, 0.5);
   transform: scale(1.05);
+  animation: pulse 2s infinite;
 }
 
 .btn-primary:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 10px 40px rgba(6, 214, 160, 0.5);
+  }
+  50% {
+    box-shadow: 0 10px 40px rgba(6, 214, 160, 0.7);
+  }
 }
 
 .btn-secondary {
@@ -214,7 +226,7 @@ export default {
   border: 1px solid rgba(6, 214, 160, 0.2);
   border-radius: 12px;
   padding: 1rem 1.5rem;
-  margin: 0.5rem 0;
+  margin: 0;
 }
 
 .guarantee-text {
@@ -311,61 +323,60 @@ export default {
 
 @media (max-width: 640px) {
   .hero-section {
-    padding: 5rem 1rem 3rem;
+    padding: 4rem 1rem 2rem;
+    min-height: 100vh;
+  }
+
+  .hero-text {
+    gap: 0.8rem;
+  }
+
+  .hero-badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
   }
 
   .hero-image img {
-    max-height: 220px;
+    max-height: 160px;
   }
 
   .hero-title {
-    font-size: 1.3rem;
-    line-height: 1.3;
+    font-size: 1.15rem;
+    line-height: 1.25;
+    margin-bottom: 0.3rem;
   }
 
   .hero-cta {
     flex-direction: column;
     width: 100%;
+    margin: 0.5rem 0;
   }
 
   .btn {
     width: 100%;
     justify-content: center;
-    padding: 0.9rem 1.5rem;
-    font-size: 0.95rem;
+    padding: 1.1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 900;
   }
 
   .guarantee-box {
-    flex-direction: column;
     text-align: center;
-    padding: 1rem;
+    padding: 0.6rem 0.9rem;
+    margin: 0;
   }
 
   .guarantee-text strong {
-    font-size: 0.9rem;
-  }
-
-  .guarantee-text span {
-    font-size: 0.75rem;
-  }
-
-  .scroll-indicator {
-    display: none;
-  }
-}
-@media (max-width: 640px) {
-  .guarantee-box {
-    padding: 0.6rem 0.8rem; /* Más compacto */
-    margin: 0.3rem 0; /* Menos margen */
-  }
-
-  .guarantee-text strong {
-    font-size: 0.75rem; /* Texto más pequeño */
+    font-size: 0.7rem;
     line-height: 1.2;
   }
 
   .guarantee-text span {
-    font-size: 0.65rem; /* Subtexto más pequeño */
+    font-size: 0.6rem;
+  }
+
+  .scroll-indicator {
+    display: none;
   }
 }
 </style>
