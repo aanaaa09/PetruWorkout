@@ -133,11 +133,12 @@ export default {
   max-width: 1400px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 4rem;
+  grid-template-columns: 1fr;
+  gap: 0;
   align-items: center;
   position: relative;
   z-index: 1;
+  margin-top: -1rem;
 }
 
 .hero-text {
@@ -343,8 +344,9 @@ export default {
 
 @media (max-width: 640px) {
   .hero-section {
-    padding: 3rem 1rem 2rem;
-    min-height: 100vh;
+    padding: 1rem 1rem 2rem;
+    min-height: calc(100vh - 60px);
+    margin-top: -2rem;
   }
 
   .hero-content {
