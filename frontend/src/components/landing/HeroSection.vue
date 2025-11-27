@@ -1,63 +1,68 @@
 <template>
   <section id="hero" class="hero-section">
 
-    <div class="hero-bg">
-      <div class="hero-overlay"></div>
+```
+<div class="hero-bg">
+  <div class="hero-overlay"></div>
+</div>
+
+<div class="hero-content">
+  <div class="hero-text">
+    <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
+
+    <h1 class="hero-title">
+      Consigue menos de <span class="highlight">20% de grasa</span>
+      y <span class="highlight">+3kg de músculo</span> en
+      <span class="accent">90 Días</span>
+    </h1>
+
+    <!-- Imagen móvil colocada aquí -->
+    <div class="hero-image-mobile">
+      <img
+        :src="mobileImage"
+        alt="Petru - Entrenador Personal de Calistenia"
+        @error="handleImageError"
+      />
     </div>
 
-    <div class="hero-content">
-      <div class="hero-text">
-        <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
+    <div class="hero-cta">
+      <a
+        href="https://calendly.com/petruworkout/reunion"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-primary"
+        @click="trackButtonClick('Agendar Llamada')"
+      >
+        📅 AGENDAR LLAMADA GRATUITA
+      </a>
+    </div>
 
-        <h1 class="hero-title">
-          Consigue menos de <span class="highlight">20% de grasa</span>
-          y <span class="highlight">+3kg de músculo</span> en
-          <span class="accent">90 Días</span>
-        </h1>
-
-        <div class="hero-cta">
-          <a
-            href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-primary"
-            @click="trackButtonClick('Agendar Llamada')"
-          >
-            📅 AGENDAR LLAMADA GRATUITA
-          </a>
-        </div>
-
-        <div class="guarantee-box">
-          <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
-            <span>FIRMADO POR CONTRATO</span>
-          </div>
-        </div>
-
-        <div class="hero-image-mobile">
-          <img
-            src="/images/petru-hero.png"
-            alt="Petru - Entrenador Personal de Calistenia"
-            @error="handleImageError"
-          />
-        </div>
-
-      </div>
-
-      <div class="hero-image hero-image-desktop">
-        <img
-          src="/images/petru-hero.png"
-          alt="Petru - Entrenador Personal de Calistenia"
-          @error="handleImageError"
-        />
-        <div class="image-decoration"></div>
+    <div class="guarantee-box">
+      <div class="guarantee-text">
+        <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+        <span>FIRMADO POR CONTRATO</span>
       </div>
     </div>
 
-    <div class="scroll-indicator">
-      <span>Descubre más</span>
-      <div class="scroll-arrow">↓</div>
-    </div>
+  </div>
+
+  <!-- Imagen escritorio -->
+  <div class="hero-image hero-image-desktop">
+    <img
+      :src="desktopImage"
+      alt="Petru - Entrenador Personal de Calistenia"
+      @error="handleImageError"
+    />
+    <div class="image-decoration"></div>
+  </div>
+</div>
+
+<div class="scroll-indicator">
+  <span>Descubre más</span>
+  <div class="scroll-arrow">↓</div>
+</div>
+```
+
   </section>
 </template>
 
@@ -66,7 +71,8 @@ export default {
   name: 'HeroSection',
   data() {
     return {
-      useVideo: true
+      desktopImage: '/images/petru-hero.png',
+      mobileImage: '/images/petru-hero-horizontal.png'
     }
   },
   methods: {
