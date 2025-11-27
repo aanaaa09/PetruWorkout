@@ -6,8 +6,6 @@
     </div>
 
     <div class="hero-content">
-
-      <!-- TEXTO -->
       <div class="hero-text">
         <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
 
@@ -36,7 +34,6 @@
           </div>
         </div>
 
-        <!-- IMAGEN MOBILE DEBAJO DEL TEXTO -->
         <div class="hero-image-mobile">
           <img
             src="/images/petru-hero.png"
@@ -44,17 +41,17 @@
             @error="handleImageError"
           />
         </div>
+
       </div>
 
-      <!-- IMAGEN DESKTOP A LA DERECHA -->
       <div class="hero-image hero-image-desktop">
         <img
           src="/images/petru-hero.png"
           alt="Petru - Entrenador Personal de Calistenia"
           @error="handleImageError"
         />
+        <div class="image-decoration"></div>
       </div>
-
     </div>
 
     <div class="scroll-indicator">
@@ -67,9 +64,14 @@
 <script>
 export default {
   name: 'HeroSection',
+  data() {
+    return {
+      useVideo: true
+    }
+  },
   methods: {
     handleImageError(e) {
-      e.target.style.display = 'none';
+      e.target.style.display = 'none'
     },
     trackButtonClick(buttonName) {
       if (window.gtag) {
@@ -77,10 +79,12 @@ export default {
           'button_name': buttonName,
           'page_path': window.location.pathname
         });
+      } else {
+        console.log('gtag no disponible');
       }
     }
   }
-};
+}
 </script>
 
 <style scoped>
