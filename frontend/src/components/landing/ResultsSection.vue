@@ -32,6 +32,32 @@
         </div>
       </div>
 
+      <!-- NUEVA SECCIÓN DE VIDEOS -->
+      <div class="videos-section">
+        <div class="videos-header">
+          <h3>Esto es lo que opinan mis clientes</h3>
+          <p>Testimonios reales de personas que han logrado sus objetivos</p>
+        </div>
+
+        <div class="videos-grid">
+          <div
+            v-for="video in videoTestimonials"
+            :key="video.id"
+            class="video-wrapper"
+          >
+            <video
+              :src="video.src"
+              :poster="video.poster"
+              controls
+              playsinline
+              preload="none"
+            >
+              Tu navegador no soporta el video.
+            </video>
+          </div>
+        </div>
+      </div>
+
       <div class="results-cta">
         <p>¿Quieres ser el próximo?</p>
         <a
@@ -42,7 +68,6 @@
           >
         Empieza Tu Transformación →
         </a>
-
       </div>
     </div>
   </section>
@@ -85,6 +110,23 @@ export default {
           duration: '14 semanas',
           quote: 'Con mis entrenamientos estamos de maravilla, vamos mejorando más y más día con día. Mi plan de nutrición me gusta y he notado que ya hay menos grasa. Estoy mejorando tratando de no salirme del camino y con tu apoyo que recibo constantemente me he sentido súper contento y con motivación para poder seguir. Como te he dicho, de ahora en adelante esto es un muy buen hábito para mí. ¡No hay marcha atrás!',
           time: '16:04'
+        }
+      ],
+      videoTestimonials: [
+        {
+          id: 1,
+          src: '/videos/video1.mp4',
+          poster: '/videos/thumbs/thumb1.png'
+        },
+        {
+          id: 2,
+          src: '/videos/video2.mp4',
+          poster: '/videos/thumbs/thumb2.png'
+        },
+        {
+          id: 3,
+          src: '/videos/video3.mp4',
+          poster: '/videos/thumbs/thumb3.png'
         }
       ]
     }
@@ -229,6 +271,56 @@ export default {
   margin-top: 0.25rem;
 }
 
+/* NUEVA SECCIÓN DE VIDEOS */
+.videos-section {
+  margin-top: 5rem;
+  padding-top: 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.videos-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.videos-header h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 1rem 0;
+}
+
+.videos-header p {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.video-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.video-wrapper:hover {
+  transform: translateY(-5px);
+  border-color: rgba(6, 214, 160, 0.3);
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .results-cta {
   text-align: center;
   margin-top: 4rem;
@@ -268,6 +360,12 @@ export default {
     max-width: 500px;
     margin: 0 auto;
   }
+
+  .videos-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -285,6 +383,10 @@ export default {
 
   .whatsapp-text {
     font-size: 0.85rem;
+  }
+
+  .videos-header h3 {
+    font-size: 1.5rem;
   }
 
   .results-cta {

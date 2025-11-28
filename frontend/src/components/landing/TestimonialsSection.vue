@@ -9,69 +9,15 @@
         </p>
       </div>
 
-      <!-- Loading state -->
-      <div v-if="loading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Cargando testimonios...</p>
+      <!-- Solo mostrar el estado de próximamente -->
+      <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <h3>Próximamente</h3>
+        <p>Las reseñas de mis clientes aparecerán aquí pronto.</p>
+        <p class="empty-note">
+          ¿Ya eres cliente? Pronto podrás dejar tu reseña.
+        </p>
       </div>
-
-      <template v-else>
-        <!-- Video Testimonials -->
-        <div class="videos-grid">
-          <div
-            v-for="video in videoTestimonials"
-            :key="video.id"
-            class="video-wrapper"
-          >
-            <video
-              :src="video.src"
-              :poster="video.poster"
-              controls
-              playsinline
-              preload="none"
-            >
-              Tu navegador no soporta el video.
-            </video>
-          </div>
-        </div>
-
-        <!-- Empty state -->
-        <div v-if="testimonials.length === 0" class="empty-state">
-          <div class="empty-icon">💬</div>
-          <h3>Próximamente</h3>
-          <p>Las reseñas de mis clientes aparecerán aquí pronto.</p>
-          <p class="empty-note">
-            ¿Ya eres cliente? Pronto podrás dejar tu reseña.
-          </p>
-        </div>
-
-        <!-- Testimonials grid -->
-        <div v-else class="testimonials-grid">
-          <div
-            v-for="testimonial in testimonials"
-            :key="testimonial.id"
-            class="testimonial-card"
-          >
-            <div class="testimonial-header">
-              <div class="avatar">
-                {{ getInitials(testimonial.nombre) }}
-              </div>
-              <div class="info">
-                <h4>{{ testimonial.nombre }}</h4>
-                <div class="stars">
-                  <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= testimonial.valoracion }">
-                    ★
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <p class="testimonial-text">"{{ testimonial.texto }}"</p>
-
-            <span class="testimonial-date">{{ formatDate(testimonial.fecha) }}</span>
-          </div>
-        </div>
-      </template>
 
       <!-- Trust indicators -->
       <div class="trust-indicators">
@@ -94,65 +40,7 @@
 
 <script>
 export default {
-  name: 'TestimonialsSection',
-  data() {
-    return {
-      testimonials: [],
-      loading: true,
-      videoTestimonials: [
-        {
-          id: 1,
-          src: '/videos/video1.mp4',
-          poster: '/videos/thumbs/thumb1.png'
-        },
-        {
-          id: 2,
-          src: '/videos/video2.mp4',
-          poster: '/videos/thumbs/thumb2.png'
-        },
-        {
-          id: 3,
-          src: '/videos/video3.mp4',
-          poster: '/videos/thumbs/thumb3.png'
-        }
-      ]
-    }
-  },
-  mounted() {
-    this.loadTestimonials()
-  },
-  methods: {
-    async loadTestimonials() {
-      try {
-        const response = await fetch('http://localhost:5000/api/resenas/publicas')
-        if (response.ok) {
-          const data = await response.json()
-          this.testimonials = data.resenas || []
-        }
-      } catch (error) {
-        console.log('No se pudieron cargar las reseñas')
-        this.testimonials = []
-      } finally {
-        this.loading = false
-      }
-    },
-    getInitials(name) {
-      return name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    },
-    formatDate(dateStr) {
-      if (!dateStr) return ''
-      const date = new Date(dateStr)
-      return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long'
-      })
-    }
-  }
+  name: 'TestimonialsSection'
 }
 </script>
 
@@ -194,29 +82,6 @@ export default {
   margin: 0;
 }
 
-.loading-state {
-  text-align: center;
-  padding: 4rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.loading-state p {
-  color: var(--color-text-muted);
-}
-
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
@@ -247,99 +112,6 @@ export default {
   font-style: italic;
 }
 
-/* VIDEOS */
-.videos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-bottom: 4rem;
-}
-
-.video-wrapper {
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.video-wrapper video {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* TESTIMONIALS */
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-.testimonial-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 2rem;
-  transition: all 0.3s ease;
-}
-
-.testimonial-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-5px);
-}
-
-.testimonial-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-  color: white;
-}
-
-.info h4 {
-  font-size: 1rem;
-  color: white;
-  margin: 0 0 0.25rem 0;
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-}
-
-.star {
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 1rem;
-}
-
-.star.filled {
-  color: #ffd700;
-}
-
-.testimonial-text {
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  line-height: 1.7;
-  margin: 0 0 1rem 0;
-  font-style: italic;
-}
-
-.testimonial-date {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
 .trust-indicators {
   display: flex;
   justify-content: center;
@@ -361,24 +133,6 @@ export default {
   color: var(--color-success);
 }
 
-@media (max-width: 968px) {
-  .testimonials-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .videos-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .empty-state {
-    margin-top: 2rem;
-  }
-}
-
 @media (max-width: 640px) {
   .testimonials-section {
     padding: 4rem 1rem;
@@ -394,8 +148,8 @@ export default {
     gap: 1rem;
   }
 
-  .testimonial-card {
-    padding: 1.5rem;
+  .empty-state {
+    padding: 3rem 1.5rem;
   }
 }
 </style>
