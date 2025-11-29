@@ -15,25 +15,24 @@
         <div class="footer-links">
           <div class="link-group">
             <h4>Navegación</h4>
-            <a href="#resultados">Resultados</a>
-            <a href="#video">Mi método</a>
-            <a href="#sobre-mi">Sobre mí</a>
-            <a href="#servicios">Servicios</a>
-            <a href="#testimonios">Testimonios</a>
+            <a href="#resultados" @click.prevent="scrollTo('resultados')">Resultados</a>
+            <a href="#video" @click.prevent="scrollTo('video')">Mi método</a>
+            <a href="#sobre-mi" @click.prevent="scrollTo('sobre-mi')">Sobre mí</a>
+            <a href="#servicios" @click.prevent="scrollTo('servicios')">Servicios</a>
+            <a href="#testimonios" @click.prevent="scrollTo('testimonios')">Testimonios</a>
           </div>
 
           <div class="link-group">
             <h4>Contacto</h4>
-            <a href="#calendly">Agendar Llamada</a>
-            <a href="#contacto">Formulario</a>
+            <a href="#calendly" @click.prevent="scrollTo('calendly')">Agendar Llamada</a>
+            <a href="#contacto" @click.prevent="scrollTo('contacto')">Formulario</a>
             <a href="mailto:petruworkout@gmail.com">Email</a>
           </div>
 
           <div class="link-group">
             <h4>Legal</h4>
-            <a href="#" @click.prevent="handlePrivacyClick">Política de Privacidad</a>
-            <a href="#" @click.prevent="handleLegalClick">Aviso Legal</a>
-            <a href="#" @click.prevent="handleTermsClick">Términos y Condiciones</a>
+            <router-link to="/">Volver al Inicio</router-link>
+            <a href="mailto:petruworkout@gmail.com">Contacto</a>
           </div>
         </div>
       </div>
@@ -60,24 +59,18 @@
 
 <script>
 export default {
-  name: 'Footer',
+  name: 'FullFooter',
   computed: {
     currentYear() {
       return new Date().getFullYear()
     }
   },
   methods: {
-    handlePrivacyClick() {
-      console.log('Privacy clicked')
-      this.$emit('show-privacy')
-    },
-    handleLegalClick() {
-      console.log('Legal clicked')
-      this.$emit('show-legal')
-    },
-    handleTermsClick() {
-      console.log('Terms clicked')
-      this.$emit('show-terms')
+    scrollTo(sectionId) {
+      const el = document.getElementById(sectionId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
     }
   }
 }
@@ -165,12 +158,7 @@ export default {
   gap: 1rem;
 }
 
-.copyright {
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  margin: 0;
-}
-
+.copyright,
 .credits {
   color: var(--color-text-muted);
   font-size: 0.85rem;

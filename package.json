@@ -3,6 +3,7 @@
     "axios": "^1.13.2"
   },
   "devDependencies": {
-    "vite-plugin-html": "^3.2.2"
+    "vite-plugin-html": "^3.2.2",
+    "vite-ssg": "^28.2.2"
   }
 }

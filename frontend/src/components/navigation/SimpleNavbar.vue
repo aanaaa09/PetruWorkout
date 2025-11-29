@@ -1,9 +1,9 @@
 <template>
-  <nav class="navbar" :class="{ 'scrolled': isScrolled }">
+  <nav class="simple-navbar" :class="{ 'scrolled': isScrolled }">
     <div class="navbar-container">
-      <a href="#" class="logo" @click.prevent="$emit('scroll-to', 'hero')">
+      <router-link to="/" class="logo">
         <span class="logo-accent">PETRU</span>WORKOUT
-      </a>
+      </router-link>
 
       <button class="mobile-toggle" @click="menuOpen = !menuOpen" :class="{ 'active': menuOpen }">
         <span></span>
@@ -12,16 +12,21 @@
       </button>
 
       <ul class="nav-links" :class="{ 'open': menuOpen }">
-        <li><a href="#resultados" @click.prevent="navigateTo('resultados')">Resultados</a></li>
-        <li><a href="#video" @click.prevent="navigateTo('video')">Mi método</a></li>
-        <li><a href="#sobre-mi" @click.prevent="navigateTo('sobre-mi')">Sobre mí</a></li>
-        <li><a href="#servicios" @click.prevent="navigateTo('servicios')">Servicios</a></li>
-        <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Testimonios</a></li>
-        <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
-        <li class="nav-cta">
-          <a href="#calendly" @click.prevent="navigateTo('calendly')" class="btn-cta">
+        <li>
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-cta"
+            @click="menuOpen = false"
+          >
             📅 Agendar Llamada
           </a>
+        </li>
+        <li>
+          <router-link to="/info" class="btn-info" @click="menuOpen = false">
+            📋 Más Información
+          </router-link>
         </li>
       </ul>
     </div>
@@ -30,7 +35,7 @@
 
 <script>
 export default {
-  name: 'Navbar',
+  name: 'SimpleNavbar',
   data() {
     return {
       isScrolled: false,
@@ -46,17 +51,13 @@ export default {
   methods: {
     handleScroll() {
       this.isScrolled = window.scrollY > 50
-    },
-    navigateTo(section) {
-      this.menuOpen = false
-      this.$emit('scroll-to', section)
     }
   }
 }
 </script>
 
 <style scoped>
-.navbar {
+.simple-navbar {
   position: fixed;
   top: 0;
   left: 0;
@@ -67,7 +68,7 @@ export default {
   background: transparent;
 }
 
-.navbar.scrolled {
+.simple-navbar.scrolled {
   background: rgba(13, 13, 13, 0.95);
   backdrop-filter: blur(20px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
@@ -98,57 +99,45 @@ export default {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.nav-links a {
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  font-weight: 500;
+.btn-cta,
+.btn-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 700;
   font-size: 0.95rem;
-  transition: color 0.3s ease;
-  position: relative;
-}
-
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--color-accent);
-  transition: width 0.3s ease;
-}
-
-.nav-links a:hover {
-  color: white;
-}
-
-.nav-links a:hover::after {
-  width: 100%;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 .btn-cta {
   background: var(--gradient-primary);
-  padding: 0.75rem 1.5rem !important;
-  border-radius: 8px;
-  color: white !important;
-  font-weight: 600 !important;
-  box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
-  transition: all 0.3s ease !important;
-}
-
-.btn-cta::after {
-  display: none !important;
+  color: white;
+  box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
 }
 
 .btn-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(230, 57, 70, 0.5);
+  box-shadow: 0 6px 25px rgba(6, 214, 160, 0.5);
+}
+
+.btn-info {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-info:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .mobile-toggle {
@@ -180,7 +169,7 @@ export default {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
-@media (max-width: 968px) {
+@media (max-width: 768px) {
   .mobile-toggle {
     display: flex;
   }
@@ -204,14 +193,10 @@ export default {
     opacity: 1;
   }
 
-  .nav-cta {
+  .btn-cta,
+  .btn-info {
     width: 100%;
-  }
-
-  .btn-cta {
-    display: block;
-    text-align: center;
-    width: 100%;
+    justify-content: center;
   }
 }
 </style>
