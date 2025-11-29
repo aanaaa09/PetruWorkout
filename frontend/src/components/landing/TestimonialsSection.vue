@@ -2,7 +2,7 @@
   <section id="testimonios" class="testimonials-section">
     <div class="testimonials-container">
       <div class="section-header">
-        <span class="section-tag">TESTIMONIOS</span>
+        <span class="section-tag">RESEÑAS</span>
         <h2 class="section-title">Lo que dicen mis clientes</h2>
         <p class="section-subtitle">
           Opiniones verificadas de personas que han trabajado conmigo

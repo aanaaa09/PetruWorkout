@@ -14,7 +14,7 @@
       <ul class="nav-links" :class="{ 'open': menuOpen }">
         <li><a href="#sobre-mi" @click.prevent="navigateTo('sobre-mi')">Sobre mí</a></li>
         <li><a href="#servicios" @click.prevent="navigateTo('servicios')">Servicios</a></li>
-        <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Testimonios</a></li>
+        <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Reseñas</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
         <li class="nav-cta">
           <a href="#calendly" @click.prevent="navigateTo('calendly')" class="btn-cta">

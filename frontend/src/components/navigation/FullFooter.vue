@@ -18,7 +18,7 @@
             <router-link to="/">Inicio</router-link>
             <a href="#sobre-mi" @click.prevent="scrollTo('sobre-mi')">Sobre mí</a>
             <a href="#servicios" @click.prevent="scrollTo('servicios')">Servicios</a>
-            <a href="#testimonios" @click.prevent="scrollTo('testimonios')">Testimonios</a>
+            <a href="#testimonios" @click.prevent="scrollTo('testimonios')">Reseñas</a>
           </div>
 
           <div class="link-group">
