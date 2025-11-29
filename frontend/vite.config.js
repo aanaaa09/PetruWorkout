@@ -3,17 +3,38 @@ import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue()
+  ],
+
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src')
+      '@': resolve(__dirname, 'src')
     }
   },
+
+  ssgOptions: {
+    // Rutas que quieres pre-renderizar
+    includedRoutes: ['/', '/info'],
+
+    // Formato de salida
+    formatting: 'minify',
+
+    // Crítico para SEO
+    crittersOptions: {
+      reduceInlineStyles: false,
+    }
+  },
+
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        info: resolve(__dirname, 'info.html')
+      output: {
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router']
+        }
       }
     }
   }
