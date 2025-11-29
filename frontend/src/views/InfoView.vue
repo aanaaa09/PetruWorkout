@@ -32,7 +32,7 @@ import FullFooter from '@/components/navigation/FullFooter.vue'
 export default {
   name: 'InfoView',
   components: {
-    FullNavbar,
+    FullNavbar: FullNavbar,
     HeroSection,
     SocialProof,
     ResultsSection,
