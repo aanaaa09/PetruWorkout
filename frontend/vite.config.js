@@ -3,9 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [
-    vue()
-  ],
+  plugins: [vue()],
 
   resolve: {
     alias: {
@@ -14,28 +12,7 @@ export default defineConfig({
   },
 
   ssgOptions: {
-    // Rutas que quieres pre-renderizar
-    includedRoutes: ['/', '/info'],
-
-    // Formato de salida
-    formatting: 'minify',
-
-    // Crítico para SEO
-    crittersOptions: {
-      reduceInlineStyles: false,
-    }
-  },
-
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vue-vendor': ['vue', 'vue-router']
-        }
-      }
-    }
+    script: 'async',
+    formatting: 'minify'
   }
 })
