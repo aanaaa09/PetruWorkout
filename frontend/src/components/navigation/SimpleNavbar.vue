@@ -13,7 +13,7 @@
 
       <ul class="nav-links" :class="{ 'open': menuOpen }">
         <li>
-
+        <a
             href="https://calendly.com/petruworkout/reunion"
             target="_blank"
             rel="noopener noreferrer"
