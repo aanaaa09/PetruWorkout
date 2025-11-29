@@ -2,9 +2,8 @@
   <div class="home-view">
     <SimpleNavbar />
     <HeroSection />
-    <SocialProof />
-    <ResultsSection />
     <VideoSection />
+    <ResultsSection />
     <SimpleFooter />
   </div>
 </template>
@@ -12,9 +11,8 @@
 <script>
 import SimpleNavbar from '@/components/navigation/SimpleNavbar.vue'
 import HeroSection from '@/components/landing/HeroSection.vue'
-import SocialProof from '@/components/landing/SocialProof.vue'
-import ResultsSection from '@/components/landing/ResultsSection.vue'
 import VideoSection from '@/components/landing/VideoSection.vue'
+import ResultsSection from '@/components/landing/ResultsSection.vue'
 import SimpleFooter from '@/components/navigation/SimpleFooter.vue'
 
 export default {
@@ -22,9 +20,8 @@ export default {
   components: {
     SimpleNavbar,
     HeroSection,
-    SocialProof,
-    ResultsSection,
     VideoSection,
+    ResultsSection,
     SimpleFooter
   }
 }

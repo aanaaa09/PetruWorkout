@@ -15,8 +15,7 @@
         <div class="footer-links">
           <div class="link-group">
             <h4>Navegación</h4>
-            <a href="#resultados" @click.prevent="scrollTo('resultados')">Resultados</a>
-            <a href="#video" @click.prevent="scrollTo('video')">Mi método</a>
+            <router-link to="/">Inicio</router-link>
             <a href="#sobre-mi" @click.prevent="scrollTo('sobre-mi')">Sobre mí</a>
             <a href="#servicios" @click.prevent="scrollTo('servicios')">Servicios</a>
             <a href="#testimonios" @click.prevent="scrollTo('testimonios')">Testimonios</a>
@@ -31,8 +30,15 @@
 
           <div class="link-group">
             <h4>Legal</h4>
-            <router-link to="/">Volver al Inicio</router-link>
-            <a href="mailto:petruworkout@gmail.com">Contacto</a>
+            <button @click="$emit('show-legal', 'privacy')" class="footer-link-btn">
+              Política de Privacidad
+            </button>
+            <button @click="$emit('show-legal', 'terms')" class="footer-link-btn">
+              Términos y Condiciones
+            </button>
+            <button @click="$emit('show-legal', 'legal-notice')" class="footer-link-btn">
+              Aviso Legal
+            </button>
           </div>
         </div>
       </div>
@@ -137,15 +143,22 @@ export default {
   gap: 0.75rem;
 }
 
-.link-group a {
+.link-group a,
+.footer-link-btn {
   color: var(--color-text-muted);
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s ease;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
 }
 
-.link-group a:hover {
+.link-group a:hover,
+.footer-link-btn:hover {
   color: var(--color-accent);
 }
 
@@ -204,6 +217,10 @@ export default {
 
   .link-group {
     align-items: center;
+  }
+
+  .footer-link-btn {
+    text-align: center;
   }
 
   .footer-bottom {
