@@ -13,18 +13,22 @@
 
       <ul class="nav-links" :class="{ 'open': menuOpen }">
         <li>
-          <a
+
             href="https://calendly.com/petruworkout/reunion"
             target="_blank"
             rel="noopener noreferrer"
             class="btn-cta"
-            @click="menuOpen = false"
+            @click="trackCalendlyClick"
           >
             📅 Agendar Llamada
           </a>
         </li>
         <li>
-          <router-link to="/info" class="btn-info" @click="menuOpen = false">
+          <router-link
+            to="/info"
+            class="btn-info"
+            @click="trackMoreInfoClick"
+          >
             📋 Más Información
           </router-link>
         </li>
@@ -51,12 +55,42 @@ export default {
   methods: {
     handleScroll() {
       this.isScrolled = window.scrollY > 50
+    },
+
+    // Evento para el botón de Calendly
+    trackCalendlyClick() {
+      this.menuOpen = false
+
+      if (window.gtag) {
+        window.gtag('event', 'button_click', {
+          'button_name': 'Agendar Llamada',
+          'page_path': window.location.pathname,
+          'button_location': 'navbar'
+        })
+      } else {
+        console.log('GA - Evento: Agendar Llamada desde navbar')
+      }
+    },
+
+    // 🆕 Evento NUEVO específico para "Más Información"
+    trackMoreInfoClick() {
+      this.menuOpen = false
+
+      if (window.gtag) {
+        window.gtag('event', 'view_more_info', {
+          'source': 'navbar',
+          'from_page': window.location.pathname
+        })
+      } else {
+        console.log('GA - Evento: Más Información desde navbar')
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+/* El CSS permanece igual */
 .simple-navbar {
   position: fixed;
   top: 0;
