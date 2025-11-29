@@ -9,7 +9,7 @@
       </div>
 
       <div class="footer-actions">
-          <a
+      <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
@@ -20,6 +20,20 @@
         <router-link to="/info" class="btn btn-secondary">
           📋 Más Información
         </router-link>
+      </div>
+
+      <div class="footer-legal">
+        <button @click="$emit('show-legal', 'privacy')" class="legal-link">
+          Política de Privacidad
+        </button>
+        <span class="separator">•</span>
+        <button @click="$emit('show-legal', 'terms')" class="legal-link">
+          Términos y Condiciones
+        </button>
+        <span class="separator">•</span>
+        <button @click="$emit('show-legal', 'legal-notice')" class="legal-link">
+          Aviso Legal
+        </button>
       </div>
 
       <div class="footer-bottom">
@@ -132,6 +146,38 @@ export default {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+.footer-legal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.legal-link {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0;
+  font-family: inherit;
+}
+
+.legal-link:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.separator {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
 .footer-bottom {
   display: flex;
   justify-content: space-between;
@@ -173,6 +219,15 @@ export default {
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .footer-legal {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .separator {
+    display: none;
   }
 
   .footer-bottom {

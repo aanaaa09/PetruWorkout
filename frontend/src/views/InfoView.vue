@@ -1,26 +1,24 @@
 <template>
   <div class="info-view">
     <FullNavbar @scroll-to="scrollToSection" />
-    <HeroSection id="inicio" />
-    <SocialProof />
-    <ResultsSection id="resultados" />
-    <VideoSection id="video" />
     <AboutSection id="sobre-mi" />
     <ServicesSection id="servicios" />
     <GuaranteeSection />
     <TestimonialsSection id="testimonios" />
     <CalendlySection id="calendly" />
     <ContactForm id="contacto" />
-    <FullFooter />
+    <FullFooter @show-legal="showLegalPage" />
+
+    <component
+      v-if="currentLegalPage"
+      :is="currentLegalComponent"
+      @close="currentLegalPage = null"
+    />
   </div>
 </template>
 
 <script>
 import FullNavbar from '@/components/navigation/FullNavbar.vue'
-import HeroSection from '@/components/landing/HeroSection.vue'
-import SocialProof from '@/components/landing/SocialProof.vue'
-import ResultsSection from '@/components/landing/ResultsSection.vue'
-import VideoSection from '@/components/landing/VideoSection.vue'
 import AboutSection from '@/components/landing/AboutSection.vue'
 import ServicesSection from '@/components/landing/ServicesSection.vue'
 import GuaranteeSection from '@/components/landing/GuaranteeSection.vue'
@@ -28,22 +26,39 @@ import TestimonialsSection from '@/components/landing/TestimonialsSection.vue'
 import CalendlySection from '@/components/landing/CalendlySection.vue'
 import ContactForm from '@/components/landing/ContactForm.vue'
 import FullFooter from '@/components/navigation/FullFooter.vue'
+import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
+import TermsConditions from '@/components/legal/TermsConditions.vue'
+import LegalNotice from '@/components/legal/LegalNotice.vue'
 
 export default {
   name: 'InfoView',
   components: {
-    FullNavbar: FullNavbar,
-    HeroSection,
-    SocialProof,
-    ResultsSection,
-    VideoSection,
+    FullNavbar,
     AboutSection,
     ServicesSection,
     GuaranteeSection,
     TestimonialsSection,
     CalendlySection,
     ContactForm,
-    FullFooter
+    FullFooter,
+    PrivacyPolicy,
+    TermsConditions,
+    LegalNotice
+  },
+  data() {
+    return {
+      currentLegalPage: null
+    }
+  },
+  computed: {
+    currentLegalComponent() {
+      const components = {
+        'privacy': PrivacyPolicy,
+        'terms': TermsConditions,
+        'legal-notice': LegalNotice
+      }
+      return components[this.currentLegalPage]
+    }
   },
   methods: {
     scrollToSection(sectionId) {
@@ -51,6 +66,10 @@ export default {
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
+    },
+    showLegalPage(pageType) {
+      this.currentLegalPage = pageType
+      window.scrollTo(0, 0)
     }
   }
 }
