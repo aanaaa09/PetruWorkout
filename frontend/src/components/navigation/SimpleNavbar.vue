@@ -1,129 +1,157 @@
 <template>
-  <footer class="simple-footer">
-    <div class="footer-container">
-      <div class="footer-brand">
-        <h3 class="logo">
-          <span class="logo-accent">PETRU</span>WORKOUT
-        </h3>
-        <p>Entrenador personal especializado en calistenia y transformación física.</p>
-      </div>
+  <nav class="simple-navbar" :class="{ 'scrolled': isScrolled }">
+    <div class="navbar-container">
+      <router-link to="/" class="logo" @click="scrollToTop">
+        <span class="logo-accent">PETRU</span>WORKOUT
+      </router-link>
 
-      <div class="footer-actions">
-      <a
-          href="https://calendly.com/petruworkout/reunion"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn btn-primary"
-        >
-          📅 Agendar Llamada Gratuita
-        </a>
-        <router-link to="/info" class="btn btn-secondary" @click="scrollToTop">
-          📋 Más Información
-        </router-link>
-      </div>
+      <button class="mobile-toggle" @click="menuOpen = !menuOpen" :class="{ 'active': menuOpen }">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
-      <div class="footer-legal">
-        <button @click="$emit('show-legal', 'privacy')" class="legal-link">
-          Política de Privacidad
-        </button>
-        <span class="separator">•</span>
-        <button @click="$emit('show-legal', 'terms')" class="legal-link">
-          Términos y Condiciones
-        </button>
-        <span class="separator">•</span>
-        <button @click="$emit('show-legal', 'legal-notice')" class="legal-link">
-          Aviso Legal
-        </button>
-      </div>
-
-      <div class="footer-bottom">
-        <p class="copyright">
-          © {{ currentYear }} PetruWorkout. Todos los derechos reservados.
-        </p>
-        <p class="credits">
-          Desarrollado por
-          <a
-            href="https://linkedin.com/in/ana-seseña-4290891bb"
+      <ul class="nav-links" :class="{ 'open': menuOpen }">
+        <li>
+        <a
+            href="https://calendly.com/petruworkout/reunion"
             target="_blank"
             rel="noopener noreferrer"
+            class="btn-cta"
+            @click="trackCalendlyClick"
           >
-            Ana Seseña
+            📅 Agendar Llamada
           </a>
-        </p>
-      </div>
+        </li>
+        <li>
+          <router-link
+            to="/info"
+            class="btn-info"
+            @click="trackMoreInfoClick"
+          >
+            📋 Más Información
+          </router-link>
+        </li>
+      </ul>
     </div>
-  </footer>
+  </nav>
 </template>
 
 <script>
 export default {
-  name: 'SimpleFooter',
-  computed: {
-    currentYear() {
-      return new Date().getFullYear()
+  name: 'SimpleNavbar',
+  data() {
+    return {
+      isScrolled: false,
+      menuOpen: false
     }
   },
+  mounted() {
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
   methods: {
+    handleScroll() {
+      this.isScrolled = window.scrollY > 50
+    },
+
     scrollToTop() {
       this.$nextTick(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       })
+    },
+
+    // Evento para el botón de Calendly
+    trackCalendlyClick() {
+      this.menuOpen = false
+
+      if (window.gtag) {
+        window.gtag('event', 'button_click', {
+          'button_name': 'Agendar Llamada',
+          'page_path': window.location.pathname,
+          'button_location': 'navbar'
+        })
+      } else {
+        console.log('GA - Evento: Agendar Llamada desde navbar')
+      }
+    },
+
+    trackMoreInfoClick() {
+      this.menuOpen = false
+
+      if (window.gtag) {
+        window.gtag('event', 'view_more_info', {
+          'source': 'navbar',
+          'from_page': window.location.pathname
+        })
+      } else {
+        console.log('GA - Evento: Más Información desde navbar')
+      }
+
+      // Hacer scroll arriba después de que Vue Router navegue
+      this.scrollToTop()
     }
   }
 }
 </script>
 
 <style scoped>
-.simple-footer {
-  background: rgba(0, 0, 0, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 3rem 2rem 2rem;
+.simple-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+  background: transparent;
 }
 
-.footer-container {
-  max-width: 1200px;
+.simple-navbar.scrolled {
+  background: rgba(13, 13, 13, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 0;
+}
+
+.navbar-container {
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 0 2rem;
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.footer-brand {
-  text-align: center;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo {
   font-size: 1.5rem;
   font-weight: 900;
+  text-decoration: none;
   color: white;
-  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
 }
 
 .logo-accent {
   color: var(--color-accent);
 }
 
-.footer-brand p {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.footer-actions {
+.nav-links {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.btn {
+.btn-cta,
+.btn-info {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 10px;
   font-weight: 700;
   font-size: 0.95rem;
@@ -131,115 +159,85 @@ export default {
   transition: all 0.3s ease;
 }
 
-.btn-primary {
+.btn-cta {
   background: var(--gradient-primary);
   color: white;
   box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
 }
 
-.btn-primary:hover {
+.btn-cta:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 25px rgba(6, 214, 160, 0.5);
 }
 
-.btn-secondary {
+.btn-info {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.btn-secondary:hover {
+.btn-info:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.footer-legal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding: 1.5rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.legal-link {
+.mobile-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
   background: none;
   border: none;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
   cursor: pointer;
-  transition: color 0.3s ease;
-  padding: 0;
-  font-family: inherit;
+  padding: 5px;
 }
 
-.legal-link:hover {
-  color: var(--color-accent);
-  text-decoration: underline;
-}
-
-.separator {
-  color: var(--color-text-muted);
-  font-size: 0.8rem;
-}
-
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.copyright,
-.credits {
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  margin: 0;
-}
-
-.credits a {
-  color: var(--color-accent);
-  text-decoration: none;
-  font-weight: 600;
+.mobile-toggle span {
+  width: 25px;
+  height: 2px;
+  background: white;
   transition: all 0.3s ease;
 }
 
-.credits a:hover {
-  text-decoration: underline;
+.mobile-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
 @media (max-width: 768px) {
-  .simple-footer {
-    padding: 2rem 1rem;
+  .mobile-toggle {
+    display: flex;
   }
 
-  .footer-actions {
+  .nav-links {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: rgba(13, 13, 13, 0.98);
     flex-direction: column;
-    width: 100%;
+    padding: 2rem;
+    gap: 1.5rem;
+    transform: translateY(-150%);
+    opacity: 0;
+    transition: all 0.3s ease;
   }
 
-  .btn {
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .btn-cta,
+  .btn-info {
     width: 100%;
     justify-content: center;
-  }
-
-  .footer-legal {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .separator {
-    display: none;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    text-align: center;
   }
 }
 </style>
