@@ -6,7 +6,7 @@
           src="/images/petru-about.webp"
           alt="Petru - Entrenador Personal"
           width="450"
-          height="600"
+          height="450"
           loading="lazy"
           @error="handleImageError"
         />
