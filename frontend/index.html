@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <!-- FAVICONS OPTIMIZADOS -->
     <link rel="icon" type="image/x-icon" href="/logo.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
@@ -40,13 +41,50 @@
     <meta name="geo.position" content="39.8628;-4.0273">
     <meta name="ICBM" content="39.8628, -4.0273">
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DX7Q2MC11Z"></script>
+    <!-- Preload imagen hero crítica -->
+    <link
+      rel="preload"
+      as="image"
+      href="/images/petru-hero-movil.webp"
+      media="(max-width: 640px)"
+    >
+    <link
+      rel="preload"
+      as="image"
+      href="/images/petru-hero.webp"
+      media="(min-width: 641px)"
+    >
+
+    <!-- Google Fonts optimizado -->
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    >
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    </noscript>
+
+    <!-- Google Analytics con carga diferida -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-DX7Q2MC11Z');
+      // Cargar GA después de que la página esté lista
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DX7Q2MC11Z';
+          document.head.appendChild(script);
+
+          script.onload = function() {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', 'G-DX7Q2MC11Z');
+          };
+        }, 3000); // 3 segundos de retraso
+      });
     </script>
 
     <!-- CANONICAL -->
