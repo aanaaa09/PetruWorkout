@@ -14,7 +14,6 @@
   "devDependencies": {
     "@unhead/vue": "^1.8.0",
     "@vitejs/plugin-vue": "^5.2.0",
-    "sharp": "^0.34.5",
     "vite": "^5.4.0",
     "vite-ssg": "^0.23.0"
   }
