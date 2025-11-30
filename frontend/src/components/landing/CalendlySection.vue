@@ -24,7 +24,18 @@
         </div>
       </div>
 
-      <div class="calendly-widget">
+      <!-- ✅ NUEVO: Botón para activar Calendly -->
+      <div v-if="!calendlyLoaded" class="calendly-placeholder">
+        <button @click="loadCalendly" class="btn-load-calendly">
+          📅 Cargar Calendario de Citas
+        </button>
+        <p class="calendly-note-small">
+          Haz clic para ver las fechas disponibles
+        </p>
+      </div>
+
+      <!-- ✅ Solo se carga cuando el usuario hace clic -->
+      <div v-else class="calendly-widget">
         <div
           class="calendly-inline-widget"
           :data-url="calendlyUrl"
@@ -47,24 +58,34 @@ export default {
   name: 'CalendlySection',
   data() {
     return {
-      calendlyUrl: 'https://calendly.com/petruworkout/reunion?hide_gdpr_banner=1'
+      calendlyUrl: 'https://calendly.com/petruworkout/reunion?hide_gdpr_banner=1',
+      calendlyLoaded: false,
+      scriptsLoaded: false
     }
   },
-  mounted() {
-    // Cargar script de Calendly
-    if (!document.querySelector('script[src*="calendly"]')) {
-      const script = document.createElement('script')
-      script.src = 'https://assets.calendly.com/assets/external/widget.js'
-      script.async = true
-      document.head.appendChild(script)
-    }
+  methods: {
+    loadCalendly() {
+      this.calendlyLoaded = true
 
-    // Cargar CSS de Calendly
-    if (!document.querySelector('link[href*="calendly"]')) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = 'https://assets.calendly.com/assets/external/widget.css'
-      document.head.appendChild(link)
+      if (!this.scriptsLoaded) {
+        this.scriptsLoaded = true
+
+        // Cargar script de Calendly
+        if (!document.querySelector('script[src*="calendly"]')) {
+          const script = document.createElement('script')
+          script.src = 'https://assets.calendly.com/assets/external/widget.js'
+          script.async = true
+          document.head.appendChild(script)
+        }
+
+        // Cargar CSS de Calendly
+        if (!document.querySelector('link[href*="calendly"]')) {
+          const link = document.createElement('link')
+          link.rel = 'stylesheet'
+          link.href = 'https://assets.calendly.com/assets/external/widget.css'
+          document.head.appendChild(link)
+        }
+      }
     }
   }
 }
@@ -132,6 +153,42 @@ export default {
   font-size: 1.2rem;
 }
 
+/* ✅ NUEVO: Estilos del placeholder */
+.calendly-placeholder {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  border: 2px dashed rgba(6, 214, 160, 0.3);
+}
+
+.btn-load-calendly {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 2.5rem;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+}
+
+.btn-load-calendly:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.5);
+}
+
+.calendly-note-small {
+  margin-top: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
 .calendly-widget {
   background: white;
   border-radius: 20px;
@@ -183,6 +240,15 @@ export default {
 
   .calendly-inline-widget {
     height: 600px !important;
+  }
+
+  .btn-load-calendly {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .calendly-placeholder {
+    padding: 3rem 1.5rem;
   }
 }
 </style>

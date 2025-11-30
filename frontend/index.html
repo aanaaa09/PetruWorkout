@@ -2,8 +2,13 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- ✅ PRECONNECT OPTIMIZADO -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://assets.calendly.com">
+    <link rel="dns-prefetch" href="https://js.stripe.com">
 
     <!-- FAVICONS OPTIMIZADOS -->
     <link rel="icon" type="image/x-icon" href="/logo.ico">
@@ -41,55 +46,72 @@
     <meta name="geo.position" content="39.8628;-4.0273">
     <meta name="ICBM" content="39.8628, -4.0273">
 
-    <!-- Preload imagen hero crítica -->
+    <!-- ✅ PRELOAD IMAGEN HERO CON FETCHPRIORITY HIGH -->
     <link
       rel="preload"
       as="image"
       href="/images/petru-hero-movil.webp"
       media="(max-width: 640px)"
+      fetchpriority="high"
     >
     <link
       rel="preload"
       as="image"
       href="/images/petru-hero.webp"
       media="(min-width: 641px)"
+      fetchpriority="high"
     >
 
     <!-- Google Fonts optimizado -->
     <link
-  rel="preload"
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-  as="style"
-  onload="this.onload=null;this.rel='stylesheet'"
->
-<style>
-  /* Fallback mientras carga la fuente */
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  }
-</style>
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    >
+    <style>
+      /* Fallback mientras carga la fuente */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      }
+    </style>
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     </noscript>
 
-    <!-- Google Analytics con carga diferida -->
+    <!-- ✅ GOOGLE ANALYTICS OPTIMIZADO CON CARGA DIFERIDA -->
     <script>
-      // Cargar GA después de que la página esté lista
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          var script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DX7Q2MC11Z';
-          document.head.appendChild(script);
+      // Solo cargar GA después de que la página esté lista y el usuario interactúe
+      let gaLoaded = false;
 
-          script.onload = function() {
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('js', new Date());
-            gtag('config', 'G-DX7Q2MC11Z');
-          };
-        }, 3000); // 3 segundos de retraso
+      function loadGA() {
+        if (gaLoaded) return;
+        gaLoaded = true;
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DX7Q2MC11Z';
+        document.head.appendChild(script);
+
+        script.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-DX7Q2MC11Z');
+        };
+      }
+
+      // Cargar GA cuando el usuario interactúe
+      ['scroll', 'click', 'mousemove', 'touchstart'].forEach(function(event) {
+        window.addEventListener(event, function() {
+          setTimeout(loadGA, 1000);
+        }, { once: true, passive: true });
+      });
+
+      // Fallback: cargar después de 5 segundos si no hay interacción
+      window.addEventListener('load', function() {
+        setTimeout(loadGA, 5000);
       });
     </script>
 
@@ -238,13 +260,9 @@
     }
     </script>
 
-    <!-- ⚡ IMPORTANTE: Marcador para vite-plugin-ssg -->
-    <!-- SSG insertará meta tags dinámicos adicionales aquí -->
     <!--app-head-->
   </head>
   <body>
-    <!-- ⚡ IMPORTANTE: Marcador para vite-plugin-ssg -->
-    <!-- SSG insertará el HTML renderizado aquí -->
     <div id="app"><!--app-html--></div>
     <script type="module" src="/src/main.js"></script>
   </body>
