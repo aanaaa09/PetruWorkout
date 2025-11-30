@@ -75,7 +75,7 @@ export default {
   data() {
     return {
       desktopImage: '/images/petru-hero.png',
-      mobileImage: '/images/petru-hero-movil.png'
+      mobileImage: '/images/petru-hero-movil.webp'
     }
   },
   methods: {

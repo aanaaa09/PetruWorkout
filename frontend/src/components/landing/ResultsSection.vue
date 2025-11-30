@@ -99,7 +99,7 @@ export default {
           time: '17:12'
         },
         {
-          image: '/images/results/sergio.png',
+          image: '/images/results/sergio.webp',
           width: 534,
           height: 545,
           name: 'Sergio, 34 años',
@@ -119,7 +119,7 @@ export default {
           time: '9:16'
         },
         {
-          image: '/images/results/pedro.png',
+          image: '/images/results/pedro.webp',
           width: 534,
           height: 523,
           name: 'Pedro, 63 años',
