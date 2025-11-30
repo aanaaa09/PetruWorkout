@@ -14,6 +14,12 @@
         >
           <div class="result-images">
             <img
+              :srcset="`
+                ${result.imagePath}-small.webp 330w,
+                ${result.imagePath}-medium.webp 660w,
+                ${result.imagePath}-large.webp 1000w
+              `"
+              sizes="(max-width: 640px) 330px, (max-width: 968px) 660px, 500px"
               :src="result.image"
               :alt="result.name"
               :width="result.width"
@@ -54,7 +60,7 @@
           >
             <video
               :src="video.src"
-              :poster="video.poster"
+              :poster="video.posterSmall"
               controls
               playsinline
               preload="none"
@@ -69,13 +75,13 @@
 
       <div class="results-cta">
         <p>¿Quieres ser el próximo?</p>
-        <a
+
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
           class="btn btn-primary"
-          >
-        Empieza Tu Transformación →
+        >
+          Empieza Tu Transformación →
         </a>
       </div>
     </div>
@@ -90,6 +96,7 @@ export default {
       results: [
         {
           image: '/images/results/esteban.webp',
+          imagePath: '/images/results/esteban',
           width: 534,
           height: 501,
           name: 'Esteban, 37 años',
@@ -100,6 +107,7 @@ export default {
         },
         {
           image: '/images/results/sergio.webp',
+          imagePath: '/images/results/sergio',
           width: 534,
           height: 545,
           name: 'Sergio, 34 años',
@@ -110,6 +118,7 @@ export default {
         },
         {
           image: '/images/results/oscar.webp',
+          imagePath: '/images/results/oscar',
           width: 534,
           height: 517,
           name: 'Óscar, 28 años',
@@ -120,6 +129,7 @@ export default {
         },
         {
           image: '/images/results/pedro.webp',
+          imagePath: '/images/results/pedro',
           width: 534,
           height: 523,
           name: 'Pedro, 63 años',
@@ -133,23 +143,26 @@ export default {
         {
           id: 1,
           src: '/videos/video1.mp4',
-          poster: '/videos/thumbs/thumb1.webp'
+          poster: '/videos/thumbs/thumb1.webp',
+          posterSmall: '/videos/thumbs/thumb1-small.webp'
         },
         {
           id: 2,
           src: '/videos/video2.mp4',
-          poster: '/videos/thumbs/thumb2.webp'
+          poster: '/videos/thumbs/thumb2.webp',
+          posterSmall: '/videos/thumbs/thumb2-small.webp'
         },
         {
           id: 3,
           src: '/videos/video3.mp4',
-          poster: '/videos/thumbs/thumb3.webp'
+          poster: '/videos/thumbs/thumb3.webp',
+          posterSmall: '/videos/thumbs/thumb3-small.webp'
         }
       ]
     }
   },
   methods: {
-     handleImageError(e) {
+    handleImageError(e) {
       if (e.target.dataset.errorHandled) return;
       e.target.dataset.errorHandled = 'true';
       e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E';
@@ -159,7 +172,7 @@ export default {
 </script>
 
 <style scoped>
-/* El CSS se mantiene igual */
+/* Mantén todos tus estilos actuales exactamente igual */
 .results-section {
   padding: 6rem 2rem;
   background: var(--bg-secondary);

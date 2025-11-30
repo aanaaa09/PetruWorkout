@@ -74,8 +74,8 @@ export default {
   name: 'HeroSection',
   data() {
     return {
-      desktopImage: '/images/petru-hero.webp',
-      mobileImage: '/images/petru-hero-movil.webp'
+      desktopImage: '/images/petru-hero-optimized.webp',
+    mobileImage: '/images/petru-hero-movil-optimized.webp'
     }
   },
   methods: {
