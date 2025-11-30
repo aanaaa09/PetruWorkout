@@ -1,12 +1,14 @@
 <template>
   <div class="info-view">
     <FullNavbar @scroll-to="scrollToSection" />
-    <AboutSection id="sobre-mi" />
-    <ServicesSection id="servicios" />
-    <GuaranteeSection />
-    <TestimonialsSection id="testimonios" />
-    <CalendlySection id="calendly" />
-    <ContactForm id="contacto" />
+    <main>
+      <AboutSection id="sobre-mi" />
+      <ServicesSection id="servicios" />
+      <GuaranteeSection />
+      <TestimonialsSection id="testimonios" />
+      <CalendlySection id="calendly" />
+      <ContactForm id="contacto" />
+    </main>
     <FullFooter @show-legal="showLegalPage" />
 
     <component
@@ -49,6 +51,17 @@ export default {
     return {
       currentLegalPage: null
     }
+  },
+  // ✅ AÑADIR ESTO:
+  mounted() {
+    // Actualizar canonical para /info
+    const canonical = document.querySelector('link[rel="canonical"]')
+    if (canonical) {
+      canonical.href = 'https://petrucalistenia.com/info'
+    }
+
+    // Actualizar title
+    document.title = 'Servicios y Testimonios - PetruWorkout | Entrenador Personal'
   },
   computed: {
     currentLegalComponent() {

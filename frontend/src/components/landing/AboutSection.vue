@@ -3,8 +3,11 @@
     <div class="about-container">
       <div class="about-image">
         <img
-          src="/images/petru-about.png"
+          src="/images/petru-about.webp"
           alt="Petru - Entrenador Personal"
+          width="450"
+          height="600"
+          loading="lazy"
           @error="handleImageError"
         />
         <div class="experience-badge">
