@@ -75,7 +75,7 @@
 
       <div class="results-cta">
         <p>¿Quieres ser el próximo?</p>
-
+        <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
