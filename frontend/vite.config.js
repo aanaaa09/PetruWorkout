@@ -11,6 +11,17 @@ export default defineConfig({
     }
   },
 
+  build: {
+    cssCodeSplit: true,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
+  },
+
   ssgOptions: {
     script: 'async',
     formatting: 'minify',

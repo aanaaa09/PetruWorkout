@@ -9,26 +9,51 @@
         </p>
       </div>
 
-      <div class="video-wrapper">
+      <div class="video-wrapper" @click="loadVideo">
+        <!-- Thumbnail mientras no se carga -->
+        <div v-if="!videoLoaded" class="video-thumbnail">
+          <img
+            src="https://img.youtube.com/vi/yCDxpnd_Dz0/maxresdefault.jpg"
+            alt="Video thumbnail"
+          >
+          <button class="play-button" aria-label="Reproducir video">
+            <svg width="68" height="48" viewBox="0 0 68 48">
+              <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#f00"></path>
+              <path d="M 45,24 27,14 27,34" fill="#fff"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- iframe solo se carga al hacer click -->
         <iframe
+          v-if="videoLoaded"
           class="video-frame"
           width="100%"
           height="100%"
-          src="https://www.youtube.com/embed/yCDxpnd_Dz0?rel=0&modestbranding=1"
+          :src="`https://www.youtube.com/embed/yCDxpnd_Dz0?autoplay=1&rel=0&modestbranding=1`"
           title="Petru Workout - Método de Entrenamiento"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
         ></iframe>
       </div>
-
     </div>
   </section>
 </template>
 
 <script>
 export default {
-  name: 'VideoSection'
+  name: 'VideoSection',
+  data() {
+    return {
+      videoLoaded: false
+    }
+  },
+  methods: {
+    loadVideo() {
+      this.videoLoaded = true
+    }
+  }
 }
 </script>
 
@@ -78,6 +103,46 @@ export default {
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   background: #000;
+  cursor: pointer;
+}
+
+.video-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: none;
+  border-radius: 20px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.play-button:hover {
+  background: rgba(255, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.play-button svg {
+  display: block;
 }
 
 .video-frame {
