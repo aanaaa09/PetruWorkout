@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar" :class="{ 'scrolled': isScrolled }">
     <div class="navbar-container">
-      <router-link to="/info" class="logo">
+      <router-link to="/info" class="logo" @click="scrollToTop">
         <span class="logo-accent">PETRU</span>WORKOUT
       </router-link>
 
@@ -44,6 +44,11 @@ export default {
   methods: {
     handleScroll() {
       this.isScrolled = window.scrollY > 50
+    },
+    scrollToTop() {
+      this.$nextTick(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
     },
     navigateTo(section) {
       this.menuOpen = false

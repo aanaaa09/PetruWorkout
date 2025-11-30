@@ -17,7 +17,7 @@
         >
           📅 Agendar Llamada Gratuita
         </a>
-        <router-link to="/info" class="btn btn-secondary">
+        <router-link to="/info" class="btn btn-secondary" @click="scrollToTop">
           📋 Más Información
         </router-link>
       </div>
@@ -61,6 +61,13 @@ export default {
   computed: {
     currentYear() {
       return new Date().getFullYear()
+    }
+  },
+  methods: {
+    scrollToTop() {
+      this.$nextTick(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
     }
   }
 }
