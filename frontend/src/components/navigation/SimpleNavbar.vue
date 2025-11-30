@@ -72,7 +72,6 @@ export default {
       }
     },
 
-    // 🆕 Evento NUEVO específico para "Más Información"
     trackMoreInfoClick() {
       this.menuOpen = false
 
@@ -84,6 +83,11 @@ export default {
       } else {
         console.log('GA - Evento: Más Información desde navbar')
       }
+
+      // Hacer scroll arriba después de que Vue Router navegue
+      this.$nextTick(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
     }
   }
 }
