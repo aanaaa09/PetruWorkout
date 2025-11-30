@@ -81,7 +81,7 @@ export default {
       results: [
         {
           image: '/images/results/esteban.png',
-          name: 'Esteban',
+          name: 'Esteban, 37 años',
           stats: 'Antes 25% grasa, ahora 12% grasa',
           duration: '12 semanas',
           quote: 'Excelente, de hecho ya hasta dejé el tabaco. Fumaba 3-5 cigarros al día y esta semana ya no fumé en lo absoluto. Estoy haciendo un gran cambio en mi persona y se empieza a notar. Estoy feliz por mis resultados y con mayor ánimo de poder seguir dando el máximo. Muchas gracias por estar al pendiente.',
@@ -89,7 +89,7 @@ export default {
         },
         {
           image: '/images/results/sergio.png',
-          name: 'Sergio',
+          name: 'Sergio, 34 años',
           stats: '+2,5kg de músculo',
           duration: '10 semanas',
           quote: 'Muchas gracias tío, la verdad que la dieta me está sentando muy bien y los entrenamientos mejor. Aún poco a poco voy logrando progresos que no esperaba ver. Sobre todo el apoyo que ofreces y das para todo. Para problemas con la dieta, problemas personales o de ejercicio, eres un gran entrenador y ojalá haberte conocido antes.',
@@ -97,7 +97,7 @@ export default {
         },
         {
           image: '/images/results/oscar.png',
-          name: 'Óscar',
+          name: 'Óscar, 28 años',
           stats: 'Antes 25% de grasa, ahora 16% de grasa',
           duration: '12 semanas',
           quote: 'Hola buenos días, además de que es un momento divertido y que me gusta, me lo paso bien y cada día que pasa me siento mejor. Cada pequeño avance como poder una repetición más o no estar tan cansado se nota y disfruto. Y esto es solo el comienzo, verás dentro de unos meses. Me alegro mucho y la verdad que estoy agradecido por dar ese paso.',
@@ -105,7 +105,7 @@ export default {
         },
         {
           image: '/images/results/pedro.png',
-          name: 'Pedro',
+          name: 'Pedro, 63 años',
           stats: 'Antes 22% de grasa, ahora 17% de grasa',
           duration: '14 semanas',
           quote: 'Con mis entrenamientos estamos de maravilla, vamos mejorando más y más día con día. Mi plan de nutrición me gusta y he notado que ya hay menos grasa. Estoy mejorando tratando de no salirme del camino y con tu apoyo que recibo constantemente me he sentido súper contento y con motivación para poder seguir. Como te he dicho, de ahora en adelante esto es un muy buen hábito para mí. ¡No hay marcha atrás!',
