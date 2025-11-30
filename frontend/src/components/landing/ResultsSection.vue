@@ -13,7 +13,14 @@
           class="result-card"
         >
           <div class="result-images">
-            <img :src="result.image" :alt="result.name" @error="handleImageError" />
+            <img
+              :src="result.image"
+              :alt="result.name"
+              :width="result.width"
+              :height="result.height"
+              loading="lazy"
+              @error="handleImageError"
+            />
           </div>
 
           <div class="result-info">
@@ -51,6 +58,8 @@
               controls
               playsinline
               preload="none"
+              width="377"
+              height="640"
             >
               Tu navegador no soporta el video.
             </video>
@@ -81,6 +90,8 @@ export default {
       results: [
         {
           image: '/images/results/esteban.png',
+          width: 534,
+          height: 501,
           name: 'Esteban, 37 años',
           stats: 'Antes 25% grasa, ahora 12% grasa',
           duration: '12 semanas',
@@ -89,6 +100,8 @@ export default {
         },
         {
           image: '/images/results/sergio.png',
+          width: 534,
+          height: 545,
           name: 'Sergio, 34 años',
           stats: '+2,5kg de músculo',
           duration: '10 semanas',
@@ -97,6 +110,8 @@ export default {
         },
         {
           image: '/images/results/oscar.png',
+          width: 534,
+          height: 517,
           name: 'Óscar, 28 años',
           stats: 'Antes 25% de grasa, ahora 16% de grasa',
           duration: '12 semanas',
@@ -105,6 +120,8 @@ export default {
         },
         {
           image: '/images/results/pedro.png',
+          width: 534,
+          height: 523,
           name: 'Pedro, 63 años',
           stats: 'Antes 22% de grasa, ahora 17% de grasa',
           duration: '14 semanas',
@@ -142,6 +159,7 @@ export default {
 </script>
 
 <style scoped>
+/* El CSS se mantiene igual */
 .results-section {
   padding: 6rem 2rem;
   background: var(--bg-secondary);
@@ -229,7 +247,6 @@ export default {
   font-weight: 500;
 }
 
-/* Estilo WhatsApp */
 .whatsapp-message {
   margin-top: 1rem;
 }
@@ -271,7 +288,6 @@ export default {
   margin-top: 0.25rem;
 }
 
-/* NUEVA SECCIÓN DE VIDEOS */
 .videos-section {
   margin-top: 5rem;
   padding-top: 4rem;

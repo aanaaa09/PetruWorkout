@@ -1,68 +1,70 @@
 <template>
   <section id="hero" class="hero-section">
-
-```
-<div class="hero-bg">
-  <div class="hero-overlay"></div>
-</div>
-
-<div class="hero-content">
-  <div class="hero-text">
-    <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
-
-    <h1 class="hero-title">
-      Consigue menos de <span class="highlight">20% de grasa</span>
-      y <span class="highlight">+3kg de músculo</span> en
-      <span class="accent">90 Días</span>
-    </h1>
-
-    <!-- Imagen móvil colocada aquí -->
-    <div class="hero-image-mobile">
-      <img
-        :src="mobileImage"
-        alt="Petru - Entrenador Personal de Calistenia"
-        @error="handleImageError"
-      />
+    <div class="hero-bg">
+      <div class="hero-overlay"></div>
     </div>
 
-    <div class="hero-cta">
-      <a
-        href="https://calendly.com/petruworkout/reunion"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn btn-primary"
-        @click="trackButtonClick('Agendar Llamada')"
-      >
-        📅 AGENDAR LLAMADA GRATUITA
-      </a>
-    </div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
 
-    <div class="guarantee-box">
-      <div class="guarantee-text">
-        <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
-        <span>FIRMADO POR CONTRATO</span>
+        <h1 class="hero-title">
+          Consigue menos de <span class="highlight">20% de grasa</span>
+          y <span class="highlight">+3kg de músculo</span> en
+          <span class="accent">90 Días</span>
+        </h1>
+
+        <!-- Imagen móvil colocada aquí -->
+        <div class="hero-image-mobile">
+          <img
+            :src="mobileImage"
+            alt="Petru - Entrenador Personal de Calistenia"
+            width="360"
+            height="350"
+            loading="eager"
+            @error="handleImageError"
+          />
+        </div>
+
+        <div class="hero-cta">
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary"
+            @click="trackButtonClick('Agendar Llamada')"
+          >
+            📅 AGENDAR LLAMADA GRATUITA
+          </a>
+        </div>
+
+        <div class="guarantee-box">
+          <div class="guarantee-text">
+            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
+            <span>FIRMADO POR CONTRATO</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Imagen escritorio con fetchpriority HIGH -->
+      <div class="hero-image hero-image-desktop">
+        <img
+          :src="desktopImage"
+          alt="Petru - Entrenador Personal de Calistenia"
+          width="441"
+          height="450"
+          fetchpriority="high"
+          loading="eager"
+          @error="handleImageError"
+        />
+        <div class="image-decoration"></div>
       </div>
     </div>
 
-  </div>
-
-  <!-- Imagen escritorio -->
-  <div class="hero-image hero-image-desktop">
-    <img
-      :src="desktopImage"
-      alt="Petru - Entrenador Personal de Calistenia"
-      @error="handleImageError"
-    />
-    <div class="image-decoration"></div>
-  </div>
-</div>
-
-<div class="scroll-indicator">
-  <span>Descubre más</span>
-  <div class="scroll-arrow">↓</div>
-</div>
-```
-
+    <div class="scroll-indicator">
+      <span>Descubre más</span>
+      <div class="scroll-arrow">↓</div>
+    </div>
   </section>
 </template>
 
@@ -280,7 +282,6 @@ export default {
 .hero-image img {
   max-width: 100%;
   height: auto;
-  max-height: 450px;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   position: relative;
@@ -327,10 +328,6 @@ export default {
 
   .hero-image-desktop {
     order: -1;
-  }
-
-  .hero-image img {
-    max-height: 280px;
   }
 
   .hero-cta {
@@ -414,7 +411,6 @@ export default {
   .hero-image-mobile img {
     max-width: 90%;
     height: auto;
-    max-height: 350px;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   }
