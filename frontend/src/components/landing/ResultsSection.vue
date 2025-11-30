@@ -133,17 +133,17 @@ export default {
         {
           id: 1,
           src: '/videos/video1.mp4',
-          poster: '/videos/thumbs/thumb1.png'
+          poster: '/videos/thumbs/thumb1.webp'
         },
         {
           id: 2,
           src: '/videos/video2.mp4',
-          poster: '/videos/thumbs/thumb2.png'
+          poster: '/videos/thumbs/thumb2.webp'
         },
         {
           id: 3,
           src: '/videos/video3.mp4',
-          poster: '/videos/thumbs/thumb3.png'
+          poster: '/videos/thumbs/thumb3.webp'
         }
       ]
     }
