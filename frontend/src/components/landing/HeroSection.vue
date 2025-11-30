@@ -21,6 +21,7 @@
             alt="Petru - Entrenador Personal de Calistenia"
             width="360"
             height="350"
+            fetchpriority="high"
             loading="eager"
             @error="handleImageError"
           />

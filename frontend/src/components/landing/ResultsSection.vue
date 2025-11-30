@@ -89,7 +89,7 @@ export default {
     return {
       results: [
         {
-          image: '/images/results/esteban.png',
+          image: '/images/results/esteban.webp',
           width: 534,
           height: 501,
           name: 'Esteban, 37 años',
@@ -109,7 +109,7 @@ export default {
           time: '6 min'
         },
         {
-          image: '/images/results/oscar.png',
+          image: '/images/results/oscar.webp',
           width: 534,
           height: 517,
           name: 'Óscar, 28 años',
