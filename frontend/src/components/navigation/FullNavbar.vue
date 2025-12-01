@@ -16,11 +16,17 @@
         <li><a href="#servicios" @click.prevent="navigateTo('servicios')">Servicios</a></li>
         <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Reseñas</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
-        <li class="nav-cta">
-          <a href="#calendly" @click.prevent="navigateTo('calendly')" class="btn-cta">
-            📅 Agendar Llamada
-          </a>
-        </li>
+         <li class="nav-cta">
+    <!-- ✅ CAMBIAR A LINK DIRECTO -->
+    <a
+      href="https://calendly.com/petruworkout/reunion"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-cta"
+    >
+      📅 Agendar Llamada
+    </a>
+  </li>
       </ul>
     </div>
   </nav>
