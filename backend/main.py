@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from .routers import auth,  consultas
+from .routers import auth,  consultas, tracking
 from .config.database import Base, engine
 from .init_db import crear_base_datos
 
@@ -54,7 +54,7 @@ app.add_middleware(
 # --------------------------
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(consultas.router)
-
+app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
 # --------------------------
 # Health y info API
 # --------------------------
