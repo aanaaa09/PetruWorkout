@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from .routers import auth, resenas, consultas
+from .routers import auth,  consultas
 from .config.database import Base, engine
 from .init_db import crear_base_datos
 
@@ -53,7 +53,6 @@ app.add_middleware(
 # Routers API
 # --------------------------
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(resenas.router)
 app.include_router(consultas.router)
 
 # --------------------------
