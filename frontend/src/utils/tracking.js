@@ -122,7 +122,7 @@ async function trackPageVisit() {
       landing_page: window.location.pathname + window.location.search
     };
 
-    const response = await fetch('http://localhost:5000/api/tracking/visit', {
+    const response = await fetch('https://petruworkout.up.railway.app/api/tracking/visit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
