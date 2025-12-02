@@ -101,6 +101,19 @@ if os.path.isdir(frontend_dist):
 else:
     logger.warning(f"⚠️ Frontend no encontrado en {frontend_dist}")
 """
+
+
+@app.get("/api/sync-calendly")
+async def sync_calendly_endpoint():
+    """Endpoint para sincronizar reservas de Calendly"""
+    from .sync_calendly import sync_calendly_bookings
+
+    try:
+        sync_calendly_bookings()
+        return {"success": True, "message": "Sincronización completada"}
+    except Exception as e:
+        logger.error(f"Error en sync endpoint: {e}")
+        return {"success": False, "error": str(e)}
 # --------------------------
 # Arrancar servidor
 # --------------------------
