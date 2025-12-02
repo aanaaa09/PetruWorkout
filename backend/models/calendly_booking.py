@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Date, Time, func
+from sqlalchemy import Column, Integer, String, DateTime, Date, Time, func, Index
 from backend.config.database import Base
 
 
@@ -9,17 +9,32 @@ class CalendlyBooking(Base):
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String(255), nullable=True, index=True)
     traffic_source = Column(String(50), nullable=True, index=True)
-    calendly_event_id = Column(String(255), unique=True, nullable=False)
-    invitee_email = Column(String(255), nullable=True)
+    calendly_event_id = Column(String(255), unique=True, nullable=False, index=True)
+    invitee_email = Column(String(255), nullable=True, index=True)  # AÑADIR INDEX
     invitee_name = Column(String(255), nullable=True)
-    event_start_time = Column(DateTime(timezone=True), nullable=True)
+    event_start_time = Column(DateTime(timezone=True), nullable=True, index=True)  # AÑADIR INDEX
 
     # Timestamp completo
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     # Campos separados para análisis
-    fecha = Column(Date, nullable=False, index=True)  # Fecha completa (YYYY-MM-DD)
-    dia = Column(Integer, nullable=False, index=True)  # 1-31
-    mes = Column(Integer, nullable=False, index=True)  # 1-12
-    año = Column(Integer, nullable=False, index=True)  # 2024, 2025, etc.
-    hora = Column(Time, nullable=False, index=True)  # HH:MM:SS
+    fecha = Column(Date, nullable=False, index=True)
+    dia = Column(Integer, nullable=False)
+    mes = Column(Integer, nullable=False)
+    año = Column(Integer, nullable=False)
+    hora = Column(Time, nullable=False)
+
+    # ÍNDICES COMPUESTOS
+    __table_args__ = (
+        # Para calcular conversiones por fuente
+        Index('ix_calendly_bookings_source_fecha', 'traffic_source', 'fecha'),
+
+        # Para análisis temporal de conversiones
+        Index('ix_calendly_bookings_año_mes', 'año', 'mes'),
+
+        # Para vincular con el embudo completo
+        Index('ix_calendly_bookings_session_timestamp', 'session_id', 'timestamp'),
+
+        # Para detectar usuarios recurrentes
+        Index('ix_calendly_bookings_email_fecha', 'invitee_email', 'fecha'),
+    )

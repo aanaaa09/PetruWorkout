@@ -1,72 +1,69 @@
+# backend/routers/auth.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..config.database import get_db
 from ..schemas.auth import (
-    RegistroRequest, LoginRequest, LogoutRequest,
-    VerificarRequest
+    NewsletterRegistroRequest,
+    LoginRequest,
+    LogoutRequest,
+    VerificarRequest,
+    NewsletterUnsubscribeRequest
 )
 from ..services.auth_service import AuthService
-from ..crud.sesion import sesion_crud
 
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/registro")
-def registro(data: RegistroRequest, db: Session = Depends(get_db)):
-    """Registra un nuevo usuario"""
-    resultado = AuthService.registrar_usuario(db, data.nombre, data.email, data.password)
+@router.post("/newsletter/registro")
+def registro_newsletter(data: NewsletterRegistroRequest, db: Session = Depends(get_db)):
+    """Registro para newsletter (sin crear sesión)"""
+    resultado = AuthService.registrar_newsletter(db, data.nombre, data.email, data.password)
 
     if not resultado['success']:
         raise HTTPException(status_code=400, detail=resultado['error'])
 
-    return {
-        'success': True,
-        'mensaje': 'Usuario registrado correctamente',
-        'token': resultado['data']['token'],
-        'usuario': resultado['data']['usuario']
-    }
+    return resultado
 
 
-@router.post("/login")
-def login(data: LoginRequest, db: Session = Depends(get_db)):
-    """Inicia sesión"""
-    resultado = AuthService.iniciar_sesion(db, data.email, data.password)
+@router.post("/newsletter/cancelar")
+def cancelar_newsletter(data: NewsletterUnsubscribeRequest, db: Session = Depends(get_db)):
+    """Cancelar suscripción a newsletter"""
+    resultado = AuthService.cancelar_suscripcion(db, data.email)
+
+    if not resultado['success']:
+        raise HTTPException(status_code=400, detail=resultado['error'])
+
+    return resultado
+
+
+@router.post("/admin/login")
+def login_admin(data: LoginRequest, db: Session = Depends(get_db)):
+    """Login solo para administrador"""
+    resultado = AuthService.login_admin(db, data.email, data.password)
 
     if not resultado['success']:
         raise HTTPException(status_code=401, detail=resultado['error'])
 
-    return {
-        'success': True,
-        'mensaje': 'Sesión iniciada correctamente',
-        'token': resultado['data']['token'],
-        'usuario': resultado['data']['usuario']
-    }
+    return resultado
 
 
-@router.post("/logout")
-def logout(data: LogoutRequest, db: Session = Depends(get_db)):
-    """Cierra sesión"""
+@router.post("/admin/logout")
+def logout_admin(data: LogoutRequest, db: Session = Depends(get_db)):
+    """Cierra sesión de admin"""
     resultado = AuthService.cerrar_sesion(db, data.token)
 
     if not resultado['success']:
         raise HTTPException(status_code=400, detail=resultado.get('error'))
 
-    return {'success': True, 'mensaje': 'Sesión cerrada correctamente'}
+    return resultado
 
 
-@router.post("/verificar")
-def verificar_sesion(data: VerificarRequest, db: Session = Depends(get_db)):
-    """Verifica si una sesión es válida"""
-    resultado = AuthService.verificar_sesion(db, data.token)
+@router.post("/admin/verificar")
+def verificar_admin(data: VerificarRequest, db: Session = Depends(get_db)):
+    """Verifica si el token es de admin"""
+    resultado = AuthService.verificar_admin(db, data.token)
 
     if not resultado['valida']:
         raise HTTPException(status_code=401, detail=resultado.get('error'))
 
-    return {'valida': True, 'usuario': resultado['usuario']}
-
-
-@router.post("/limpiar-sesiones-expiradas")
-def limpiar_sesiones_expiradas(db: Session = Depends(get_db)):
-    """Limpia sesiones expiradas (endpoint de mantenimiento)"""
-    eliminadas = sesion_crud.clean_expired(db)
-    return {'success': True, 'mensaje': f'{eliminadas} sesiones expiradas eliminadas'}
+    return resultado

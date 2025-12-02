@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum, func
+# backend/models/usuario.py
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum as SQLEnum, func
 from sqlalchemy.orm import relationship
 from backend.config.database import Base
 import bcrypt
@@ -6,9 +7,8 @@ import enum
 
 
 class TipoUsuario(enum.Enum):
-    """Tipos de usuario en la aplicación"""
-    NO_CLIENTE = "no_cliente"  # Usuario registrado pero no cliente
-    CLIENTE = "cliente"        # Cliente activo de Petru
+    """Tipos de usuario"""
+    NEWSLETTER = "newsletter"  # Usuario registrado solo para newsletter
     ADMIN = "admin"            # Administrador (Petru)
 
 
@@ -19,18 +19,20 @@ class Usuario(Base):
 
     # Datos básicos
     nombre = Column(String(100), nullable=False)
-    apellidos = Column(String(200), nullable=False, default="")
     email = Column(String(255), unique=True, nullable=False, index=True)
-    nombre_usuario = Column(String(100), unique=True, nullable=True, index=True)
     password_hash = Column(String(255), nullable=False)
 
     # Tipo de usuario
     tipo_usuario = Column(
         SQLEnum(TipoUsuario),
-        default=TipoUsuario.NO_CLIENTE,
+        default=TipoUsuario.NEWSLETTER,
         nullable=False,
         index=True
     )
+
+    # Newsletter
+    suscrito_newsletter = Column(Boolean, default=True, nullable=False)
+    fecha_suscripcion = Column(DateTime(timezone=True), server_default=func.now())
 
     # Fechas
     fecha_registro = Column(DateTime(timezone=True), server_default=func.now())
@@ -47,10 +49,6 @@ class Usuario(Base):
     def verificar_password(self, password: str) -> bool:
         """Verifica si la contraseña es correcta"""
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
-
-    def es_cliente(self) -> bool:
-        """Verifica si el usuario es cliente activo"""
-        return self.tipo_usuario == TipoUsuario.CLIENTE
 
     def es_admin(self) -> bool:
         """Verifica si el usuario es administrador"""
