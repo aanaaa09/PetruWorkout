@@ -1,9 +1,4 @@
 # backend/sync_calendly.py
-"""
-Script para sincronizar reservas de Calendly con tu BD
-Ejecutar cada 5-10 minutos con un cron job
-"""
-
 import requests
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
@@ -57,14 +52,6 @@ def sync_calendly_bookings():
             event_uri = event['uri']
             event_start = event['start_time']
 
-            # Verificar si ya existe
-            existe = db.query(CalendlyBooking).filter(
-                CalendlyBooking.calendly_event_id == event_uri
-            ).first()
-
-            if existe:
-                continue  # Ya está registrada
-
             # Obtener datos del invitee
             invitees_url = f"{event_uri}/invitees"
             inv_response = requests.get(invitees_url, headers=headers)
@@ -87,11 +74,19 @@ def sync_calendly_bookings():
             except:
                 event_datetime = datetime.now()
 
-            # IMPORTANTE: Intentar vincular con el click más reciente de ese email
-            # Buscar clicks de las últimas 48 horas para dar margen
-            time_window = datetime.now() - timedelta(hours=48)
+            # ✅ VERIFICAR SI YA EXISTE POR EMAIL Y FECHA (más confiable)
+            existe = db.query(CalendlyBooking).filter(
+                CalendlyBooking.invitee_email == email,
+                CalendlyBooking.event_start_time == event_datetime
+            ).first()
+
+            if existe:
+                logger.info(f"⏭️  Reserva duplicada ignorada: {email} - {event_datetime}")
+                continue  # Ya está registrada
 
             # Buscar session_id y traffic_source del último click antes de la reserva
+            time_window = datetime.now() - timedelta(hours=48)
+
             last_click = db.query(CalendlyClick).filter(
                 CalendlyClick.timestamp >= time_window,
                 CalendlyClick.timestamp <= event_datetime
