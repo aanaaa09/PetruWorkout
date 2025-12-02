@@ -160,3 +160,54 @@ async def calendly_webhook(
     except Exception as e:
         logger.error(f"Error al procesar webhook de Calendly: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/booking-completed")
+async def booking_completed(
+        data: dict,
+        db: Session = Depends(get_db)
+):
+    """
+    Registra una reserva completada detectada desde el frontend
+    cuando Calendly emite el evento 'calendly.event_scheduled'
+    """
+    try:
+        from datetime import datetime
+
+        session_id = data.get('session_id')
+        traffic_source = data.get('traffic_source', 'unknown')
+        invitee_email = data.get('invitee_email', 'unknown')
+        invitee_name = data.get('invitee_name', 'unknown')
+        event_uri = data.get('event_uri')
+        event_start_time_str = data.get('event_start_time')
+
+        # Parsear fecha si existe
+        event_start_time = None
+        if event_start_time_str:
+            try:
+                event_start_time = datetime.fromisoformat(event_start_time_str.replace('Z', '+00:00'))
+            except:
+                pass
+
+        # Crear el booking
+        booking = tracking_crud.create_calendly_booking(
+            db=db,
+            calendly_event_id=event_uri or f"frontend_{session_id}_{datetime.now().timestamp()}",
+            invitee_email=invitee_email,
+            invitee_name=invitee_name,
+            event_start_time=event_start_time,
+            session_id=session_id,
+            traffic_source=traffic_source
+        )
+
+        logger.info(f"✅ Reserva completada registrada: {invitee_email} desde {traffic_source}")
+
+        return {
+            "success": True,
+            "message": "Reserva registrada correctamente",
+            "booking_id": booking.id
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Error al registrar booking: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
