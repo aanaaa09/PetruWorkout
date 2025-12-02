@@ -156,7 +156,7 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
       page_url: window.location.pathname
     };
 
-    const response = await fetch('http://localhost:5000/api/tracking/click', {
+    const response = await fetch('https://petruworkout.up.railway.app/api/tracking/click', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
