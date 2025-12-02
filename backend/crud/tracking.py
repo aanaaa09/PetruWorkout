@@ -23,18 +23,26 @@ class TrackingCRUD:
             ip_address: str = None
     ) -> PageVisit:
         """Registra una visita a la página"""
+        now = datetime.now()
+
         visit = PageVisit(
             session_id=session_id,
             traffic_source=traffic_source,
             referrer_url=referrer_url,
             user_agent=user_agent,
             landing_page=landing_page,
-            ip_address=ip_address
+            ip_address=ip_address,
+            timestamp=now,
+            fecha=now.date(),
+            dia=now.day,
+            mes=now.month,
+            año=now.year,
+            hora=now.time()
         )
         db.add(visit)
         db.commit()
         db.refresh(visit)
-        logger.info(f"Visita registrada: {session_id} desde {traffic_source}")
+        logger.info(f"Visita registrada: {session_id} desde {traffic_source} el {now.date()} a las {now.time()}")
         return visit
 
     def create_calendly_click(
@@ -47,17 +55,25 @@ class TrackingCRUD:
             page_url: str = None
     ) -> CalendlyClick:
         """Registra un click en botón de Calendly"""
+        now = datetime.now()
+
         click = CalendlyClick(
             session_id=session_id,
             traffic_source=traffic_source,
             button_id=button_id,
             button_location=button_location,
-            page_url=page_url
+            page_url=page_url,
+            timestamp=now,
+            fecha=now.date(),
+            dia=now.day,
+            mes=now.month,
+            año=now.year,
+            hora=now.time()
         )
         db.add(click)
         db.commit()
         db.refresh(click)
-        logger.info(f"Click registrado: {session_id} en {button_location}")
+        logger.info(f"Click registrado: {session_id} en {button_location} el {now.date()} a las {now.time()}")
         return click
 
     def create_calendly_booking(
@@ -71,18 +87,26 @@ class TrackingCRUD:
             traffic_source: str = None
     ) -> CalendlyBooking:
         """Registra una reserva completada en Calendly"""
+        now = datetime.now()
+
         booking = CalendlyBooking(
             session_id=session_id,
             traffic_source=traffic_source,
             calendly_event_id=calendly_event_id,
             invitee_email=invitee_email,
             invitee_name=invitee_name,
-            event_start_time=event_start_time
+            event_start_time=event_start_time,
+            timestamp=now,
+            fecha=now.date(),
+            dia=now.day,
+            mes=now.month,
+            año=now.year,
+            hora=now.time()
         )
         db.add(booking)
         db.commit()
         db.refresh(booking)
-        logger.info(f"Reserva registrada: {calendly_event_id}")
+        logger.info(f"Reserva registrada: {calendly_event_id} el {now.date()} a las {now.time()}")
         return booking
 
     def get_traffic_stats(self, db: Session, days: int = 30):
@@ -160,6 +184,37 @@ class TrackingCRUD:
             'booking_rate': round(booking_rate, 2),
             'overall_conversion': round(overall_conversion, 2)
         }
+
+    def get_stats_by_date(self, db: Session, days: int = 30):
+        """Obtiene estadísticas agrupadas por fecha"""
+        fecha_inicio = datetime.now() - timedelta(days=days)
+
+        stats = db.query(
+            PageVisit.fecha,
+            PageVisit.dia,
+            PageVisit.mes,
+            PageVisit.año,
+            func.count(PageVisit.id).label('visitas')
+        ).filter(
+            PageVisit.timestamp >= fecha_inicio
+        ).group_by(
+            PageVisit.fecha,
+            PageVisit.dia,
+            PageVisit.mes,
+            PageVisit.año
+        ).order_by(
+            PageVisit.fecha.desc()
+        ).all()
+
+        return [
+            {
+                'fecha': str(s.fecha),
+                'dia': s.dia,
+                'mes': s.mes,
+                'año': s.año,
+                'visitas': s.visitas
+            } for s in stats
+        ]
 
 
 tracking_crud = TrackingCRUD()

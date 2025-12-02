@@ -23,6 +23,7 @@
       target="_blank"
       rel="noopener noreferrer"
       class="btn-cta"
+      @click="handleCalendlyClick"
     >
       📅 Agendar Llamada
     </a>
@@ -33,6 +34,7 @@
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'FullNavbar',
   data() {
@@ -59,6 +61,10 @@ export default {
     navigateTo(section) {
       this.menuOpen = false
       this.$emit('scroll-to', section)
+    },
+    handleCalendlyClick() {
+      this.menuOpen = false
+      trackCalendlyClick('full-navbar-cta-button', 'full-navbar')
     }
   }
 }

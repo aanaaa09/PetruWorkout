@@ -80,6 +80,7 @@
           target="_blank"
           rel="noopener noreferrer"
           class="btn btn-primary"
+          @click="handleCalendlyClick"
         >
           Empieza Tu Transformación →
         </a>
@@ -89,6 +90,7 @@
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'ResultsSection',
   data() {
@@ -166,6 +168,9 @@ export default {
       if (e.target.dataset.errorHandled) return;
       e.target.dataset.errorHandled = 'true';
       e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E';
+    },
+    handleCalendlyClick() {
+      trackCalendlyClick('results-cta-button', 'results-section')
     }
   }
 }

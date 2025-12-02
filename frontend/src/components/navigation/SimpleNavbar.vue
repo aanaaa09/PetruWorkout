@@ -18,7 +18,7 @@
             target="_blank"
             rel="noopener noreferrer"
             class="btn-cta"
-            @click="trackCalendlyClick"
+            @click="handleCalendlyClick"
           >
             📅 Agendar Llamada
           </a>
@@ -27,7 +27,7 @@
           <router-link
             to="/info"
             class="btn-info"
-            @click="trackMoreInfoClick"
+            @click="handleMoreInfoClick"
           >
             📋 Más Información
           </router-link>
@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
+
 export default {
   name: 'SimpleNavbar',
   data() {
@@ -63,19 +65,13 @@ export default {
       })
     },
 
-    // Evento para el botón de Calendly
-    trackCalendlyClick() {
+    handleCalendlyClick() {
       this.menuOpen = false
-
-      if (window.gtag) {
-        window.gtag('event', 'button_click', {
-          'button_name': 'Agendar Llamada',
-          'page_path': window.location.pathname,
-          'button_location': 'navbar'
-        })
-      } else {
-        console.log('GA - Evento: Agendar Llamada desde navbar')
-      }
+      trackCalendlyClick('simple-navbar-cta-button', 'simple-navbar')
+    },
+    handleMoreInfoClick() {
+      this.menuOpen = false
+      this.scrollToTop()
     },
 
     trackMoreInfoClick() {

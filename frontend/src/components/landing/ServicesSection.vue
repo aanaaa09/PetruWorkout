@@ -106,6 +106,7 @@
           target="_blank"
           rel="noopener noreferrer"
           class="btn btn-primary"
+          @click="handleCalendlyClick"
         >
           📅 Agendar Llamada Gratuita
         </a>
@@ -115,8 +116,14 @@
 </template>
 
 <script>
+
 export default {
-  name: 'ServicesSection'
+  name: 'ServicesSection',
+  methods: {
+    handleCalendlyClick() {
+      trackCalendlyClick('services-cta-button', 'services-section')
+    }
+  }
 }
 </script>
 

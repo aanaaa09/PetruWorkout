@@ -14,6 +14,7 @@
           target="_blank"
           rel="noopener noreferrer"
           class="btn btn-primary"
+          @click="handleCalendlyClick"
         >
           📅 Agendar Llamada Gratuita
         </a>
@@ -56,6 +57,8 @@
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
+
 export default {
   name: 'SimpleFooter',
   computed: {
@@ -68,6 +71,9 @@ export default {
       this.$nextTick(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       })
+    },
+    handleCalendlyClick() {
+      trackCalendlyClick('simple-footer-cta-button', 'simple-footer')
     }
   }
 }

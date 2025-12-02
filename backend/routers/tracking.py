@@ -1,0 +1,162 @@
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm import Session
+from typing import Optional
+from ..config.database import get_db
+from ..crud.tracking import tracking_crud
+from ..schemas.tracking import PageVisitCreate, CalendlyClickCreate, CalendlyWebhook
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+
+@router.post("/visit")
+async def register_page_visit(
+        visit_data: PageVisitCreate,
+        request: Request,
+        db: Session = Depends(get_db)
+):
+    """Registra una visita a la página"""
+    try:
+        # Obtener IP del cliente
+        ip_address = request.client.host if request.client else None
+
+        visit = tracking_crud.create_page_visit(
+            db=db,
+            session_id=visit_data.session_id,
+            traffic_source=visit_data.traffic_source,
+            referrer_url=visit_data.referrer_url,
+            user_agent=visit_data.user_agent,
+            landing_page=visit_data.landing_page,
+            ip_address=ip_address
+        )
+
+        return {
+            "success": True,
+            "message": "Visita registrada correctamente",
+            "visit_id": visit.id
+        }
+    except Exception as e:
+        logger.error(f"Error al registrar visita: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/click")
+async def register_calendly_click(
+        click_data: CalendlyClickCreate,
+        db: Session = Depends(get_db)
+):
+    """Registra un click en botón de Calendly"""
+    try:
+        click = tracking_crud.create_calendly_click(
+            db=db,
+            session_id=click_data.session_id,
+            traffic_source=click_data.traffic_source,
+            button_id=click_data.button_id,
+            button_location=click_data.button_location,
+            page_url=click_data.page_url
+        )
+
+        return {
+            "success": True,
+            "message": "Click registrado correctamente",
+            "click_id": click.id
+        }
+    except Exception as e:
+        logger.error(f"Error al registrar click: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/stats")
+async def get_traffic_statistics(
+        days: int = 30,
+        db: Session = Depends(get_db)
+):
+    """Obtiene estadísticas de tráfico"""
+    try:
+        stats = tracking_crud.get_traffic_stats(db=db, days=days)
+        return {
+            "success": True,
+            "period_days": days,
+            "data": stats
+        }
+    except Exception as e:
+        logger.error(f"Error al obtener estadísticas: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/funnel")
+async def get_conversion_funnel(
+        traffic_source: Optional[str] = None,
+        days: int = 30,
+        db: Session = Depends(get_db)
+):
+    """Obtiene el embudo de conversión"""
+    try:
+        funnel = tracking_crud.get_conversion_funnel(
+            db=db,
+            traffic_source=traffic_source,
+            days=days
+        )
+        return {
+            "success": True,
+            "period_days": days,
+            "traffic_source": traffic_source or "all",
+            "funnel": funnel
+        }
+    except Exception as e:
+        logger.error(f"Error al obtener embudo: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/stats-by-date")
+async def get_stats_by_date(
+        days: int = 30,
+        db: Session = Depends(get_db)
+):
+    """Obtiene estadísticas agrupadas por fecha"""
+    try:
+        stats = tracking_crud.get_stats_by_date(db=db, days=days)
+        return {
+            "success": True,
+            "period_days": days,
+            "data": stats
+        }
+    except Exception as e:
+        logger.error(f"Error al obtener estadísticas por fecha: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/calendly-webhook")
+async def calendly_webhook(
+        webhook_data: CalendlyWebhook,
+        db: Session = Depends(get_db)
+):
+    """Webhook de Calendly para registrar reservas completadas"""
+    try:
+        # Calendly envía diferentes tipos de eventos
+        if webhook_data.event == "invitee.created":
+            payload = webhook_data.payload
+
+            # Extraer datos del webhook
+            event_uri = payload.get("event")
+            invitee = payload.get("invitee", {})
+
+            tracking_crud.create_calendly_booking(
+                db=db,
+                calendly_event_id=event_uri,
+                invitee_email=invitee.get("email"),
+                invitee_name=invitee.get("name"),
+                event_start_time=None,  # Extraer de payload si está disponible
+                session_id=None,  # Lo vincularemos después
+                traffic_source=None  # Lo vincularemos después
+            )
+
+            logger.info(f"Reserva de Calendly registrada: {event_uri}")
+
+        return {"success": True, "message": "Webhook procesado"}
+
+    except Exception as e:
+        logger.error(f"Error al procesar webhook de Calendly: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

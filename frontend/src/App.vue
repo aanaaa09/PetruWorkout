@@ -5,9 +5,14 @@
 </template>
 
 <script>
+import { initTracking } from './utils/tracking'
+
 export default {
   name: 'App',
   mounted() {
+    // Inicializar tracking cuando la app se carga
+    initTracking()
+
     // Añadir preconnect para Google Fonts si no existe
     if (!document.querySelector('link[href="https://fonts.googleapis.com"]')) {
       const preconnect1 = document.createElement('link');

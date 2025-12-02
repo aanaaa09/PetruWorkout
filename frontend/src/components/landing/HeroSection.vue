@@ -33,7 +33,7 @@
             target="_blank"
             rel="noopener noreferrer"
             class="btn btn-primary"
-            @click="trackButtonClick('Agendar Llamada')"
+            @click="handleCalendlyClick"
           >
             📅 AGENDAR LLAMADA GRATUITA
           </a>
@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'HeroSection',
   data() {
@@ -82,15 +83,8 @@ export default {
     handleImageError(e) {
       e.target.style.display = 'none'
     },
-    trackButtonClick(buttonName) {
-      if (window.gtag) {
-        window.gtag('event', 'button_click', {
-          'button_name': buttonName,
-          'page_path': window.location.pathname
-        });
-      } else {
-        console.log('gtag no disponible');
-      }
+    handleCalendlyClick() {
+      trackCalendlyClick('hero-cta-button', 'hero-section')
     }
   }
 }
