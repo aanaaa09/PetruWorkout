@@ -122,7 +122,7 @@ async function trackPageVisit() {
       landing_page: window.location.pathname + window.location.search
     };
 
-    const response = await fetch('https://petruworkout.up.railway.app/api/tracking/visit', {
+    const response = await fetch('https://petruworkout-production.up.railway.app//api/tracking/visit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -156,7 +156,7 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
       page_url: window.location.pathname
     };
 
-    const response = await fetch('https://petruworkout.up.railway.app/api/tracking/click', {
+    const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
