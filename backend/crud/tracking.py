@@ -23,7 +23,9 @@ class TrackingCRUD:
             ip_address: str = None
     ) -> PageVisit:
         """Registra una visita a la página"""
-        now = datetime.now()
+        # ✅ CAMBIO: Usar hora de España (UTC+1)
+        now_utc = datetime.utcnow()
+        now_spain = now_utc + timedelta(hours=1)  # Ajustar a España
 
         visit = PageVisit(
             session_id=session_id,
@@ -32,17 +34,18 @@ class TrackingCRUD:
             user_agent=user_agent,
             landing_page=landing_page,
             ip_address=ip_address,
-            timestamp=now,
-            fecha=now.date(),
-            dia=now.day,
-            mes=now.month,
-            año=now.year,
-            hora=now.time()
+            timestamp=now_spain,
+            fecha=now_spain.date(),
+            dia=now_spain.day,
+            mes=now_spain.month,
+            año=now_spain.year,
+            hora=now_spain.time()
         )
         db.add(visit)
         db.commit()
         db.refresh(visit)
-        logger.info(f"Visita registrada: {session_id} desde {traffic_source} el {now.date()} a las {now.time()}")
+        logger.info(
+            f"Visita registrada: {session_id} desde {traffic_source} el {now_spain.date()} a las {now_spain.time()}")
         return visit
 
     def create_calendly_click(
@@ -55,7 +58,9 @@ class TrackingCRUD:
             page_url: str = None
     ) -> CalendlyClick:
         """Registra un click en botón de Calendly"""
-        now = datetime.now()
+        # ✅ CAMBIO: Usar hora de España (UTC+1)
+        now_utc = datetime.utcnow()
+        now_spain = now_utc + timedelta(hours=1)
 
         click = CalendlyClick(
             session_id=session_id,
@@ -63,17 +68,18 @@ class TrackingCRUD:
             button_id=button_id,
             button_location=button_location,
             page_url=page_url,
-            timestamp=now,
-            fecha=now.date(),
-            dia=now.day,
-            mes=now.month,
-            año=now.year,
-            hora=now.time()
+            timestamp=now_spain,
+            fecha=now_spain.date(),
+            dia=now_spain.day,
+            mes=now_spain.month,
+            año=now_spain.year,
+            hora=now_spain.time()
         )
         db.add(click)
         db.commit()
         db.refresh(click)
-        logger.info(f"Click registrado: {session_id} en {button_location} el {now.date()} a las {now.time()}")
+        logger.info(
+            f"Click registrado: {session_id} en {button_location} el {now_spain.date()} a las {now_spain.time()}")
         return click
 
     def create_calendly_booking(
@@ -87,7 +93,9 @@ class TrackingCRUD:
             traffic_source: str = None
     ) -> CalendlyBooking:
         """Registra una reserva completada en Calendly"""
-        now = datetime.now()
+        # ✅ CAMBIO: Usar hora de España (UTC+1)
+        now_utc = datetime.utcnow()
+        now_spain = now_utc + timedelta(hours=1)
 
         booking = CalendlyBooking(
             session_id=session_id,
@@ -96,18 +104,20 @@ class TrackingCRUD:
             invitee_email=invitee_email,
             invitee_name=invitee_name,
             event_start_time=event_start_time,
-            timestamp=now,
-            fecha=now.date(),
-            dia=now.day,
-            mes=now.month,
-            año=now.year,
-            hora=now.time()
+            timestamp=now_spain,
+            fecha=now_spain.date(),
+            dia=now_spain.day,
+            mes=now_spain.month,
+            año=now_spain.year,
+            hora=now_spain.time()
         )
         db.add(booking)
         db.commit()
         db.refresh(booking)
-        logger.info(f"Reserva registrada: {calendly_event_id} el {now.date()} a las {now.time()}")
+        logger.info(f"Reserva registrada: {calendly_event_id} el {now_spain.date()} a las {now_spain.time()}")
         return booking
+
+
 
     def get_traffic_stats(self, db: Session, days: int = 30):
         """Obtiene estadísticas de tráfico por fuente"""
