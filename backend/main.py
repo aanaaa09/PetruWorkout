@@ -43,8 +43,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:5000",
-        "https://petrucalistenia.com/",
-        "https://petrucalistenia.com/info"
+        "https://petrucalistenia.com",
+        "https://www.petrucalistenia.com",
 
     ],
     allow_credentials=True,
