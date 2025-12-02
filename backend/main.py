@@ -67,8 +67,9 @@ async def health():
     return {"status": "healthy", "service": "petruworkout"}
 
 # --------------------------
-# Montar frontend SPA
+# Montar frontend SPA (comentado, ya no necesario)
 # --------------------------
+"""
 frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
 
 if os.path.isdir(frontend_dist):
@@ -96,7 +97,7 @@ if os.path.isdir(frontend_dist):
             return FileResponse(favicon_path)
 else:
     logger.warning(f"⚠️ Frontend no encontrado en {frontend_dist}")
-
+"""
 # --------------------------
 # Arrancar servidor
 # --------------------------
