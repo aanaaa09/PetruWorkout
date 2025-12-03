@@ -1,7 +1,6 @@
 # backend/sync_calendly.py
 import requests
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
 from backend.config.database import SessionLocal
 from backend.config.settings import settings
 from backend.crud.tracking import tracking_crud
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def sync_calendly_bookings():
     """
-    Obtiene eventos de Calendly de las últimas 24 horas
+    Obtiene eventos de Calendly de la última hora
     y los vincula con los clicks registrados
     """
     db = SessionLocal()
@@ -26,8 +25,8 @@ def sync_calendly_bookings():
             'Content-Type': 'application/json'
         }
 
-        # Obtener eventos de las últimas 24 horas
-        min_time = (datetime.now() - timedelta(hours=24)).isoformat()
+        # Obtener eventos de la última hora + 5 minutos
+        min_time = (datetime.now() - timedelta(hours=1, minutes=5)).isoformat()
 
         url = "https://api.calendly.com/scheduled_events"
         params = {
@@ -74,7 +73,7 @@ def sync_calendly_bookings():
             except:
                 event_datetime = datetime.now()
 
-            # ✅ VERIFICAR SI YA EXISTE POR EMAIL Y FECHA (más confiable)
+            # Verificar si ya existe
             existe = db.query(CalendlyBooking).filter(
                 CalendlyBooking.invitee_email == email,
                 CalendlyBooking.event_start_time == event_datetime
@@ -82,18 +81,22 @@ def sync_calendly_bookings():
 
             if existe:
                 logger.info(f"⏭️  Reserva duplicada ignorada: {email} - {event_datetime}")
-                continue  # Ya está registrada
+                continue
 
-            # Buscar session_id y traffic_source del último click antes de la reserva
-            time_window = datetime.now() - timedelta(hours=48)
-
-            last_click = db.query(CalendlyClick).filter(
+            # Buscar click más cercano en tiempo antes del evento (últimas 2h)
+            time_window = datetime.now() - timedelta(hours=2)
+            clicks = db.query(CalendlyClick).filter(
                 CalendlyClick.timestamp >= time_window,
                 CalendlyClick.timestamp <= event_datetime
-            ).order_by(CalendlyClick.timestamp.desc()).first()
+            ).all()
 
-            session_id = last_click.session_id if last_click else None
-            traffic_source = last_click.traffic_source if last_click else 'calendly_api'
+            if clicks:
+                closest_click = min(clicks, key=lambda c: abs((event_datetime - c.timestamp).total_seconds()))
+                session_id = closest_click.session_id
+                traffic_source = closest_click.traffic_source
+            else:
+                session_id = None
+                traffic_source = 'calendly_api'
 
             # Crear booking
             tracking_crud.create_calendly_booking(
