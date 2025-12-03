@@ -11,11 +11,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 def sync_calendly_bookings():
     """
-    Obtiene eventos de Calendly de la última hora
-    y los vincula con los clicks registrados
+    Obtiene eventos de Calendly de las últimas 24 horas
+    y los vincula con los clicks registrados más cercanos previos.
     """
     db = SessionLocal()
 
@@ -25,8 +24,8 @@ def sync_calendly_bookings():
             'Content-Type': 'application/json'
         }
 
-        # Obtener eventos de la última hora + 5 minutos
-        min_time = (datetime.now() - timedelta(hours=1, minutes=5)).isoformat()
+        # Buscar solo lo ocurrido en las últimas 24h
+        min_time = (datetime.utcnow() - timedelta(hours=24)).isoformat() + "Z"
 
         url = "https://api.calendly.com/scheduled_events"
         params = {
@@ -43,50 +42,49 @@ def sync_calendly_bookings():
             return
 
         events = response.json().get('collection', [])
-        logger.info(f"📅 Encontrados {len(events)} eventos en Calendly")
+        logger.info(f"📅 Reservas detectadas en las últimas 24h: {len(events)}")
 
         nuevas_reservas = 0
 
         for event in events:
-            event_uri = event['uri']
-            event_start = event['start_time']
+            event_uri = event["uri"]
+            event_start = event["start_time"]
 
-            # Obtener datos del invitee
+            # Obtener datos del asistente
             invitees_url = f"{event_uri}/invitees"
             inv_response = requests.get(invitees_url, headers=headers)
 
             if inv_response.status_code != 200:
-                logger.warning(f"No se pudo obtener invitee para {event_uri}")
                 continue
 
-            invitees = inv_response.json().get('collection', [])
+            invitees = inv_response.json().get("collection", [])
             if not invitees:
                 continue
 
             invitee = invitees[0]
-            email = invitee.get('email')
-            name = invitee.get('name')
+            email = invitee.get("email")
+            name = invitee.get("name")
 
-            # Parsear fecha
             try:
-                event_datetime = datetime.fromisoformat(event_start.replace('Z', '+00:00'))
+                event_datetime = datetime.fromisoformat(event_start.replace("Z", "+00:00"))
             except:
-                event_datetime = datetime.now()
+                event_datetime = datetime.utcnow()
 
-            # Verificar si ya existe
+            # Comprobar si ya existe en BD
             existe = db.query(CalendlyBooking).filter(
                 CalendlyBooking.invitee_email == email,
                 CalendlyBooking.event_start_time == event_datetime
             ).first()
 
             if existe:
-                logger.info(f"⏭️  Reserva duplicada ignorada: {email} - {event_datetime}")
+                logger.info(f"⏭️ Ya existe: {email} - {event_datetime}")
                 continue
 
-            # Buscar click más cercano en tiempo antes del evento (últimas 2h)
-            time_window = datetime.now() - timedelta(hours=2)
+            # Buscar clicks previos en últimas 24h
+            time_window_start = event_datetime - timedelta(hours=24)
+
             clicks = db.query(CalendlyClick).filter(
-                CalendlyClick.timestamp >= time_window,
+                CalendlyClick.timestamp >= time_window_start,
                 CalendlyClick.timestamp <= event_datetime
             ).all()
 
@@ -96,9 +94,9 @@ def sync_calendly_bookings():
                 traffic_source = closest_click.traffic_source
             else:
                 session_id = None
-                traffic_source = 'calendly_api'
+                traffic_source = "direct"
 
-            # Crear booking
+            # Guardar reserva
             tracking_crud.create_calendly_booking(
                 db=db,
                 calendly_event_id=event_uri,
@@ -110,17 +108,17 @@ def sync_calendly_bookings():
             )
 
             nuevas_reservas += 1
-            logger.info(f"✅ Nueva reserva: {email} - Fuente: {traffic_source}")
+            logger.info(f"📌 Reserva registrada: {email} | Source: {traffic_source}")
 
-        logger.info(f"🎉 Sincronización completada: {nuevas_reservas} nuevas reservas")
+        logger.info(f"🎉 Finalizado. Nuevas reservas guardadas: {nuevas_reservas}")
 
     except Exception as e:
-        logger.error(f"❌ Error en sync: {e}")
+        logger.error(f"❌ Error en sincronización: {e}")
 
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    logger.info("🔄 Iniciando sincronización con Calendly...")
+    logger.info("🔄 Iniciando sync con Calendly (últimas 24h)...")
     sync_calendly_bookings()
