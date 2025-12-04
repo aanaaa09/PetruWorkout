@@ -23,18 +23,15 @@
 
           <div class="link-group">
             <h4>Contacto</h4>
-             <li class="nav-cta">
-    <!-- ✅ CAMBIAR A LINK DIRECTO -->
-    <a
-      href="https://calendly.com/petruworkout/reunion"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="btn-cta"
-      @click="handleCalendlyClick"
-    >
-      Agendar Llamada
-    </a>
-  </li>
+             <a
+  href="https://calendly.com/petruworkout/reunion"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="btn-cta"
+  @click="handleCalendlyClick"
+>Agendar Llamada
+</a>
+
             <a href="#contacto" @click.prevent="scrollTo('contacto')">Formulario</a>
             <a href="mailto:petruworkout@gmail.com">Email</a>
           </div>
