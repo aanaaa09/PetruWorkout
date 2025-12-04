@@ -2,29 +2,41 @@ import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from contextlib import asynccontextmanager
 
-from .routers import auth,  consultas, tracking
-from .config.database import Base, engine
+from .routers import auth, consultas, tracking
+from .config.database import Base, engine, close_db_connections
 from .init_db import crear_base_datos
 
 # --------------------------
 # Logging
 # --------------------------
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-# --------------------------
-# Crear base de datos si no existe
-# --------------------------
-crear_base_datos()
 
 # --------------------------
-# Crear todas las tablas
+# ✅ Lifespan: startup/shutdown events
 # --------------------------
-Base.metadata.create_all(bind=engine)
-logger.info("✅ Tablas de la base de datos creadas/verificadas")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Maneja inicio y cierre de la aplicación"""
+    # STARTUP
+    logger.info("🚀 Iniciando aplicación...")
+    crear_base_datos()
+    Base.metadata.create_all(bind=engine)
+    logger.info("✅ Base de datos inicializada")
+
+    yield  # Aplicación corriendo
+
+    # SHUTDOWN
+    logger.info("🛑 Cerrando aplicación...")
+    close_db_connections()
+    logger.info("✅ Conexiones cerradas")
+
 
 # --------------------------
 # Crear app FastAPI
@@ -32,7 +44,8 @@ logger.info("✅ Tablas de la base de datos creadas/verificadas")
 app = FastAPI(
     title="PetruWorkout API",
     description="API de PetruWorkout",
-    version="2.0"
+    version="2.0",
+    lifespan=lifespan  # ✅ Usar lifespan context manager
 )
 
 # --------------------------
@@ -45,7 +58,6 @@ app.add_middleware(
         "http://localhost:5000",
         "https://petrucalistenia.com",
         "https://www.petrucalistenia.com",
-
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -58,6 +70,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(consultas.router)
 app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
+
+
 # --------------------------
 # Health y info API
 # --------------------------
@@ -65,58 +79,54 @@ app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
 async def api_info():
     return {"message": "PetruWorkout API", "version": "2.0"}
 
+
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": "petruworkout"}
-
-# --------------------------
-# Montar frontend SPA (comentado, ya no necesario)
-# --------------------------
-"""
-frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
-
-if os.path.isdir(frontend_dist):
-    # Montar SPA y fallback automático de index.html
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
-    logger.info(f"✅ Frontend SPA montado desde {frontend_dist}")
-
-    # Montar carpeta assets
-    assets_dir = os.path.join(frontend_dist, "assets")
-    if os.path.isdir(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
-        logger.info(f"✅ Assets montados desde {assets_dir}")
-
-    # Montar carpeta images
-    images_dir = os.path.join(frontend_dist, "images")
-    if os.path.isdir(images_dir):
-        app.mount("/images", StaticFiles(directory=images_dir), name="images")
-        logger.info(f"✅ Imágenes montadas desde {images_dir}")
-
-    # Favicon
-    favicon_path = os.path.join(frontend_dist, "favicon.svg")
-    if os.path.exists(favicon_path):
-        @app.get("/favicon.svg")
-        async def favicon():
-            return FileResponse(favicon_path)
-else:
-    logger.warning(f"⚠️ Frontend no encontrado en {frontend_dist}")
-"""
+    """Health check optimizado"""
+    try:
+        # ✅ No verificar BD en cada health check para evitar conexiones innecesarias
+        return {
+            "status": "healthy",
+            "service": "petruworkout",
+            "version": "2.0"
+        }
+    except Exception as e:
+        logger.error(f"Health check falló: {e}")
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
 
 
 @app.get("/api/sync-calendly")
 async def sync_calendly_endpoint():
-    """Endpoint para sincronizar reservas de Calendly"""
+    """
+    Endpoint para sincronizar reservas de Calendly
+    ⚠️ Este endpoint debería protegerse con autenticación en producción
+    """
     from .sync_calendly import sync_calendly_bookings
 
     try:
         sync_calendly_bookings()
         return {"success": True, "message": "Sincronización completada"}
     except Exception as e:
-        logger.error(f"Error en sync endpoint: {e}")
+        logger.error(f"Error en sync: {e}")
         return {"success": False, "error": str(e)}
+
+
 # --------------------------
 # Arrancar servidor
 # --------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=5000, reload=True)
+
+    # ✅ Configuración optimizada de uvicorn
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=5000,
+        reload=False,  # ✅ Desactivar en producción
+        workers=1,  # ✅ 1 worker para tráfico bajo
+        limit_concurrency=50,  # ✅ Limitar requests concurrentes
+        timeout_keep_alive=30  # ✅ Cerrar conexiones idle
+    )

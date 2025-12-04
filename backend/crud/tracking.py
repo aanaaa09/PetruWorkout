@@ -44,8 +44,7 @@ class TrackingCRUD:
         db.add(visit)
         db.commit()
         db.refresh(visit)
-        logger.info(
-            f"Visita registrada: {session_id} desde {traffic_source} el {now_spain.date()} a las {now_spain.time()}")
+        db.expunge(visit)
         return visit
 
     def create_calendly_click(
@@ -78,8 +77,7 @@ class TrackingCRUD:
         db.add(click)
         db.commit()
         db.refresh(click)
-        logger.info(
-            f"Click registrado: {session_id} en {button_location} el {now_spain.date()} a las {now_spain.time()}")
+        db.expunge(click)
         return click
 
     def create_calendly_booking(
@@ -114,7 +112,7 @@ class TrackingCRUD:
         db.add(booking)
         db.commit()
         db.refresh(booking)
-        logger.info(f"Reserva registrada: {calendly_event_id} el {now_spain.date()} a las {now_spain.time()}")
+        db.expunge(booking)
         return booking
 
 
