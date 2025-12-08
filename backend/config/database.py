@@ -8,15 +8,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# ✅ OPCIÓN 1: Pool minimalista (para tráfico bajo/medio)
 engine = create_engine(
     settings.DATABASE_URL,
+    poolclass=NullPool,
     pool_pre_ping=True,
-    pool_size=2,              # ✅ Reducido de 20 a 2
-    max_overflow=3,           # ✅ Reducido de 40 a 3
-    pool_recycle=1800,        # ✅ Reducido de 3600 a 1800 (30 min)
-    pool_timeout=10,          # ✅ Timeout de 10 segundos
-    echo=False,               # ✅ Desactivar logs SQL en producción
+    echo=False,
 )
 
 
