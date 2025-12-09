@@ -23,9 +23,8 @@ class TrackingCRUD:
             ip_address: str = None
     ) -> PageVisit:
         """Registra una visita a la página"""
-        # ✅ CAMBIO: Usar hora de España (UTC+1)
         now_utc = datetime.utcnow()
-        now_spain = now_utc + timedelta(hours=1)  # Ajustar a España
+        now_spain = now_utc + timedelta(hours=1)
 
         visit = PageVisit(
             session_id=session_id,
@@ -43,8 +42,7 @@ class TrackingCRUD:
         )
         db.add(visit)
         db.commit()
-        db.refresh(visit)
-        db.expunge(visit)
+        # ✅ QUITAR db.expunge(visit) - consume memoria innecesariamente
         return visit
 
     def create_calendly_click(
@@ -57,7 +55,6 @@ class TrackingCRUD:
             page_url: str = None
     ) -> CalendlyClick:
         """Registra un click en botón de Calendly"""
-        # ✅ CAMBIO: Usar hora de España (UTC+1)
         now_utc = datetime.utcnow()
         now_spain = now_utc + timedelta(hours=1)
 
@@ -76,8 +73,7 @@ class TrackingCRUD:
         )
         db.add(click)
         db.commit()
-        db.refresh(click)
-        db.expunge(click)
+        # ✅ QUITAR db.expunge(click)
         return click
 
     def create_calendly_booking(
@@ -91,7 +87,6 @@ class TrackingCRUD:
             traffic_source: str = None
     ) -> CalendlyBooking:
         """Registra una reserva completada en Calendly"""
-        # ✅ CAMBIO: Usar hora de España (UTC+1)
         now_utc = datetime.utcnow()
         now_spain = now_utc + timedelta(hours=1)
 
@@ -111,17 +106,13 @@ class TrackingCRUD:
         )
         db.add(booking)
         db.commit()
-        db.refresh(booking)
-        db.expunge(booking)
+        # ✅ QUITAR db.expunge(booking)
         return booking
-
-
 
     def get_traffic_stats(self, db: Session, days: int = 30):
         """Obtiene estadísticas de tráfico por fuente"""
         fecha_inicio = datetime.now() - timedelta(days=days)
 
-        # Visitas por fuente
         visits = db.query(
             PageVisit.traffic_source,
             func.count(PageVisit.id).label('total_visits'),
@@ -132,7 +123,6 @@ class TrackingCRUD:
             PageVisit.traffic_source
         ).all()
 
-        # Clicks por fuente
         clicks = db.query(
             CalendlyClick.traffic_source,
             func.count(CalendlyClick.id).label('total_clicks')
@@ -142,7 +132,6 @@ class TrackingCRUD:
             CalendlyClick.traffic_source
         ).all()
 
-        # Reservas por fuente
         bookings = db.query(
             CalendlyBooking.traffic_source,
             func.count(CalendlyBooking.id).label('total_bookings')
@@ -153,8 +142,7 @@ class TrackingCRUD:
         ).all()
 
         return {
-            'visits': [{'source': v.traffic_source, 'total': v.total_visits, 'unique': v.unique_visitors} for v in
-                       visits],
+            'visits': [{'source': v.traffic_source, 'total': v.total_visits, 'unique': v.unique_visitors} for v in visits],
             'clicks': [{'source': c.traffic_source, 'total': c.total_clicks} for c in clicks],
             'bookings': [{'source': b.traffic_source, 'total': b.total_bookings} for b in bookings]
         }

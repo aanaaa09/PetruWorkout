@@ -9,17 +9,17 @@ from .config.database import Base, engine, close_db_connections
 from .init_db import crear_base_datos
 
 # --------------------------
-# Logging
+# Logging reducido
 # --------------------------
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,  # ✅ Cambiar a WARNING en producción (antes INFO)
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
 
 # --------------------------
-# ✅ Lifespan: startup/shutdown events
+# Lifespan: startup/shutdown events
 # --------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,7 +45,9 @@ app = FastAPI(
     title="PetruWorkout API",
     description="API de PetruWorkout",
     version="2.0",
-    lifespan=lifespan  # ✅ Usar lifespan context manager
+    lifespan=lifespan,
+    docs_url=None,  # ✅ Desactivar docs en producción (ahorra memoria)
+    redoc_url=None  # ✅ Desactivar redoc
 )
 
 # --------------------------
@@ -82,28 +84,17 @@ async def api_info():
 
 @app.get("/health")
 async def health():
-    """Health check optimizado"""
-    try:
-        # ✅ No verificar BD en cada health check para evitar conexiones innecesarias
-        return {
-            "status": "healthy",
-            "service": "petruworkout",
-            "version": "2.0"
-        }
-    except Exception as e:
-        logger.error(f"Health check falló: {e}")
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+    """Health check sin verificar BD"""
+    return {
+        "status": "healthy",
+        "service": "petruworkout",
+        "version": "2.0"
+    }
 
 
 @app.get("/api/sync-calendly")
 async def sync_calendly_endpoint():
-    """
-    Endpoint para sincronizar reservas de Calendly
-    ⚠️ Este endpoint debería protegerse con autenticación en producción
-    """
+    """Endpoint para sincronizar reservas de Calendly"""
     from .sync_calendly import sync_calendly_bookings
 
     try:
@@ -120,13 +111,14 @@ async def sync_calendly_endpoint():
 if __name__ == "__main__":
     import uvicorn
 
-    # ✅ Configuración optimizada de uvicorn
+    # ✅ Configuración MUY optimizada para Railway con poco tráfico
     uvicorn.run(
         "backend.main:app",
         host="0.0.0.0",
-        port=5000,
-        reload=False,  # ✅ Desactivar en producción
-        workers=1,  # ✅ 1 worker para tráfico bajo
-        limit_concurrency=50,  # ✅ Limitar requests concurrentes
-        timeout_keep_alive=30  # ✅ Cerrar conexiones idle
+        port=int(os.getenv("PORT", 5000)),  # ✅ Puerto dinámico de Railway
+        reload=False,
+        workers=1,              # Solo 1 worker
+        limit_concurrency=10,   # ✅ Solo 10 requests concurrentes (antes 50)
+        timeout_keep_alive=20,  # ✅ Cerrar conexiones idle rápido (antes 30)
+        backlog=20              # ✅ Cola pequeña
     )

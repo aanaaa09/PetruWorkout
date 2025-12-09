@@ -1,45 +1,34 @@
 from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import QueuePool
 from .settings import settings
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 
 logger = logging.getLogger(__name__)
 
+# ✅ Pool pequeño optimizado para Railway con poco tráfico
 engine = create_engine(
     settings.DATABASE_URL,
-    poolclass=NullPool,
-    pool_pre_ping=True,
+    poolclass=QueuePool,
+    pool_size=2,              # Solo 2 conexiones persistentes (antes 5)
+    max_overflow=1,           # Máximo 1 conexión extra si hay pico (antes 10)
+    pool_recycle=300,         # Reciclar conexiones cada 5 min (evita conexiones muertas)
+    pool_pre_ping=True,       # Verifica conexión antes de usarla
+    pool_timeout=10,          # Timeout reducido
     echo=False,
 )
 
-
-
-# SessionLocal con configuración optimizada
+# ✅ SessionLocal optimizado
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine,
-    expire_on_commit=False  # ✅ Evita queries adicionales post-commit
+    expire_on_commit=False  # Evita queries adicionales post-commit
 )
 
 Base = declarative_base()
-
-
-# ✅ Event listener para cerrar conexiones automáticamente
-@event.listens_for(engine, "connect")
-def receive_connect(dbapi_conn, connection_record):
-    """Configura timeout en cada conexión nueva"""
-    connection_record.info['pid'] = dbapi_conn.get_backend_pid()
-    logger.debug(f"Nueva conexión BD: PID {connection_record.info['pid']}")
-
-
-@event.listens_for(engine, "checkout")
-def receive_checkout(dbapi_conn, connection_record, connection_proxy):
-    """Log cuando se obtiene conexión del pool"""
-    logger.debug(f"Checkout conexión: PID {connection_record.info.get('pid')}")
 
 
 def get_db():
@@ -52,7 +41,7 @@ def get_db():
         db.rollback()
         raise
     finally:
-        db.close()  # ✅ Cierra explícitamente
+        db.close()
         logger.debug("Sesión BD cerrada")
 
 
