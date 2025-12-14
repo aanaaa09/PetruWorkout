@@ -1,4 +1,4 @@
-// tracking.js - Sistema de tracking unificado para conversión
+// tracking.js - Sistema de tracking mejorado sin UTM
 
 /**
  * Detecta el origen del tráfico basándose en referrer y user agent
@@ -7,37 +7,69 @@ function detectTrafficSource() {
   const referrer = document.referrer.toLowerCase();
   const userAgent = navigator.userAgent.toLowerCase();
 
-  // 1. Revisar referrer primero (más confiable)
-  if (referrer.includes('instagram.com')) {
-    return 'instagram';
-  }
-  if (referrer.includes('tiktok.com')) {
-    return 'tiktok';
-  }
-  if (referrer.includes('youtube.com') || referrer.includes('m.youtube.com')) {
-    return 'youtube';
-  }
-  if (referrer.includes('youtu.be')) {
-    return 'youtube';
-  }
-  if (referrer.includes('linkedin.com')) {
+  // 1. LinkedIn (incluye app móvil Android)
+  if (referrer.includes('linkedin.com') ||
+      referrer.includes('lnkd.in') ||
+      referrer.includes('android-app://com.linkedin.android')) {
     return 'linkedin';
   }
 
-  // 2. Búsqueda orgánica
+  // 2. Instagram
+  if (referrer.includes('instagram.com') ||
+      referrer.includes('ig.me')) {
+    return 'instagram';
+  }
+
+  // 3. TikTok
+  if (referrer.includes('tiktok.com') ||
+      referrer.includes('tiktokv.com')) {
+    return 'tiktok';
+  }
+
+  // 4. YouTube
+  if (referrer.includes('youtube.com') ||
+      referrer.includes('m.youtube.com') ||
+      referrer.includes('youtu.be')) {
+    return 'youtube';
+  }
+
+  // 5. Facebook
+  if (referrer.includes('facebook.com') ||
+      referrer.includes('fb.com') ||
+      referrer.includes('m.facebook.com')) {
+    return 'facebook';
+  }
+
+  // 6. Twitter/X
+  if (referrer.includes('twitter.com') ||
+      referrer.includes('t.co') ||
+      referrer.includes('x.com')) {
+    return 'twitter';
+  }
+
+  // 7. WhatsApp
+  if (referrer.includes('whatsapp.com') ||
+      referrer.includes('wa.me')) {
+    return 'whatsapp';
+  }
+
+  // 8. BÚSQUEDA ORGÁNICA (Google, Bing, etc)
   if (referrer.includes('google.com') ||
+      referrer.includes('google.es') ||
       referrer.includes('bing.com') ||
       referrer.includes('yahoo.com') ||
       referrer.includes('duckduckgo.com') ||
       referrer.includes('baidu.com')) {
-    // Si viene de búsqueda de video en Google
-    if (referrer.includes('tbm=vid') || referrer.includes('/videosearch')) {
-      return 'youtube'; // Organic video
-    }
     return 'organic_search';
   }
 
-  // 3. Fallback a User-Agent para apps móviles (cuando no hay referrer)
+  // 9. TRÁFICO INTERNO (de tu propia web)
+  if (referrer.includes('petrucalistenia.com') ||
+      referrer.includes(window.location.hostname)) {
+    return 'internal';
+  }
+
+  // 10. Fallback a User-Agent para apps móviles sin referrer
   if (!referrer || referrer === '') {
     if (userAgent.includes('instagram')) {
       return 'instagram';
@@ -49,16 +81,30 @@ function detectTrafficSource() {
       return 'linkedin';
     }
     if (userAgent.includes('fban') || userAgent.includes('fbav')) {
-      return 'facebook'; // Por si acaso
+      return 'facebook';
+    }
+    if (userAgent.includes('twitter')) {
+      return 'twitter';
     }
   }
 
-  // 4. Tráfico directo
-  if (!referrer || referrer === '' || referrer.includes(window.location.hostname)) {
+  // 11. TRÁFICO DIRECTO (usuario escribió la URL o bookmark)
+  if (!referrer || referrer === '') {
     return 'direct';
   }
 
-  // 5. Desconocido
+  // 12. OTRO REFERRER EXTERNO
+  if (referrer && !referrer.includes(window.location.hostname)) {
+    try {
+      const refUrl = new URL(document.referrer);
+      const domain = refUrl.hostname.replace('www.', '').split('.')[0];
+      return `referral_${domain}`;
+    } catch (e) {
+      return 'referral';
+    }
+  }
+
+  // 13. DESCONOCIDO
   return 'unknown';
 }
 
@@ -70,7 +116,6 @@ function getOrCreateSessionId() {
   let sessionId = sessionStorage.getItem(SESSION_KEY);
 
   if (!sessionId) {
-    // Generar UUID v4
     sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -89,7 +134,6 @@ function saveTrafficSourceToSession(source) {
   const TRAFFIC_SOURCE_KEY = 'petru_traffic_source';
   const existingSource = sessionStorage.getItem(TRAFFIC_SOURCE_KEY);
 
-  // Solo guardar si no existe (mantener el origen inicial)
   if (!existingSource) {
     sessionStorage.setItem(TRAFFIC_SOURCE_KEY, source);
   }
@@ -133,10 +177,10 @@ async function trackPageVisit() {
     if (!response.ok) {
       console.error('Error al registrar visita:', await response.text());
     } else {
-      console.log('Visita registrada correctamente desde:', savedSource);
+      console.log('✅ Visita registrada - Source:', savedSource);
     }
   } catch (error) {
-    console.error('Error al trackear visita:', error);
+    console.error('❌ Error al trackear visita:', error);
   }
 }
 
@@ -167,10 +211,10 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
     if (!response.ok) {
       console.error('Error al registrar click:', await response.text());
     } else {
-      console.log('Click registrado en:', buttonLocation);
+      console.log('✅ Click registrado en:', buttonLocation, '- Source:', trafficSource);
     }
   } catch (error) {
-    console.error('Error al trackear click:', error);
+    console.error('❌ Error al trackear click:', error);
   }
 }
 
@@ -178,16 +222,14 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
  * Inicializa el sistema de tracking
  */
 function initTracking() {
-  // Registrar visita al cargar la página
   trackPageVisit();
 
-  // Opcional: Log en consola para debugging
-  console.log('Tracking inicializado');
-  console.log('Session ID:', getOrCreateSessionId());
-  console.log('Traffic Source:', getTrafficSourceFromSession());
+  console.log('🔍 Tracking inicializado');
+  console.log('📱 Session ID:', getOrCreateSessionId());
+  console.log('🌐 Traffic Source:', getTrafficSourceFromSession());
+  console.log('🔗 Referrer:', document.referrer || 'ninguno');
 }
 
-// Exportar funciones
 export {
   detectTrafficSource,
   getOrCreateSessionId,
