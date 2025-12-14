@@ -12,7 +12,7 @@ class PageVisit(Base):
     referrer_url = Column(Text, nullable=True)
     user_agent = Column(Text, nullable=True)
     landing_page = Column(String(255), nullable=True)
-    ip_address = Column(String(45), nullable=True)
+    # ❌ ELIMINADO: ip_address
 
     # Timestamp completo
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)

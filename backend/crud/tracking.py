@@ -19,8 +19,8 @@ class TrackingCRUD:
             traffic_source: str,
             referrer_url: str = None,
             user_agent: str = None,
-            landing_page: str = None,
-            ip_address: str = None
+            landing_page: str = None
+            # ❌ ELIMINADO: ip_address
     ) -> PageVisit:
         """Registra una visita a la página"""
         now_utc = datetime.utcnow()
@@ -32,7 +32,7 @@ class TrackingCRUD:
             referrer_url=referrer_url,
             user_agent=user_agent,
             landing_page=landing_page,
-            ip_address=ip_address,
+            # ❌ ELIMINADO: ip_address=ip_address,
             timestamp=now_spain,
             fecha=now_spain.date(),
             dia=now_spain.day,
@@ -42,7 +42,6 @@ class TrackingCRUD:
         )
         db.add(visit)
         db.commit()
-        # ✅ QUITAR db.expunge(visit) - consume memoria innecesariamente
         return visit
 
     def create_calendly_click(
@@ -73,7 +72,6 @@ class TrackingCRUD:
         )
         db.add(click)
         db.commit()
-        # ✅ QUITAR db.expunge(click)
         return click
 
     def create_calendly_booking(
@@ -106,7 +104,6 @@ class TrackingCRUD:
         )
         db.add(booking)
         db.commit()
-        # ✅ QUITAR db.expunge(booking)
         return booking
 
     def get_traffic_stats(self, db: Session, days: int = 30):

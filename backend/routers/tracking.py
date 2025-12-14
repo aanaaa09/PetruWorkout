@@ -14,13 +14,11 @@ router = APIRouter()
 @router.post("/visit")
 async def register_page_visit(
         visit_data: PageVisitCreate,
-        request: Request,
         db: Session = Depends(get_db)
 ):
     """Registra una visita a la página"""
     try:
-        # Obtener IP del cliente
-        ip_address = request.client.host if request.client else None
+        # ❌ NO obtener IP del cliente (ya no la guardamos)
 
         visit = tracking_crud.create_page_visit(
             db=db,
@@ -28,8 +26,8 @@ async def register_page_visit(
             traffic_source=visit_data.traffic_source,
             referrer_url=visit_data.referrer_url,
             user_agent=visit_data.user_agent,
-            landing_page=visit_data.landing_page,
-            ip_address=ip_address
+            landing_page=visit_data.landing_page
+            # ❌ ELIMINADO: ip_address=ip_address
         )
 
         return {
@@ -135,11 +133,9 @@ async def calendly_webhook(
 ):
     """Webhook de Calendly para registrar reservas completadas"""
     try:
-        # Calendly envía diferentes tipos de eventos
         if webhook_data.event == "invitee.created":
             payload = webhook_data.payload
 
-            # Extraer datos del webhook
             event_uri = payload.get("event")
             invitee = payload.get("invitee", {})
 
@@ -148,9 +144,9 @@ async def calendly_webhook(
                 calendly_event_id=event_uri,
                 invitee_email=invitee.get("email"),
                 invitee_name=invitee.get("name"),
-                event_start_time=None,  # Extraer de payload si está disponible
-                session_id=None,  # Lo vincularemos después
-                traffic_source=None  # Lo vincularemos después
+                event_start_time=None,
+                session_id=None,
+                traffic_source=None
             )
 
             logger.info(f"Reserva de Calendly registrada: {event_uri}")
@@ -181,7 +177,6 @@ async def booking_completed(
         event_uri = data.get('event_uri')
         event_start_time_str = data.get('event_start_time')
 
-        # Parsear fecha si existe
         event_start_time = None
         if event_start_time_str:
             try:
@@ -189,7 +184,6 @@ async def booking_completed(
             except:
                 pass
 
-        # Crear el booking
         booking = tracking_crud.create_calendly_booking(
             db=db,
             calendly_event_id=event_uri or f"frontend_{session_id}_{datetime.now().timestamp()}",
