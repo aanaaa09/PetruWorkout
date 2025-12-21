@@ -61,10 +61,6 @@ jobs:
           CALENDLY_API_KEY: test_key
           CALENDLY_USER_URI: test_uri
           CALENDLY_EVENT_URL: test_url
-          SPOTIFY_CLIENT_ID: test_id
-          SPOTIFY_CLIENT_SECRET: test_secret
-          SPOTIFY_REFRESH_TOKEN: test_token
-          OPENAI_API_KEY: test_key
         run: |
           cd backend
           pytest tests/unit/ -v --cov=backend --cov-report=term-missing
