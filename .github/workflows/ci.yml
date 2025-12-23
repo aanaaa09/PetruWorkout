@@ -224,6 +224,7 @@ jobs:
 
       - name: 🧪 Ejecutar tests E2E
         env:
+          CI: true
           DB_HOST: localhost
           DB_PORT: 5432
           DB_NAME: test_db
@@ -239,7 +240,7 @@ jobs:
           OPENAI_API_KEY: test_key
         run: |
           cd backend
-          pytest tests/e2e/ -v --driver Chrome --headless
+          pytest tests/e2e/ -v
 
       - name: 📸 Guardar screenshots si falla
         if: failure()
