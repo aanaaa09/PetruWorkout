@@ -35,7 +35,7 @@ def driver():
     driver.quit()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def base_url():
     """URL base del frontend"""
     return "http://localhost:5173"
