@@ -61,6 +61,10 @@ jobs:
           CALENDLY_API_KEY: test_key
           CALENDLY_USER_URI: test_uri
           CALENDLY_EVENT_URL: test_url
+          SPOTIFY_CLIENT_ID: test_id
+          SPOTIFY_CLIENT_SECRET: test_secret
+          SPOTIFY_REFRESH_TOKEN: test_token
+          OPENAI_API_KEY: test_key
         run: |
           cd backend
           pytest tests/unit/ -v --cov=backend --cov-report=term-missing
@@ -115,12 +119,29 @@ jobs:
           CALENDLY_API_KEY: test_key
           CALENDLY_USER_URI: test_uri
           CALENDLY_EVENT_URL: test_url
+          SPOTIFY_CLIENT_ID: test_id
+          SPOTIFY_CLIENT_SECRET: test_secret
+          SPOTIFY_REFRESH_TOKEN: test_token
+          OPENAI_API_KEY: test_key
         run: |
-          cd backend
-          python -m uvicorn main:app --host 0.0.0.0 --port 5000 &
+          python -m uvicorn backend.main:app --host 0.0.0.0 --port 5000 &
           sleep 10
 
       - name: 🧪 Ejecutar tests de integración
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: test_db
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          EMAIL_API: test_key
+          CALENDLY_API_KEY: test_key
+          CALENDLY_USER_URI: test_uri
+          CALENDLY_EVENT_URL: test_url
+          SPOTIFY_CLIENT_ID: test_id
+          SPOTIFY_CLIENT_SECRET: test_secret
+          SPOTIFY_REFRESH_TOKEN: test_token
+          OPENAI_API_KEY: test_key
         run: |
           cd backend
           pytest tests/integration/ -v
@@ -187,9 +208,12 @@ jobs:
           CALENDLY_API_KEY: test_key
           CALENDLY_USER_URI: test_uri
           CALENDLY_EVENT_URL: test_url
+          SPOTIFY_CLIENT_ID: test_id
+          SPOTIFY_CLIENT_SECRET: test_secret
+          SPOTIFY_REFRESH_TOKEN: test_token
+          OPENAI_API_KEY: test_key
         run: |
-          cd backend
-          python -m uvicorn main:app --host 0.0.0.0 --port 5000 &
+          python -m uvicorn backend.main:app --host 0.0.0.0 --port 5000 &
           sleep 10
 
       - name: 🚀 Iniciar frontend
@@ -199,13 +223,27 @@ jobs:
           sleep 10
 
       - name: 🧪 Ejecutar tests E2E
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: test_db
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          EMAIL_API: test_key
+          CALENDLY_API_KEY: test_key
+          CALENDLY_USER_URI: test_uri
+          CALENDLY_EVENT_URL: test_url
+          SPOTIFY_CLIENT_ID: test_id
+          SPOTIFY_CLIENT_SECRET: test_secret
+          SPOTIFY_REFRESH_TOKEN: test_token
+          OPENAI_API_KEY: test_key
         run: |
           cd backend
           pytest tests/e2e/ -v --driver Chrome --headless
 
       - name: 📸 Guardar screenshots si falla
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-screenshots
           path: backend/tests/e2e/screenshots/
