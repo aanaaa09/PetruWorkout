@@ -200,11 +200,11 @@ def sync_calendly_bookings():
                 # Encontrar el click MÁS CERCANO
                 for click in clicks_previos:
                     # ✅ FIX: Normalizar timestamp del click también
-                    click_timestamp = click.timestamp
-                    if click_timestamp.tzinfo is not None:
-                        click_timestamp = click_timestamp.replace(tzinfo=None)
+                    click_timestamp = click.timestamp.replace(tzinfo=None)
 
-                    diferencia_segundos = abs((booking_datetime_naive - click_timestamp).total_seconds())
+                    diferencia_segundos = abs(
+                        (booking_datetime_naive - click_timestamp).total_seconds()
+                    )
 
                     if diferencia_segundos < mejor_diferencia:
                         mejor_diferencia = diferencia_segundos
