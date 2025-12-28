@@ -1,0 +1,84 @@
+# .github/workflows/backup_railway.yml
+# Backup incremental mensual desde Railway
+
+name: 📦 Backup Mensual Railway
+
+on:
+  schedule:
+    # El día 1 de cada mes a las 3:00 AM UTC (4:00 AM España)
+    - cron: '0 3 1 * *'
+
+  # Permite ejecutar manualmente
+  workflow_dispatch:
+
+jobs:
+  backup-railway:
+    name: Descargar backup desde Railway
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Instalar psycopg2
+        run: |
+          pip install psycopg2-binary
+
+      - name: 📥 Descargar backup incremental
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "🔄 Conectando a Railway..."
+          python backend/backup_railway.py
+
+      - name: 📊 Mostrar estadísticas
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📦 RESUMEN DEL BACKUP"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          ls -lh backups/*.sql | tail -1
+          echo ""
+          echo "📁 Archivos de backup:"
+          ls -1 backups/
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: 💾 Commit y push del backup
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add backups/
+          
+          # Solo hacer commit si hay cambios
+          if git diff --staged --quiet; then
+            echo "ℹ️  No hay datos nuevos para respaldar"
+          else
+            FECHA=$(date '+%Y-%m-%d')
+            git commit -m "📦 Backup mensual Railway - $FECHA"
+            git push
+            echo "✅ Backup subido a GitHub"
+          fi
+
+      - name: ✅ Backup completado
+        if: success()
+        run: |
+          echo "✅ BACKUP COMPLETADO EXITOSAMENTE"
+          echo "📅 $(date '+%Y-%m-%d %H:%M:%S %Z')"
+
+      - name: ❌ Error en backup
+        if: failure()
+        run: |
+          echo "❌ ERROR EN EL BACKUP"
+          echo "🔍 Revisa los logs arriba para más detalles"
+          exit 1
