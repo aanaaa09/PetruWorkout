@@ -9,7 +9,8 @@ jobs:
   backup-railway:
     name: Descargar backup desde Railway
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
       - name: 📥 Checkout código
         uses: actions/checkout@v4
