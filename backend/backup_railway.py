@@ -35,13 +35,26 @@ class RailwayBackup:
         self.backup_dir.mkdir(exist_ok=True)
         self.log_file = self.backup_dir / 'backup-log.json'
 
+        # Detectar si estamos corriendo dentro de Railway (via Railway CLI)
+        # o desde GitHub Actions con conexión directa
+        db_host = os.getenv('DB_HOST', 'postgres.railway.internal')
+
+        # Si estamos usando Railway CLI, usar variables internas
+        if 'railway.internal' in db_host or os.getenv('RAILWAY_ENVIRONMENT'):
+            logger.info("🚂 Usando Railway CLI (conexión interna)")
+            db_host = 'postgres.railway.internal'
+            db_port = '5432'
+        else:
+            logger.info("🌐 Usando conexión pública")
+            db_port = os.getenv('DB_PORT', '5432')
+
         # Conectar a Railway
         try:
             self.conn = psycopg2.connect(
-                host=os.getenv('DB_HOST'),
-                port=os.getenv('DB_PORT'),
-                database=os.getenv('DB_NAME'),
-                user=os.getenv('DB_USER'),
+                host=db_host,
+                port=db_port,
+                database=os.getenv('DB_NAME', 'railway'),
+                user=os.getenv('DB_USER', 'postgres'),
                 password=os.getenv('DB_PASSWORD')
             )
             logger.info("✅ Conectado a Railway")

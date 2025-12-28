@@ -27,20 +27,22 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: 📦 Instalar Railway CLI
+        run: |
+          npm install -g @railway/cli
+
       - name: 📦 Instalar psycopg2
         run: |
           pip install psycopg2-binary
 
-      - name: 📥 Descargar backup incremental
+      - name: 📥 Descargar backup usando Railway CLI
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
-          echo "🔄 Conectando a Railway..."
-          python backend/backup_railway.py
+          echo "🔄 Conectando a Railway vía CLI..."
+          railway link ${{ secrets.RAILWAY_SERVICE_NAME }}
+          railway run python backend/backup_railway.py
 
       - name: 📊 Mostrar estadísticas
         run: |
