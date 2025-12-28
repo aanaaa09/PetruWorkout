@@ -1,6 +1,5 @@
 # backend/sync_calendly.py
 import requests
-import os
 from datetime import datetime, timedelta
 from backend.config.database import SessionLocal
 from backend.config.settings import settings
@@ -9,37 +8,10 @@ from backend.models.calendly_booking import CalendlyBooking
 from backend.models.calendly_click import CalendlyClick
 from backend.models.page_visit import PageVisit
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def analizar_patron_trafico(db, booking_datetime, clicks_previos):
-    """
-    Analiza el patrón de tráfico cuando el click más cercano es muy antiguo
-    """
-    from collections import Counter
-    sources = [c.traffic_source for c in clicks_previos]
-
-    if not sources:
-        return "direct"
-
-    source_counts = Counter(sources)
-
-    # Si hay un source claramente dominante (>50%), usarlo
-    total = len(sources)
-    for source, count in source_counts.most_common():
-        if count / total > 0.5:
-            return source
-
-    # Sino, usar el más reciente de los más comunes
-    top_sources = [s for s, c in source_counts.most_common(3)]
-
-    for click in clicks_previos:
-        if click.traffic_source in top_sources:
-            return click.traffic_source
-
-    return "direct"
 
 
 def sync_calendly_bookings():
@@ -112,7 +84,7 @@ def sync_calendly_bookings():
         for event in eventos_recientes:
             event_uri = event["uri"]
             event_start = event["start_time"]
-            created_at = event.get("created_at")  # ← Hora real del booking
+            created_at = event.get("created_at")
 
             # Obtener datos del asistente
             invitees_url = f"{event_uri}/invitees"
@@ -136,20 +108,13 @@ def sync_calendly_bookings():
             except:
                 event_datetime = datetime.utcnow()
 
-            # ✅ CLAVE: Usar created_at (hora del booking) para matching
             try:
                 if created_at:
                     booking_datetime = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
                 else:
-                    booking_datetime = event_datetime
+                    booking_datetime = None
             except:
-                booking_datetime = event_datetime
-
-            # Quitar timezone para comparaciones
-            booking_datetime_naive = booking_datetime.replace(tzinfo=None)
-
-            logger.info(f"\n🔍 Procesando: {email}")
-            logger.info(f"   📅 Booking realizado: {booking_datetime_naive.strftime('%Y-%m-%d %H:%M:%S')}")
+                booking_datetime = None
 
             # Comprobar si ya existe
             existe = db.query(CalendlyBooking).filter(
@@ -157,103 +122,48 @@ def sync_calendly_bookings():
             ).first()
 
             if existe:
-                logger.info(f"⏭️  Ya existe en BD, saltando...")
+                logger.info(f"⏭️ Ya existe: {email} - {event_uri[:30]}...")
                 continue
 
-            # ========================================
-            # 🎯 ALGORITMO MEJORADO DE MATCHING
-            # ========================================
+            # Buscar click más cercano
+            search_time = booking_datetime if booking_datetime else event_datetime
 
-            # PASO 1: Buscar clicks ANTES del booking (ventana de 7 días)
-            ventana_dias = 7
-            ventana_inicio = booking_datetime_naive - timedelta(days=ventana_dias)
-
-            clicks_previos = db.query(CalendlyClick).filter(
-                CalendlyClick.timestamp >= ventana_inicio,
-                CalendlyClick.timestamp <= booking_datetime_naive
+            clicks = db.query(CalendlyClick).filter(
+                CalendlyClick.timestamp <= search_time
             ).order_by(
                 CalendlyClick.timestamp.desc()
-            ).all()
-
-            logger.info(f"   🔎 Clicks encontrados en ventana de {ventana_dias} días: {len(clicks_previos)}")
+            ).limit(50).all()
 
             session_id = None
             traffic_source = "direct"
-            mejor_match = None
-            mejor_diferencia = float('inf')
 
-            if clicks_previos:
-                # Encontrar el click MÁS CERCANO al booking
-                for click in clicks_previos:
-                    # Calcular diferencia en segundos
-                    diferencia_segundos = (booking_datetime_naive - click.timestamp).total_seconds()
+            if clicks:
+                closest_click = min(
+                    clicks,
+                    key=lambda c: abs((search_time - c.timestamp).total_seconds())
+                )
 
-                    # Solo considerar clicks que fueron ANTES del booking
-                    if diferencia_segundos >= 0:
-                        if diferencia_segundos < mejor_diferencia:
-                            mejor_diferencia = diferencia_segundos
-                            mejor_match = click
-
-                if mejor_match:
-                    diferencia_horas = mejor_diferencia / 3600
-                    diferencia_minutos = (mejor_diferencia % 3600) / 60
-
-
-                    if diferencia_horas <= 2:
-                        # Match PERFECTO: click en las últimas 2 horas
-                        session_id = mejor_match.session_id
-                        traffic_source = mejor_match.traffic_source
-                        logger.info(f"   ✅ MATCH PERFECTO: {traffic_source}")
-                        logger.info(f"      ⏱️  Click hace {int(diferencia_horas)}h {int(diferencia_minutos)}min")
-                        logger.info(f"      🆔 Session: {session_id[:10]}...")
-
-                    elif diferencia_horas <= 24:
-                        # Match BUENO: click en las últimas 24 horas
-                        session_id = mejor_match.session_id
-                        traffic_source = mejor_match.traffic_source
-                        logger.info(f"   ✅ MATCH BUENO: {traffic_source}")
-                        logger.info(f"      ⏱️  Click hace {int(diferencia_horas)}h {int(diferencia_minutos)}min")
-                        logger.info(f"      🆔 Session: {session_id[:10]}...")
-
-                    elif diferencia_horas <= 72:
-                        # Match ACEPTABLE: click en los últimos 3 días
-                        session_id = mejor_match.session_id
-                        traffic_source = mejor_match.traffic_source
-                        logger.info(f"   ⚠️  MATCH ACEPTABLE: {traffic_source}")
-                        logger.info(f"      ⏱️  Click hace {diferencia_horas:.1f}h ({diferencia_horas / 24:.1f} días)")
-                        logger.info(f"      🆔 Session: {session_id[:10]}...")
-
-                    else:
-                        # Click muy antiguo, usar análisis de tráfico
-                        logger.info(f"   ⚠️  Click más cercano es muy antiguo ({diferencia_horas / 24:.1f} días)")
-                        logger.info(f"   📊 Analizando patrón de tráfico...")
-                        traffic_source = analizar_patron_trafico(db, booking_datetime_naive, clicks_previos)
-                        logger.info(f"   🎯 Source inferido por patrón: {traffic_source}")
+                diferencia_segundos = (search_time - closest_click.timestamp).total_seconds()
+                if diferencia_segundos <= 7 * 24 * 3600:
+                    session_id = closest_click.session_id
+                    traffic_source = closest_click.traffic_source
+                    logger.info(
+                        f"🔗 Click vinculado: {traffic_source} ({diferencia_segundos / 3600:.1f}h antes del booking)")
                 else:
-                    logger.info(f"   ⚠️  No hay clicks válidos antes del booking")
-
-            # PASO 2: Si no hay clicks, analizar visitas
-            if traffic_source == "direct":
-                logger.info(f"   🔍 Sin clicks válidos, buscando visitas...")
+                    logger.info(f"⏰ Click muy antiguo ({diferencia_segundos / 86400:.1f} días), marcando como 'direct'")
+            else:
+                logger.info(f"🔍 Sin clicks, buscando visitas alternativas...")
                 visitas = db.query(PageVisit).filter(
-                    PageVisit.timestamp >= ventana_inicio,
-                    PageVisit.timestamp <= booking_datetime_naive
-                ).order_by(PageVisit.timestamp.desc()).all()
+                    PageVisit.timestamp >= search_time - timedelta(days=30),
+                    PageVisit.timestamp <= search_time
+                ).order_by(PageVisit.timestamp.desc()).limit(20).all()
 
                 if visitas:
-                    # Contar sources más frecuentes
                     sources = [v.traffic_source for v in visitas]
-                    from collections import Counter
-                    source_counts = Counter(sources)
-                    traffic_source = source_counts.most_common(1)[0][0]
-                    logger.info(
-                        f"   📊 Source más común en visitas: {traffic_source} ({source_counts[traffic_source]} visitas)")
-                else:
-                    logger.info(f"   ℹ️  Sin visitas registradas, marcando como 'direct'")
+                    traffic_source = max(set(sources), key=sources.count)
+                    logger.info(f"📊 Usando source más común: {traffic_source}")
 
-            # ========================================
-            # 💾 GUARDAR RESERVA
-            # ========================================
+            # Guardar reserva
             tracking_crud.create_calendly_booking(
                 db=db,
                 calendly_event_id=event_uri,
@@ -266,14 +176,18 @@ def sync_calendly_bookings():
             )
 
             nuevas_reservas += 1
-            logger.info(f"   ✅ Reserva guardada en BD")
-            logger.info(f"   📧 Email: {email}")
-            logger.info(f"   🎯 Source final: {traffic_source}")
 
-        logger.info(f"\n{'=' * 60}")
-        logger.info(f"🎉 FINALIZADO")
-        logger.info(f"📊 Nuevas reservas procesadas: {nuevas_reservas}/{len(eventos_recientes)}")
-        logger.info(f"{'=' * 60}\n")
+            booking_time_str = booking_datetime.strftime("%Y-%m-%d %H:%M") if booking_datetime else "N/A"
+            logger.info(f"✅ Reserva guardada: {email}")
+            logger.info(f"   📅 Booking: {booking_time_str} | Reunión: {event_datetime.strftime('%Y-%m-%d %H:%M')}")
+            logger.info(f"   🎯 Source: {traffic_source} | Session: {session_id[:10] if session_id else 'N/A'}")
+
+        logger.info(f"🎉 Finalizado. Nuevas reservas: {nuevas_reservas}/{len(eventos_recientes)}")
+
+        if nuevas_reservas > 0:
+            logger.info(f"💾 Se guardaron {nuevas_reservas} nuevas reservas en la BD")
+        else:
+            logger.info(f"ℹ️ No hay reservas nuevas para procesar")
 
     except Exception as e:
         logger.error(f"❌ Error en sincronización: {e}")
