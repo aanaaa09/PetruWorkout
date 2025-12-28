@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from collections import Counter
 
 # ✅ IMPORTAR SOLO LO NECESARIO
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from backend.config.settings import settings
@@ -62,7 +62,7 @@ def sync_calendly_bookings():
             db = SessionLocal()
 
             # ✅ CRÍTICO: Probar la conexión
-            db.execute("SELECT 1")
+            db.execute(text("SELECT 1"))
             logger.info("✅ Conexión a Railway exitosa")
         except Exception as e:
             logger.error(f"❌ Error conectando a Railway: {e}")
