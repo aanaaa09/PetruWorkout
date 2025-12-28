@@ -1,12 +1,8 @@
-# .github/workflows/sync-calendly.yml
 name: Sincronizar Calendly
 
 on:
   schedule:
-    # Ejecutar cada 24 horas a las 2:00 AM UTC (4:00 AM España verano, 3:00 AM invierno)
     - cron: '0 2 * * *'
-
-  # Permite ejecutar manualmente desde GitHub
   workflow_dispatch:
 
 jobs:
@@ -23,6 +19,10 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: 📦 Instalar Railway CLI
+        run: |
+          npm install -g @railway/cli
+
       - name: 📦 Instalar dependencias
         run: |
           python -m pip install --upgrade pip
@@ -30,18 +30,10 @@ jobs:
 
       - name: 📅 Sincronizar Calendly
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          CALENDLY_API_KEY: ${{ secrets.CALENDLY_API_KEY }}
-          CALENDLY_USER_URI: ${{ secrets.CALENDLY_USER_URI }}
-          CALENDLY_EVENT_URL: ${{ secrets.CALENDLY_EVENT_URL }}
-          EMAIL_API: ${{ secrets.EMAIL_API }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           echo "🔄 Iniciando sincronización de Calendly..."
-          python -m backend.sync_calendly
+          railway run python -m backend.sync_calendly
           echo "✅ Sincronización completada"
 
       - name: 📊 Resumen
