@@ -19,10 +19,6 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: 📦 Instalar Railway CLI
-        run: |
-          npm install -g @railway/cli
-
       - name: 📦 Instalar dependencias
         run: |
           python -m pip install --upgrade pip
@@ -30,10 +26,12 @@ jobs:
 
       - name: 📅 Sincronizar Calendly
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          CALENDLY_API_KEY: ${{ secrets.CALENDLY_API_KEY }}
+          CALENDLY_USER_URI: ${{ secrets.CALENDLY_USER_URI }}
         run: |
           echo "🔄 Iniciando sincronización de Calendly..."
-          railway run --service Postgres python -m backend.sync_calendly
+          python -m backend.sync_calendly
           echo "✅ Sincronización completada"
 
       - name: 📊 Resumen

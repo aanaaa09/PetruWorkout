@@ -35,30 +35,21 @@ class RailwayBackup:
         self.backup_dir.mkdir(exist_ok=True)
         self.log_file = self.backup_dir / 'backup-log.json'
 
-        # Railway CLI inyecta PGHOST, PGPORT, etc. automáticamente
-        # Usarlas directamente sin intentar detectar Railway
-        db_host = os.getenv('PGHOST', os.getenv('DB_HOST', 'localhost'))
-        db_port = os.getenv('PGPORT', os.getenv('DB_PORT', '5432'))
-        db_name = os.getenv('PGDATABASE', os.getenv('DB_NAME', 'railway'))
-        db_user = os.getenv('PGUSER', os.getenv('DB_USER', 'postgres'))
-        db_password = os.getenv('PGPASSWORD', os.getenv('DB_PASSWORD'))
+        # Obtener URL de Railway desde variable de entorno
+        database_url = os.getenv('DATABASE_URL')
 
-        logger.info(f"🔌 Conectando a {db_host}:{db_port}")
+        if not database_url:
+            logger.error("❌ DATABASE_URL no configurada")
+            sys.exit(1)
 
-        # Conectar a Railway
+        logger.info(f"🔌 Conectando a Railway...")
+
         try:
-            self.conn = psycopg2.connect(
-                host=db_host,
-                port=db_port,
-                database=db_name,
-                user=db_user,
-                password=db_password
-            )
+            self.conn = psycopg2.connect(database_url)
             logger.info("✅ Conectado a Railway")
         except Exception as e:
             logger.error(f"❌ Error conectando a Railway: {e}")
             sys.exit(1)
-
     def cargar_log(self):
         """Carga registro de últimos backups"""
         if self.log_file.exists():
