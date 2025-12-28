@@ -33,7 +33,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           echo "🔄 Iniciando sincronización de Calendly..."
-          railway run python -m backend.sync_calendly
+          railway run --service Postgres python -m backend.sync_calendly
           echo "✅ Sincronización completada"
 
       - name: 📊 Resumen

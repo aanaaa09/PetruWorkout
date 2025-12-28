@@ -34,7 +34,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           echo "🔄 Conectando a Railway vía CLI..."
-          railway run python backend/backup_railway.py
+          railway run --service Postgres python backend/backup_railway.py
 
       - name: 📊 Mostrar estadísticas
         run: |
