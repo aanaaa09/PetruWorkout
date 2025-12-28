@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -8,17 +9,45 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+# Detectar variables de Railway CLI (PG*) o usar settings
+def get_database_url():
+    """
+    Construye la URL de la base de datos.
+    Prioridad: Variables de Railway (PG*) > Variables custom (DB_*) > settings
+    """
+    # Railway CLI inyecta estas variables automáticamente
+    pg_host = os.getenv('PGHOST')
+    pg_port = os.getenv('PGPORT')
+    pg_database = os.getenv('PGDATABASE')
+    pg_user = os.getenv('PGUSER')
+    pg_password = os.getenv('PGPASSWORD')
+
+    # Si Railway CLI inyectó las variables, usarlas
+    if pg_host and pg_password:
+        url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}"
+        logger.info(f"🚂 Usando variables de Railway CLI: {pg_host}:{pg_port}")
+        return url
+
+    # Sino, usar settings (para backend local o en Railway)
+    logger.info("🌐 Usando configuración de settings")
+    return settings.DATABASE_URL
+
+
+DATABASE_URL = get_database_url()
+
 # ✅ Pool pequeño optimizado para Railway con poco tráfico
 engine = create_engine(
-    settings.DATABASE_URL,
+    DATABASE_URL,
     poolclass=QueuePool,
-    pool_size=2,              # Solo 2 conexiones persistentes (antes 5)
-    max_overflow=1,           # Máximo 1 conexión extra si hay pico (antes 10)
-    pool_recycle=300,         # Reciclar conexiones cada 5 min (evita conexiones muertas)
-    pool_pre_ping=True,       # Verifica conexión antes de usarla
-    pool_timeout=10,          # Timeout reducido
+    pool_size=2,
+    max_overflow=1,
+    pool_recycle=300,
+    pool_pre_ping=True,
+    pool_timeout=10,
     echo=False,
 )
+
 
 # ✅ SessionLocal optimizado
 SessionLocal = sessionmaker(

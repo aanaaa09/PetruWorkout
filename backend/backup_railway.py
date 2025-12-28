@@ -35,27 +35,24 @@ class RailwayBackup:
         self.backup_dir.mkdir(exist_ok=True)
         self.log_file = self.backup_dir / 'backup-log.json'
 
-        # Detectar si estamos corriendo dentro de Railway (via Railway CLI)
-        # o desde GitHub Actions con conexión directa
-        db_host = os.getenv('DB_HOST', 'postgres.railway.internal')
+        # Railway CLI inyecta PGHOST, PGPORT, etc. automáticamente
+        # Usarlas directamente sin intentar detectar Railway
+        db_host = os.getenv('PGHOST', os.getenv('DB_HOST', 'localhost'))
+        db_port = os.getenv('PGPORT', os.getenv('DB_PORT', '5432'))
+        db_name = os.getenv('PGDATABASE', os.getenv('DB_NAME', 'railway'))
+        db_user = os.getenv('PGUSER', os.getenv('DB_USER', 'postgres'))
+        db_password = os.getenv('PGPASSWORD', os.getenv('DB_PASSWORD'))
 
-        # Si estamos usando Railway CLI, usar variables internas
-        if 'railway.internal' in db_host or os.getenv('RAILWAY_ENVIRONMENT'):
-            logger.info("🚂 Usando Railway CLI (conexión interna)")
-            db_host = 'postgres.railway.internal'
-            db_port = '5432'
-        else:
-            logger.info("🌐 Usando conexión pública")
-            db_port = os.getenv('DB_PORT', '5432')
+        logger.info(f"🔌 Conectando a {db_host}:{db_port}")
 
         # Conectar a Railway
         try:
             self.conn = psycopg2.connect(
                 host=db_host,
                 port=db_port,
-                database=os.getenv('DB_NAME', 'railway'),
-                user=os.getenv('DB_USER', 'postgres'),
-                password=os.getenv('DB_PASSWORD')
+                database=db_name,
+                user=db_user,
+                password=db_password
             )
             logger.info("✅ Conectado a Railway")
         except Exception as e:
