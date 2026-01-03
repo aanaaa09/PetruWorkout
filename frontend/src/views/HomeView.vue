@@ -5,7 +5,7 @@
     <VideoSection />
     <ResultsSection />
     <SimpleFooter @show-legal="showLegalPage" />
-
+    <WhatsAppButton />
     <component
       v-if="currentLegalPage"
       :is="currentLegalComponent"
@@ -23,6 +23,7 @@ import SimpleFooter from '@/components/navigation/SimpleFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
 import LegalNotice from '@/components/legal/LegalNotice.vue'
+import WhatsAppButton from '@/components/shared/WhatsAppButton.vue'
 
 export default {
   name: 'HomeView',
@@ -32,6 +33,7 @@ export default {
     VideoSection,
     ResultsSection,
     SimpleFooter,
+    WhatsAppButton,
     PrivacyPolicy,
     TermsConditions,
     LegalNotice

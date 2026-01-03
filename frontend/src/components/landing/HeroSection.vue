@@ -47,7 +47,7 @@
     class="btn btn-whatsapp"
     @click="handleWhatsAppClick"
   >
-    💬 CONTACTAR POR WHATSAPP
+    💬 CONTACTAR CON PETRU
   </a>
 </div>
 

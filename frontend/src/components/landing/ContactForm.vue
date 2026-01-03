@@ -21,7 +21,6 @@
             <span class="info-icon">📱</span>
             <div>
               <h4>WhatsApp</h4>
-              <p>Disponible para clientes</p>
             </div>
           </div>
 

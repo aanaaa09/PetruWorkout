@@ -22,6 +22,15 @@
           >
             📅 Agendar Llamada
           </a>
+          <a
+            href="https://wa.link/svhddh"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn-whatsapp"
+    @click="handleWhatsAppClick"
+  >
+    💬 Contactar con Petru
+  </a>
         </li>
         <li>
           <router-link
@@ -69,6 +78,12 @@ export default {
       this.menuOpen = false
       trackCalendlyClick('simple-navbar-cta-button', 'simple-navbar')
     },
+    handleWhatsAppClick() {
+  this.menuOpen = false
+  import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
+    trackWhatsAppClick('simple-navbar-whatsapp-button', 'simple-navbar')
+  })
+},
     handleMoreInfoClick() {
       this.menuOpen = false
       this.scrollToTop()
@@ -109,13 +124,13 @@ export default {
   background: rgba(13, 13, 13, 0.95);
   backdrop-filter: blur(20px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-  padding: 0.75rem 0;
+  padding: 1rem 0;
 }
 
 .navbar-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 1.25rem 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -176,7 +191,28 @@ export default {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
 }
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
 
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
+}
 .mobile-toggle {
   display: none;
   flex-direction: column;

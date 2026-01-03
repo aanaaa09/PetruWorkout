@@ -7,6 +7,7 @@
       <GuaranteeSection />
       <TestimonialsSection id="testimonios" />
       <ContactForm id="contacto" />
+      <WhatsAppButton />
     </main>
     <FullFooter @show-legal="showLegalPage" />
 
@@ -29,6 +30,7 @@ import FullFooter from '@/components/navigation/FullFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
 import LegalNotice from '@/components/legal/LegalNotice.vue'
+import WhatsAppButton from '@/components/shared/WhatsAppButton.vue'
 
 export default {
   name: 'InfoView',
@@ -40,6 +42,7 @@ export default {
     TestimonialsSection,
     ContactForm,
     FullFooter,
+    WhatsAppButton,
     PrivacyPolicy,
     TermsConditions,
     LegalNotice
