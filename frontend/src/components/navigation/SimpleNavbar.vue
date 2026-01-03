@@ -130,12 +130,11 @@ export default {
 .navbar-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.25rem 0;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .logo {
   font-size: 1.5rem;
   font-weight: 900;
@@ -151,12 +150,11 @@ export default {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-
 .btn-cta,
 .btn-info {
   display: inline-flex;

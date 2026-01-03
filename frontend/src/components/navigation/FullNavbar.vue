@@ -128,7 +128,7 @@ export default {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 2.5rem;
+  gap: 1rem;
   list-style: none;
   margin: 0;
   padding: 0;
