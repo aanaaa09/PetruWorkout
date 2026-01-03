@@ -255,7 +255,7 @@ async function trackWhatsAppClick(buttonId, buttonLocation) {
       button_id: buttonId || 'unknown-whatsapp',
       button_location: buttonLocation || 'unknown',
       page_url: window.location.pathname,
-      via_whatsapp: false // Este click ES de WhatsApp, no viene de WhatsApp
+      via_whatsapp: true
     };
 
     const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
