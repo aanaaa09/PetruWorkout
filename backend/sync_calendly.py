@@ -1,10 +1,12 @@
 # backend/sync_calendly.py
+"""
+Sincronización de reservas de Calendly con matching inteligente en 2 pasos
+"""
 import requests
 import os
 from datetime import datetime, timedelta
 from collections import Counter
 
-# ✅ IMPORTAR SOLO LO NECESARIO
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
@@ -44,12 +46,11 @@ def analizar_patron_trafico(db, booking_datetime, clicks_previos):
 def sync_calendly_bookings():
     """
     Obtiene eventos de Calendly y los vincula con clicks
+    Matching en 2 pasos con validación de margen de 5 minutos
     """
-    # ✅ SOLUCIÓN: Detectar si estamos en GitHub Actions o local
     database_url = os.getenv('DATABASE_URL')
 
     if database_url:
-        # GitHub Actions: usar DATABASE_URL directamente
         logger.info("🚂 Conectando a Railway via DATABASE_URL (GitHub Actions)")
         try:
             engine = create_engine(
@@ -60,21 +61,17 @@ def sync_calendly_bookings():
             )
             SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
             db = SessionLocal()
-
-            # ✅ CRÍTICO: Probar la conexión
             db.execute(text("SELECT 1"))
             logger.info("✅ Conexión a Railway exitosa")
         except Exception as e:
             logger.error(f"❌ Error conectando a Railway: {e}")
             return
     else:
-        # Local: usar configuración de settings
         logger.info("💻 Conectando a BD local via settings")
         from backend.config.database import SessionLocal
         db = SessionLocal()
 
     try:
-        # Verificar que las API keys no sean de test
         if settings.CALENDLY_API_KEY == "test_key":
             logger.error("❌ CALENDLY_API_KEY es de test, no puede funcionar")
             return
@@ -195,54 +192,114 @@ def sync_calendly_bookings():
 
             logger.info(f"   🕐 Booking: {booking_datetime_naive.strftime('%Y-%m-%d %H:%M:%S')}")
 
-            # Buscar clicks
+            # ========================================
+            # MATCHING EN 2 PASOS CON VALIDACIÓN DE 5 MINUTOS
+            # ========================================
             ventana_dias = 7
             ventana_inicio = booking_datetime_naive - timedelta(days=ventana_dias)
 
-            clicks_previos = db.query(CalendlyClick).filter(
+            session_id = None
+            traffic_source = "direct"
+            via_whatsapp = False
+            match_final = None
+
+            # ========================================
+            # PASO 1: Buscar clicks con via_whatsapp = False
+            # ========================================
+            logger.info(f"   🔍 PASO 1: Buscando clicks directos a Calendly (via_whatsapp=False)...")
+
+            clicks_calendly = db.query(CalendlyClick).filter(
                 CalendlyClick.timestamp >= ventana_inicio,
-                CalendlyClick.timestamp <= booking_datetime_naive
+                CalendlyClick.timestamp <= booking_datetime_naive,
+                CalendlyClick.via_whatsapp == False
             ).order_by(
                 CalendlyClick.timestamp.desc()
             ).all()
 
-            logger.info(f"   🔎 Clicks encontrados: {len(clicks_previos)}")
+            logger.info(f"   📊 Clicks Calendly encontrados: {len(clicks_calendly)}")
 
-            session_id = None
-            traffic_source = "direct"
-            mejor_match = None
-            mejor_diferencia = float('inf')
+            if clicks_calendly:
+                # Buscar el click MÁS CERCANO
+                mejor_match_calendly = None
+                menor_diferencia_calendly = float('inf')
 
-            if clicks_previos:
-                for click in clicks_previos:
+                for click in clicks_calendly:
                     click_timestamp = click.timestamp.replace(tzinfo=None)
                     diferencia_segundos = abs(
                         (booking_datetime_naive - click_timestamp).total_seconds()
                     )
 
-                    if diferencia_segundos < mejor_diferencia:
-                        mejor_diferencia = diferencia_segundos
-                        mejor_match = click
+                    if diferencia_segundos < menor_diferencia_calendly:
+                        menor_diferencia_calendly = diferencia_segundos
+                        mejor_match_calendly = click
 
-                if mejor_match:
-                    diferencia_horas = mejor_diferencia / 3600
-                    session_id = mejor_match.session_id
-                    traffic_source = mejor_match.traffic_source
+                if mejor_match_calendly:
+                    diferencia_minutos = menor_diferencia_calendly / 60
 
-                    if diferencia_horas <= 2:
-                        logger.info(f"   ✅ MATCH PERFECTO: {traffic_source} ({diferencia_horas:.1f}h)")
-                    elif diferencia_horas <= 24:
-                        logger.info(f"   ✅ MATCH BUENO: {traffic_source} ({diferencia_horas:.1f}h)")
-                    elif diferencia_horas <= 72:
-                        logger.info(f"   ⚠️  MATCH ACEPTABLE: {traffic_source} ({diferencia_horas / 24:.1f} días)")
+                    logger.info(f"   🎯 Click Calendly más cercano: {diferencia_minutos:.1f} minutos")
+                    logger.info(f"   📱 Button: {mejor_match_calendly.button_id}")
+
+                    # ✅ VALIDAR: Si está dentro de 5 minutos, usar este match
+                    if diferencia_minutos <= 5:
+                        match_final = mejor_match_calendly
+                        session_id = mejor_match_calendly.session_id
+                        traffic_source = mejor_match_calendly.traffic_source
+                        via_whatsapp = False
+
+                        logger.info(f"   ✅ MATCH VÁLIDO (≤5min): {traffic_source} - Via Calendly DIRECTO")
                     else:
-                        traffic_source = analizar_patron_trafico(db, booking_datetime_naive, clicks_previos)
-                        logger.info(f"   📊 Source por patrón: {traffic_source}")
-            else:
-                logger.info(f"   ℹ️  Sin clicks")
+                        logger.info(f"   ⚠️  Diferencia > 5 minutos - Buscando en clicks de WhatsApp...")
 
-            # Fallback a visitas
-            if traffic_source == "direct":
+            # ========================================
+            # PASO 2: Si NO hay match válido, buscar en via_whatsapp = True
+            # ========================================
+            if not match_final:
+                logger.info(f"   🔍 PASO 2: Buscando clicks via WhatsApp (via_whatsapp=True)...")
+
+                clicks_whatsapp = db.query(CalendlyClick).filter(
+                    CalendlyClick.timestamp >= ventana_inicio,
+                    CalendlyClick.timestamp <= booking_datetime_naive,
+                    CalendlyClick.via_whatsapp == True
+                ).order_by(
+                    CalendlyClick.timestamp.desc()
+                ).all()
+
+                logger.info(f"   📊 Clicks WhatsApp encontrados: {len(clicks_whatsapp)}")
+
+                if clicks_whatsapp:
+                    # Buscar el click MÁS CERCANO de WhatsApp
+                    mejor_match_whatsapp = None
+                    menor_diferencia_whatsapp = float('inf')
+
+                    for click in clicks_whatsapp:
+                        click_timestamp = click.timestamp.replace(tzinfo=None)
+                        diferencia_segundos = abs(
+                            (booking_datetime_naive - click_timestamp).total_seconds()
+                        )
+
+                        if diferencia_segundos < menor_diferencia_whatsapp:
+                            menor_diferencia_whatsapp = diferencia_segundos
+                            mejor_match_whatsapp = click
+
+                    if mejor_match_whatsapp:
+                        diferencia_minutos = menor_diferencia_whatsapp / 60
+
+                        match_final = mejor_match_whatsapp
+                        session_id = mejor_match_whatsapp.session_id
+                        traffic_source = mejor_match_whatsapp.traffic_source
+                        via_whatsapp = True
+
+                        logger.info(f"   ✅ MATCH VIA WHATSAPP: {traffic_source} ({diferencia_minutos:.1f}min)")
+                        logger.info(f"   📱 Button: {mejor_match_whatsapp.button_id}")
+                else:
+                    logger.info(f"   ℹ️  Sin clicks de WhatsApp en la ventana")
+
+            # ========================================
+            # PASO 3: Fallback a visitas si no hay clicks
+            # ========================================
+            if not match_final:
+                logger.info(f"   🔍 PASO 3: Fallback a análisis de visitas...")
+
                 visitas = db.query(PageVisit).filter(
                     PageVisit.timestamp >= ventana_inicio,
                     PageVisit.timestamp <= booking_datetime_naive
@@ -253,8 +310,12 @@ def sync_calendly_bookings():
                     source_counts = Counter(sources)
                     traffic_source = source_counts.most_common(1)[0][0]
                     logger.info(f"   📊 Source por visitas: {traffic_source}")
+                else:
+                    logger.info(f"   ℹ️  Sin visitas ni clicks - usando 'direct'")
 
-            # ✅ GUARDAR EN BD
+            # ========================================
+            # GUARDAR EN BD
+            # ========================================
             try:
                 booking = tracking_crud.create_calendly_booking(
                     db=db,
@@ -264,10 +325,10 @@ def sync_calendly_bookings():
                     event_start_time=event_datetime,
                     booking_timestamp=booking_datetime_naive,
                     session_id=session_id,
-                    traffic_source=traffic_source
+                    traffic_source=traffic_source,
+                    via_whatsapp=via_whatsapp
                 )
 
-                # ✅ CRÍTICO: Hacer flush para asegurar que se escriba
                 db.flush()
 
                 # Verificar que se guardó
@@ -277,18 +338,19 @@ def sync_calendly_bookings():
 
                 if verificar:
                     nuevas_reservas += 1
-                    logger.info(f"   ✅ GUARDADO (ID: {verificar.id})")
-                    logger.info(f"   🎯 Source: {traffic_source}")
+                    logger.info(f"   ✅ GUARDADO EN BD (ID: {verificar.id})")
+                    logger.info(f"   🎯 Traffic Source: {traffic_source}")
+                    logger.info(f"   {'📱 Via WhatsApp: SÍ' if via_whatsapp else '🖥️  Via Calendly: DIRECTO'}")
                 else:
-                    logger.error(f"   ❌ NO SE GUARDÓ")
+                    logger.error(f"   ❌ NO SE GUARDÓ EN BD")
 
             except Exception as e:
-                logger.error(f"   ❌ Error: {e}")
+                logger.error(f"   ❌ Error guardando: {e}")
                 db.rollback()
                 import traceback
                 traceback.print_exc()
 
-        # ✅ CRÍTICO: Hacer commit final
+        # Commit final
         try:
             db.commit()
             logger.info(f"\n💾 Commit final exitoso")
