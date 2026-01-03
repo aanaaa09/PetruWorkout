@@ -124,7 +124,7 @@ export default {
   background: rgba(13, 13, 13, 0.95);
   backdrop-filter: blur(20px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-  padding: 1rem 0;
+  padding: 0.75rem 0;
 }
 
 .navbar-container {
@@ -151,7 +151,7 @@ export default {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
