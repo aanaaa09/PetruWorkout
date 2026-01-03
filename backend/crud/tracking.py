@@ -51,7 +51,8 @@ class TrackingCRUD:
             traffic_source: str,
             button_id: str = None,
             button_location: str = None,
-            page_url: str = None
+            page_url: str = None,
+            via_whatsapp: bool = False  # ✅ NUEVO
     ) -> CalendlyClick:
         """Registra un click en botón de Calendly"""
         now_utc = datetime.utcnow()
@@ -63,6 +64,7 @@ class TrackingCRUD:
             button_id=button_id,
             button_location=button_location,
             page_url=page_url,
+            via_whatsapp=via_whatsapp,
             timestamp=now_spain,
             fecha=now_spain.date(),
             dia=now_spain.day,
@@ -81,24 +83,20 @@ class TrackingCRUD:
             invitee_email: str = None,
             invitee_name: str = None,
             event_start_time: datetime = None,
-            booking_timestamp: datetime = None,  # ← NUEVO: hora real del booking
+            booking_timestamp: datetime = None,
             session_id: str = None,
-            traffic_source: str = None
+            traffic_source: str = None,
+            via_whatsapp: bool = False  # ✅ NUEVO
     ) -> CalendlyBooking:
         """Registra una reserva completada en Calendly"""
 
-        # ✅ PRIORIDAD: usar booking_timestamp (created_at de Calendly)
         if booking_timestamp:
-            # Hora en que rellenaron el formulario (lo que necesitas)
             reference_time = booking_timestamp
         elif event_start_time:
-            # Fallback: usar hora del evento si no hay booking_timestamp
             reference_time = event_start_time
         else:
-            # Último fallback: hora actual
             reference_time = datetime.utcnow()
 
-        # Convertir a hora de España (UTC+1)
         if reference_time.tzinfo:
             from datetime import timezone
             spain_tz = timezone(timedelta(hours=1))
@@ -112,22 +110,21 @@ class TrackingCRUD:
             calendly_event_id=calendly_event_id,
             invitee_email=invitee_email,
             invitee_name=invitee_name,
-            event_start_time=event_start_time,  # Hora de la reunión
-
-            # ✅ ESTOS CAMPOS AHORA USAN LA HORA REAL DEL BOOKING
-            timestamp=time_spain,  # Hora en que rellenaron formulario
-            fecha=time_spain.date(),  # Fecha del booking
+            event_start_time=event_start_time,
+            via_whatsapp=via_whatsapp,  # ✅ NUEVO
+            timestamp=time_spain,
+            fecha=time_spain.date(),
             dia=time_spain.day,
             mes=time_spain.month,
             año=time_spain.year,
-            hora=time_spain.time()  # Hora exacta del booking
+            hora=time_spain.time()
         )
 
         db.add(booking)
         db.commit()
         db.refresh(booking)
 
-        logger.info(f"✅ Booking guardado: {invitee_email} - Booking: {time_spain}")
+        logger.info(f"✅ Booking guardado: {invitee_email} - Via WhatsApp: {via_whatsapp}")
 
         return booking
     def get_traffic_stats(self, db: Session, days: int = 30):

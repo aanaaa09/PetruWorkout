@@ -28,16 +28,28 @@
         </div>
 
         <div class="hero-cta">
-          <a
-            href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-primary"
-            @click="handleCalendlyClick"
-          >
-            📅 AGENDAR LLAMADA GRATUITA
-          </a>
-        </div>
+  <!-- Botón Calendly existente -->
+  <a
+    href="https://calendly.com/petruworkout/reunion"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-primary"
+    @click="handleCalendlyClick"
+  >
+    📅 AGENDAR LLAMADA GRATUITA
+  </a>
+
+  <!-- ✅ NUEVO - Botón WhatsApp -->
+  <a
+    href="https://wa.link/svhddh"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-whatsapp"
+    @click="handleWhatsAppClick"
+  >
+    💬 CONTACTAR POR WHATSAPP
+  </a>
+</div>
 
         <div class="guarantee-box">
           <div class="guarantee-text">
@@ -70,13 +82,14 @@
 </template>
 
 <script>
-import { trackCalendlyClick } from '@/utils/tracking.js'
+import { trackCalendlyClick, trackWhatsAppClick } from '@/utils/tracking.js'
+
 export default {
   name: 'HeroSection',
   data() {
     return {
       desktopImage: '/images/petru-hero-optimized.webp',
-    mobileImage: '/images/petru-hero-movil-optimized.webp'
+      mobileImage: '/images/petru-hero-movil-optimized.webp'
     }
   },
   methods: {
@@ -84,12 +97,14 @@ export default {
       e.target.style.display = 'none'
     },
     handleCalendlyClick() {
-      trackCalendlyClick('hero-cta-button', 'hero-section')
+      trackCalendlyClick('hero-calendly-button', 'hero-section')
+    },
+    handleWhatsAppClick() {
+      trackWhatsAppClick('hero-whatsapp-button', 'hero-section')
     }
   }
 }
 </script>
-
 <style scoped>
 .hero-section {
   min-height: 100vh;
@@ -208,6 +223,28 @@ export default {
 .btn-primary:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
+}
+
+/* ✅ NUEVO - Estilos del botón WhatsApp */
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+  padding: 1.2rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 40px rgba(37, 211, 102, 0.4);
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 50px rgba(37, 211, 102, 0.6);
 }
 
 @keyframes pulse {
@@ -373,6 +410,12 @@ export default {
     padding: 1.2rem 1.5rem;
     font-size: 1rem;
     font-weight: 900;
+  }
+
+  .btn-whatsapp {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    font-size: 1rem;
   }
 
   .guarantee-box {

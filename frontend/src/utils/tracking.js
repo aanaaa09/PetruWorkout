@@ -54,14 +54,17 @@ function detectTrafficSource() {
   }
 
   // 8. BÚSQUEDA ORGÁNICA (Google, Bing, etc)
-  if (referrer.includes('google.com') ||
+   if (referrer.includes('google.com') ||
       referrer.includes('google.es') ||
       referrer.includes('bing.com') ||
       referrer.includes('yahoo.com') ||
       referrer.includes('duckduckgo.com') ||
-      referrer.includes('baidu.com')) {
+      referrer.includes('baidu.com') ||
+      referrer.includes('android-app://com.google.android.googlequicksearchbox') || // ← AÑADIR ESTO
+      referrer.includes('googlequicksearchbox')) { // ← Y ESTO
     return 'organic_search';
   }
+
 
   // 9. TRÁFICO INTERNO (de tu propia web)
   if (referrer.includes('petrucalistenia.com') ||
@@ -185,19 +188,36 @@ async function trackPageVisit() {
 }
 
 /**
- * Registra un click en botón de Calendly
+ * Marca en sessionStorage que el usuario hizo click en WhatsApp
+ */
+function markWhatsAppClick() {
+  sessionStorage.setItem('petru_via_whatsapp', 'true');
+  console.log('✅ Usuario marcado como vía WhatsApp');
+}
+
+/**
+ * Verifica si el usuario pasó por WhatsApp
+ */
+function isViaWhatsApp() {
+  return sessionStorage.getItem('petru_via_whatsapp') === 'true';
+}
+
+/**
+ * Registra un click en botón de Calendly (MODIFICADO)
  */
 async function trackCalendlyClick(buttonId, buttonLocation) {
   try {
     const sessionId = getOrCreateSessionId();
     const trafficSource = getTrafficSourceFromSession();
+    const viaWhatsApp = isViaWhatsApp(); // ← NUEVO
 
     const clickData = {
       session_id: sessionId,
       traffic_source: trafficSource,
       button_id: buttonId || 'unknown',
       button_location: buttonLocation || 'unknown',
-      page_url: window.location.pathname
+      page_url: window.location.pathname,
+      via_whatsapp: viaWhatsApp // ← NUEVO
     };
 
     const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
@@ -211,13 +231,50 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
     if (!response.ok) {
       console.error('Error al registrar click:', await response.text());
     } else {
-      console.log('✅ Click registrado en:', buttonLocation, '- Source:', trafficSource);
+      console.log('✅ Click registrado en:', buttonLocation, '- Source:', trafficSource, '- Via WhatsApp:', viaWhatsApp);
     }
   } catch (error) {
     console.error('❌ Error al trackear click:', error);
   }
 }
 
+/**
+ * Registra un click en botón de WhatsApp (NUEVO)
+ */
+async function trackWhatsAppClick(buttonId, buttonLocation) {
+  try {
+    // Marcar que pasó por WhatsApp
+    markWhatsAppClick();
+
+    const sessionId = getOrCreateSessionId();
+    const trafficSource = getTrafficSourceFromSession();
+
+    const clickData = {
+      session_id: sessionId,
+      traffic_source: trafficSource,
+      button_id: buttonId || 'unknown-whatsapp',
+      button_location: buttonLocation || 'unknown',
+      page_url: window.location.pathname,
+      via_whatsapp: false // Este click ES de WhatsApp, no viene de WhatsApp
+    };
+
+    const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(clickData)
+    });
+
+    if (!response.ok) {
+      console.error('Error al registrar click WhatsApp:', await response.text());
+    } else {
+      console.log('✅ Click WhatsApp registrado en:', buttonLocation, '- Source:', trafficSource);
+    }
+  } catch (error) {
+    console.error('❌ Error al trackear click WhatsApp:', error);
+  }
+}
 /**
  * Inicializa el sistema de tracking
  */
@@ -236,5 +293,6 @@ export {
   getTrafficSourceFromSession,
   trackPageVisit,
   trackCalendlyClick,
+  trackWhatsAppClick,
   initTracking
 };
