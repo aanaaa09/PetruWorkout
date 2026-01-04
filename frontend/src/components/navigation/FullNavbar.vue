@@ -16,27 +16,28 @@
         <li><a href="#servicios" @click.prevent="navigateTo('servicios')">Servicios</a></li>
         <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Reseñas</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
-         <li class="nav-cta">
-    <!-- ✅ CAMBIAR A LINK DIRECTO -->
-    <a
-      href="https://calendly.com/petruworkout/reunion"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="btn-cta"
-      @click="handleCalendlyClick"
-    >
-      📅 Agendar Llamada
-    </a>
-           <a
-             href="https://wa.link/svhddh"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="btn-whatsapp"
-    @click="handleWhatsAppClick"
-  >
-    💬 Contactar con Petru
-  </a>
-  </li>
+        <li class="nav-cta">
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-cta"
+            @click="handleCalendlyClick"
+          >
+            📅 Agendar Llamada
+          </a>
+        </li>
+        <li class="nav-cta">
+          <a
+            href="https://wa.link/svhddh"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-whatsapp"
+            @click="handleWhatsAppClick"
+          >
+            💬 Contactar con Petru
+          </a>
+        </li>
       </ul>
     </div>
   </nav>
@@ -44,6 +45,7 @@
 
 <script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
+
 export default {
   name: 'FullNavbar',
   data() {
@@ -76,16 +78,17 @@ export default {
       trackCalendlyClick('full-navbar-cta-button', 'full-navbar')
     },
     handleWhatsAppClick() {
-  this.menuOpen = false
-  import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
-    trackWhatsAppClick('full-navbar-whatsapp-button', 'full-navbar')
-  })
-}
+      this.menuOpen = false
+      import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
+        trackWhatsAppClick('full-navbar-whatsapp-button', 'full-navbar')
+      })
+    }
   }
 }
 </script>
 
 <style scoped>
+/* ===== NAVBAR BASE ===== */
 .navbar {
   position: fixed;
   top: 0;
@@ -113,6 +116,7 @@ export default {
   align-items: center;
 }
 
+/* ===== LOGO ===== */
 .logo {
   font-size: 1.5rem;
   font-weight: 900;
@@ -125,15 +129,21 @@ export default {
   color: var(--color-accent);
 }
 
+/* ===== LINKS DE NAVEGACIÓN ===== */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem; /* ✅ MÁS espacio horizontal entre elementos en escritorio */
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
+.nav-links li {
+  display: flex;
+}
+
+/* ===== LINKS NORMALES ===== */
 .nav-links a {
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
@@ -162,6 +172,7 @@ export default {
   width: 100%;
 }
 
+/* ===== BOTONES CTA ===== */
 .btn-cta {
   background: var(--gradient-primary);
   padding: 0.75rem 1.5rem !important;
@@ -170,8 +181,8 @@ export default {
   font-weight: 600 !important;
   box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
   transition: all 0.3s ease !important;
+  white-space: nowrap;
 }
-
 
 .btn-cta::after {
   display: none !important;
@@ -190,6 +201,7 @@ export default {
   font-weight: 600 !important;
   box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
   transition: all 0.3s ease !important;
+  white-space: nowrap;
 }
 
 .btn-whatsapp::after {
@@ -200,6 +212,8 @@ export default {
   transform: translateY(-2px);
   box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
 }
+
+/* ===== TOGGLE MÓVIL ===== */
 .mobile-toggle {
   display: none;
   flex-direction: column;
@@ -229,6 +243,7 @@ export default {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
+/* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 968px) {
   .mobile-toggle {
     display: flex;
@@ -242,10 +257,11 @@ export default {
     background: rgba(13, 13, 13, 0.98);
     flex-direction: column;
     padding: 2rem;
-    gap: 1.5rem;
+    gap: 1rem; /* ✅ Espacio vertical entre elementos en móvil */
     transform: translateY(-150%);
     opacity: 0;
     transition: all 0.3s ease;
+    align-items: stretch; /* ✅ Para que los <li> ocupen todo el ancho */
   }
 
   .nav-links.open {
@@ -253,14 +269,32 @@ export default {
     opacity: 1;
   }
 
+  .nav-links li {
+    width: 100%; /* ✅ Los <li> ocupan todo el ancho */
+  }
+
+  /* ✅ Links normales centrados en móvil */
+  .nav-links a {
+    display: block;
+    text-align: center;
+    padding: 0.5rem 0;
+  }
+
+  .nav-links a::after {
+    display: none; /* Ocultar subrayado en móvil */
+  }
+
+  /* ✅ Botones CTA ocupan todo el ancho y están centrados */
   .nav-cta {
     width: 100%;
   }
 
-  .btn-cta {
+  .btn-cta,
+  .btn-whatsapp {
     display: block;
     text-align: center;
     width: 100%;
+    padding: 1rem 1.5rem !important;
   }
 }
 </style>

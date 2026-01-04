@@ -207,7 +207,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin: 1rem 0;
+  margin: 1.2rem 0 0.5rem 0;
   align-items: stretch;
 }
 
@@ -269,7 +269,7 @@ export default {
 .guarantee-box {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   background: rgba(6, 214, 160, 0.06);
   border: 1px solid rgba(6, 214, 160, 0.2);
   border-radius: 12px;
