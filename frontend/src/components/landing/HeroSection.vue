@@ -28,7 +28,7 @@
         </div>
 
         <div class="hero-cta">
-          <!-- Botón WhatsApp primero -->
+          <!-- Solo botón WhatsApp -->
           <a
             href="https://wa.link/svhddh"
             target="_blank"
@@ -37,22 +37,6 @@
             @click="handleWhatsAppClick"
           >
             💬 CONTACTAR CON PETRU
-          </a>
-
-          <!-- Separador "o si lo prefieres" solo visible en desktop -->
-          <div class="cta-separator">
-            <span>O si lo prefieres</span>
-          </div>
-
-          <!-- Botón Calendly segundo -->
-          <a
-            href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-calendly"
-            @click="handleCalendlyClick"
-          >
-            📅 AGENDA UNA LLAMADA GRATUITA
           </a>
         </div>
 
@@ -87,7 +71,7 @@
 </template>
 
 <script>
-import { trackCalendlyClick, trackWhatsAppClick } from '@/utils/tracking.js'
+import { trackWhatsAppClick } from '@/utils/tracking.js'
 
 export default {
   name: 'HeroSection',
@@ -100,9 +84,6 @@ export default {
   methods: {
     handleImageError(e) {
       e.target.style.display = 'none'
-    },
-    handleCalendlyClick() {
-      trackCalendlyClick('hero-calendly-button', 'hero-section')
     },
     handleWhatsAppClick() {
       trackWhatsAppClick('hero-whatsapp-button', 'hero-section')
@@ -244,25 +225,6 @@ export default {
   50% {
     box-shadow: 0 10px 40px rgba(37, 211, 102, 0.7);
   }
-}
-
-.btn-calendly {
-  background: var(--gradient-primary);
-  color: white;
-  box-shadow: 0 10px 40px rgba(6, 214, 160, 0.4);
-}
-
-.btn-calendly:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
-}
-
-.cta-separator {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: 0.5rem 0;
 }
 
 /* ===== CAJA DE GARANTÍA ===== */
@@ -409,11 +371,6 @@ export default {
   }
 
   /* ===== MÓVIL: Solo mostrar botón WhatsApp ===== */
-  .btn-calendly,
-  .cta-separator {
-    display: none;
-  }
-
   .btn {
     width: 100%;
     justify-content: center;

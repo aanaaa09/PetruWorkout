@@ -37,11 +37,27 @@
           allowfullscreen
         ></iframe>
       </div>
+
+      <!-- ✅ NUEVO: Botón CTA debajo del video -->
+      <div class="video-cta">
+        <p class="cta-text">¿Listo para tu transformación?</p>
+        <a
+          href="https://calendly.com/petruworkout/reunion"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-calendly-cta"
+          @click="handleCalendlyClick"
+        >
+          📅 AGENDAR LLAMADA GRATUITA
+        </a>
+      </div>
     </div>
   </section>
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
+
 export default {
   name: 'VideoSection',
   data() {
@@ -52,6 +68,9 @@ export default {
   methods: {
     loadVideo() {
       this.videoLoaded = true
+    },
+    handleCalendlyClick() {
+      trackCalendlyClick('video-section-cta-button', 'video-section')
     }
   }
 }
@@ -153,6 +172,43 @@ export default {
   height: 100%;
 }
 
+/* ===== CTA DEBAJO DEL VIDEO ===== */
+.video-cta {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, rgba(6, 214, 160, 0.1) 0%, rgba(6, 214, 160, 0.05) 100%);
+  border-radius: 20px;
+  border: 2px solid rgba(6, 214, 160, 0.3);
+}
+
+.cta-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 1.5rem 0;
+}
+
+.btn-calendly-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 2.5rem;
+  background: var(--gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+}
+
+.btn-calendly-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
+}
+
 @media (max-width: 768px) {
   .video-section {
     padding: 4rem 1rem;
@@ -160,6 +216,22 @@ export default {
 
   .section-title {
     font-size: 2rem;
+  }
+
+  .video-cta {
+    padding: 2rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .cta-text {
+    font-size: 1.25rem;
+  }
+
+  .btn-calendly-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
   }
 }
 </style>

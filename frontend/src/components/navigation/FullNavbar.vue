@@ -242,7 +242,6 @@ export default {
 .mobile-toggle.active span:nth-child(3) {
   transform: rotate(-45deg) translate(5px, -5px);
 }
-
 /* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 968px) {
   .mobile-toggle {
@@ -305,4 +304,5 @@ export default {
     padding: 1rem 1.5rem !important;
   }
 }
+
 </style>
