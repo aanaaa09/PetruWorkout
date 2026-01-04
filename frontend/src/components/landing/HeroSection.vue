@@ -28,28 +28,28 @@
         </div>
 
         <div class="hero-cta">
-  <!-- Botón Calendly existente -->
-  <a
-    href="https://calendly.com/petruworkout/reunion"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="btn btn-primary"
-    @click="handleCalendlyClick"
-  >
-    📅 AGENDAR LLAMADA GRATUITA
-  </a>
+          <!-- Botón Calendly existente -->
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary"
+            @click="handleCalendlyClick"
+          >
+            📅 AGENDAR LLAMADA GRATUITA
+          </a>
 
-  <!-- ✅ NUEVO - Botón WhatsApp -->
-  <a
-    href="https://wa.link/svhddh"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="btn btn-whatsapp"
-    @click="handleWhatsAppClick"
-  >
-    💬 CONTACTAR CON PETRU
-  </a>
-</div>
+          <!-- Botón WhatsApp -->
+          <a
+            href="https://wa.link/svhddh"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-whatsapp"
+            @click="handleWhatsAppClick"
+          >
+            💬 CONTACTAR CON PETRU
+          </a>
+        </div>
 
         <div class="guarantee-box">
           <div class="guarantee-text">
@@ -105,7 +105,9 @@ export default {
   }
 }
 </script>
+
 <style scoped>
+/* ===== ESTILOS GENERALES ===== */
 .hero-section {
   min-height: 100vh;
   display: flex;
@@ -141,6 +143,7 @@ export default {
   );
 }
 
+/* ===== CONTENIDO HERO ===== */
 .hero-content {
   max-width: 1400px;
   width: 100%;
@@ -159,6 +162,7 @@ export default {
   gap: 1.5rem;
 }
 
+/* ===== BADGE ===== */
 .hero-badge {
   display: inline-block;
   background: rgba(6, 214, 160, 0.15);
@@ -171,6 +175,7 @@ export default {
   width: fit-content;
 }
 
+/* ===== TÍTULO ===== */
 .hero-title {
   font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 900;
@@ -192,11 +197,12 @@ export default {
   -webkit-text-fill-color: var(--color-accent);
 }
 
+/* ===== BOTONES CTA ===== */
 .hero-cta {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin: 0.5rem 0;
+  margin: 1rem 0;
 }
 
 .btn {
@@ -225,7 +231,6 @@ export default {
   box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
 }
 
-/* ✅ NUEVO - Estilos del botón WhatsApp */
 .btn-whatsapp {
   background: linear-gradient(135deg, #25D366, #128C7E);
   color: white;
@@ -267,6 +272,7 @@ export default {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* ===== CAJA DE GARANTÍA ===== */
 .guarantee-box {
   display: flex;
   align-items: center;
@@ -299,12 +305,11 @@ export default {
   letter-spacing: 0.05em;
 }
 
-/* Imagen mobile - oculta por defecto */
+/* ===== IMÁGENES ===== */
 .hero-image-mobile {
   display: none;
 }
 
-/* Imagen desktop */
 .hero-image-desktop {
   position: relative;
   display: flex;
@@ -324,6 +329,7 @@ export default {
   display: none;
 }
 
+/* ===== INDICADOR DE SCROLL ===== */
 .scroll-indicator {
   position: absolute;
   bottom: 2rem;
@@ -347,6 +353,7 @@ export default {
   50% { transform: translateX(-50%) translateY(10px); }
 }
 
+/* ===== RESPONSIVE TABLET ===== */
 @media (max-width: 1024px) {
   .hero-content {
     grid-template-columns: 1fr;
@@ -371,9 +378,10 @@ export default {
   }
 }
 
+/* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 640px) {
   .hero-section {
-    padding: 2rem 1rem 2rem;
+    padding: 5rem 1rem 2rem; /* ✅ MÁS padding-top para evitar solapamiento con navbar */
     min-height: 100vh;
   }
 
@@ -383,7 +391,7 @@ export default {
   }
 
   .hero-text {
-    gap: 1rem;
+    gap: 1.2rem; /* ✅ MÁS espacio entre elementos */
     text-align: center;
     align-items: center;
   }
@@ -391,17 +399,20 @@ export default {
   .hero-badge {
     font-size: 0.8rem;
     padding: 0.4rem 0.9rem;
+    margin-bottom: 0.3rem; /* ✅ Espacio extra después del badge */
   }
 
   .hero-title {
     font-size: 1.4rem;
     line-height: 1.3;
+    margin-bottom: 0.5rem; /* ✅ Espacio extra después del título */
   }
 
   .hero-cta {
     flex-direction: column;
     width: 100%;
-    margin: 0.8rem 0;
+    margin: 1.2rem 0; /* ✅ MÁS margen vertical */
+    gap: 0.8rem; /* ✅ Espacio entre botones (antes era 1rem por defecto) */
   }
 
   .btn {
@@ -421,7 +432,7 @@ export default {
   .guarantee-box {
     text-align: center;
     padding: 0.8rem 1rem;
-    margin: 0 0 1.5rem 0;
+    margin: 1rem 0 1.5rem 0; /* ✅ MÁS margen arriba (1rem en vez de 0) */
   }
 
   .guarantee-text strong {

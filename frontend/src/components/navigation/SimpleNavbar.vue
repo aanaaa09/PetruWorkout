@@ -13,7 +13,7 @@
 
       <ul class="nav-links" :class="{ 'open': menuOpen }">
         <li>
-        <a
+          <a
             href="https://calendly.com/petruworkout/reunion"
             target="_blank"
             rel="noopener noreferrer"
@@ -22,15 +22,17 @@
           >
             📅 Agendar Llamada
           </a>
+        </li>
+        <li>
           <a
             href="https://wa.link/svhddh"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="btn-whatsapp"
-    @click="handleWhatsAppClick"
-  >
-    💬 Contactar con Petru
-  </a>
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-whatsapp"
+            @click="handleWhatsAppClick"
+          >
+            💬 Contactar con Petru
+          </a>
         </li>
         <li>
           <router-link
@@ -78,12 +80,14 @@ export default {
       this.menuOpen = false
       trackCalendlyClick('simple-navbar-cta-button', 'simple-navbar')
     },
+
     handleWhatsAppClick() {
-  this.menuOpen = false
-  import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
-    trackWhatsAppClick('simple-navbar-whatsapp-button', 'simple-navbar')
-  })
-},
+      this.menuOpen = false
+      import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
+        trackWhatsAppClick('simple-navbar-whatsapp-button', 'simple-navbar')
+      })
+    },
+
     handleMoreInfoClick() {
       this.menuOpen = false
       this.scrollToTop()
@@ -101,7 +105,6 @@ export default {
         console.log('GA - Evento: Más Información desde navbar')
       }
 
-      // Hacer scroll arriba después de que Vue Router navegue
       this.scrollToTop()
     }
   }
@@ -109,6 +112,7 @@ export default {
 </script>
 
 <style scoped>
+/* ===== NAVBAR BASE ===== */
 .simple-navbar {
   position: fixed;
   top: 0;
@@ -135,6 +139,8 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+
+/* ===== LOGO ===== */
 .logo {
   font-size: 1.5rem;
   font-weight: 900;
@@ -147,16 +153,24 @@ export default {
   color: var(--color-accent);
 }
 
+/* ===== LINKS DE NAVEGACIÓN ===== */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem; /* ✅ MÁS espacio horizontal entre botones en escritorio */
   list-style: none;
   margin: 0;
   padding: 0;
 }
+
+.nav-links li {
+  display: flex;
+}
+
+/* ===== BOTONES BASE ===== */
 .btn-cta,
-.btn-info {
+.btn-info,
+.btn-whatsapp {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -166,8 +180,10 @@ export default {
   font-size: 0.95rem;
   text-decoration: none;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
+/* ===== BOTÓN CALENDLY ===== */
 .btn-cta {
   background: var(--gradient-primary);
   color: white;
@@ -179,28 +195,7 @@ export default {
   box-shadow: 0 6px 25px rgba(6, 214, 160, 0.5);
 }
 
-.btn-info {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-info:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-.btn-whatsapp {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
+/* ===== BOTÓN WHATSAPP ===== */
 .btn-whatsapp {
   background: linear-gradient(135deg, #25D366, #128C7E);
   color: white;
@@ -211,6 +206,20 @@ export default {
   transform: translateY(-2px);
   box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
 }
+
+/* ===== BOTÓN INFO ===== */
+.btn-info {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-info:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== TOGGLE MÓVIL ===== */
 .mobile-toggle {
   display: none;
   flex-direction: column;
@@ -240,6 +249,7 @@ export default {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
+/* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 768px) {
   .mobile-toggle {
     display: flex;
@@ -253,10 +263,11 @@ export default {
     background: rgba(13, 13, 13, 0.98);
     flex-direction: column;
     padding: 2rem;
-    gap: 1.5rem;
+    gap: 1rem; /* ✅ Espacio vertical entre botones en móvil */
     transform: translateY(-150%);
     opacity: 0;
     transition: all 0.3s ease;
+    align-items: stretch; /* ✅ Para que los <li> ocupen todo el ancho */
   }
 
   .nav-links.open {
@@ -264,10 +275,17 @@ export default {
     opacity: 1;
   }
 
+  .nav-links li {
+    width: 100%; /* ✅ Los <li> ocupan todo el ancho */
+  }
+
+  /* ✅ TODOS los botones ocupan el ancho completo y están centrados */
   .btn-cta,
-  .btn-info {
+  .btn-info,
+  .btn-whatsapp {
     width: 100%;
     justify-content: center;
+    padding: 1rem 1.5rem;
   }
 }
 </style>
