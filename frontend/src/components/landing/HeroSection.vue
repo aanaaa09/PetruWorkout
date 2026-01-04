@@ -52,7 +52,7 @@
             class="btn btn-calendly"
             @click="handleCalendlyClick"
           >
-            📅 AGENDA UNA LLAMADA CONMIGO
+            📅 AGENDA UNA LLAMADA GRATUITA
           </a>
         </div>
 
