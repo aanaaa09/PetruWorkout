@@ -28,18 +28,7 @@
         </div>
 
         <div class="hero-cta">
-          <!-- Botón Calendly existente -->
-          <a
-            href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-primary"
-            @click="handleCalendlyClick"
-          >
-            📅 AGENDAR LLAMADA GRATUITA
-          </a>
-
-          <!-- Botón WhatsApp -->
+          <!-- Botón WhatsApp primero -->
           <a
             href="https://wa.link/svhddh"
             target="_blank"
@@ -49,12 +38,28 @@
           >
             💬 CONTACTAR CON PETRU
           </a>
+
+          <!-- Separador "o si lo prefieres" solo visible en desktop -->
+          <div class="cta-separator">
+            <span>O si lo prefieres</span>
+          </div>
+
+          <!-- Botón Calendly segundo -->
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-calendly"
+            @click="handleCalendlyClick"
+          >
+            📅 AGENDA UNA LLAMADA CONMIGO
+          </a>
         </div>
 
         <div class="guarantee-box">
           <div class="guarantee-text">
-            <strong>SI NO LO CONSIGUES, TE DEVUELVO TODO TU DINERO</strong>
-            <span>FIRMADO POR CONTRATO</span>
+            <strong>Contáctame por WhatsApp sin compromiso</strong>
+            <span>Te ayudo personalmente a resolver todas tus dudas</span>
           </div>
         </div>
       </div>
@@ -200,9 +205,10 @@ export default {
 /* ===== BOTONES CTA ===== */
 .hero-cta {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  flex-wrap: wrap;
   margin: 1rem 0;
+  align-items: stretch;
 }
 
 .btn {
@@ -216,35 +222,14 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-}
-
-.btn-primary {
-  background: var(--gradient-primary);
-  color: white;
-  box-shadow: 0 10px 40px rgba(6, 214, 160, 0.5);
-  transform: scale(1.05);
-  animation: pulse 2s infinite;
-}
-
-.btn-primary:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
+  width: 100%;
 }
 
 .btn-whatsapp {
   background: linear-gradient(135deg, #25D366, #128C7E);
   color: white;
-  padding: 1.2rem 2.5rem;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 1.1rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-shadow: 0 10px 40px rgba(37, 211, 102, 0.4);
+  box-shadow: 0 10px 40px rgba(37, 211, 102, 0.5);
+  animation: pulse-whatsapp 2s infinite;
 }
 
 .btn-whatsapp:hover {
@@ -252,24 +237,32 @@ export default {
   box-shadow: 0 15px 50px rgba(37, 211, 102, 0.6);
 }
 
-@keyframes pulse {
+@keyframes pulse-whatsapp {
   0%, 100% {
-    box-shadow: 0 10px 40px rgba(6, 214, 160, 0.5);
+    box-shadow: 0 10px 40px rgba(37, 211, 102, 0.5);
   }
   50% {
-    box-shadow: 0 10px 40px rgba(6, 214, 160, 0.7);
+    box-shadow: 0 10px 40px rgba(37, 211, 102, 0.7);
   }
 }
 
-.btn-secondary {
-  background: transparent;
+.btn-calendly {
+  background: var(--gradient-primary);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 40px rgba(6, 214, 160, 0.4);
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
+.btn-calendly:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 50px rgba(6, 214, 160, 0.6);
+}
+
+.cta-separator {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
 }
 
 /* ===== CAJA DE GARANTÍA ===== */
@@ -381,7 +374,7 @@ export default {
 /* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 640px) {
   .hero-section {
-    padding: 5rem 1rem 2rem; /* ✅ MÁS padding-top para evitar solapamiento con navbar */
+    padding: 5rem 1rem 2rem;
     min-height: 100vh;
   }
 
@@ -391,7 +384,7 @@ export default {
   }
 
   .hero-text {
-    gap: 1.2rem; /* ✅ MÁS espacio entre elementos */
+    gap: 1.2rem;
     text-align: center;
     align-items: center;
   }
@@ -399,20 +392,26 @@ export default {
   .hero-badge {
     font-size: 0.8rem;
     padding: 0.4rem 0.9rem;
-    margin-bottom: 0.3rem; /* ✅ Espacio extra después del badge */
+    margin-bottom: 0.3rem;
   }
 
   .hero-title {
     font-size: 1.4rem;
     line-height: 1.3;
-    margin-bottom: 0.5rem; /* ✅ Espacio extra después del título */
+    margin-bottom: 0.5rem;
   }
 
   .hero-cta {
     flex-direction: column;
     width: 100%;
-    margin: 1.2rem 0; /* ✅ MÁS margen vertical */
-    gap: 0.8rem; /* ✅ Espacio entre botones (antes era 1rem por defecto) */
+    margin: 1.2rem 0;
+    gap: 0.8rem;
+  }
+
+  /* ===== MÓVIL: Solo mostrar botón WhatsApp ===== */
+  .btn-calendly,
+  .cta-separator {
+    display: none;
   }
 
   .btn {
@@ -432,7 +431,7 @@ export default {
   .guarantee-box {
     text-align: center;
     padding: 0.8rem 1rem;
-    margin: 1rem 0 1.5rem 0; /* ✅ MÁS margen arriba (1rem en vez de 0) */
+    margin: 1rem 0 1.5rem 0;
   }
 
   .guarantee-text strong {
