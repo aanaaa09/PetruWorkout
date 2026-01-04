@@ -207,7 +207,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin: 1.2rem 0 0.5rem 0;
+  margin: 1rem 0;
   align-items: stretch;
 }
 
@@ -269,7 +269,7 @@ export default {
 .guarantee-box {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   background: rgba(6, 214, 160, 0.06);
   border: 1px solid rgba(6, 214, 160, 0.2);
   border-radius: 12px;
@@ -404,7 +404,7 @@ export default {
   .hero-cta {
     flex-direction: column;
     width: 100%;
-    margin: 1.2rem 0;
+    margin: 1.2rem 0 0 0;
     gap: 0.8rem;
   }
 
@@ -420,18 +420,20 @@ export default {
     padding: 1.2rem 1.5rem;
     font-size: 1rem;
     font-weight: 900;
+    margin-bottom: 0;
   }
 
   .btn-whatsapp {
     width: 100%;
     padding: 1.2rem 1.5rem;
     font-size: 1rem;
+    margin-bottom: 0;
   }
 
   .guarantee-box {
     text-align: center;
     padding: 0.8rem 1rem;
-    margin: 1rem 0 1.5rem 0;
+    margin: 0.75rem 0 1.5rem 0;
   }
 
   .guarantee-text strong {
