@@ -251,17 +251,21 @@ export default {
 
   .nav-links {
     position: fixed;
-    top: 70px;
+    top: 0; /* ✅ Cambiado de 70px a 0 para empezar desde arriba */
     left: 0;
     right: 0;
     background: rgba(13, 13, 13, 0.98);
+    backdrop-filter: blur(10px);
     flex-direction: column;
-    padding: 2rem;
-    gap: 1rem; /* ✅ Espacio vertical entre elementos en móvil */
-    transform: translateY(-150%);
+    padding: 5rem 2rem 2rem; /* ✅ Padding superior aumentado para dejar espacio al navbar */
+    gap: 1rem;
+    transform: translateY(-100%); /* ✅ Cambiado para mejor animación */
     opacity: 0;
     transition: all 0.3s ease;
-    align-items: stretch; /* ✅ Para que los <li> ocupen todo el ancho */
+    align-items: center; /* ✅ Cambiado de stretch a center para centrar todo */
+    height: 100vh; /* ✅ Ocupa toda la pantalla */
+    overflow-y: auto; /* ✅ Por si el contenido es muy largo */
+    z-index: 1000; /* ✅ Por debajo del navbar pero por encima del contenido */
   }
 
   .nav-links.open {
@@ -270,28 +274,32 @@ export default {
   }
 
   .nav-links li {
-    width: 100%; /* ✅ Los <li> ocupan todo el ancho */
+    width: 100%;
+    max-width: 400px; /* ✅ Ancho máximo para mejor aspecto */
   }
 
   /* ✅ Links normales centrados en móvil */
   .nav-links a {
     display: block;
     text-align: center;
-    padding: 0.5rem 0;
+    padding: 0.75rem 0;
+    width: 100%;
   }
 
   .nav-links a::after {
-    display: none; /* Ocultar subrayado en móvil */
+    display: none;
   }
 
-  /* ✅ Botones CTA ocupan todo el ancho y están centrados */
+  /* ✅ Botones CTA centrados */
   .nav-cta {
     width: 100%;
   }
 
   .btn-cta,
   .btn-whatsapp {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     width: 100%;
     padding: 1rem 1.5rem !important;
