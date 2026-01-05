@@ -77,8 +77,9 @@ jobs:
           echo "✅ Variables de entorno configuradas"
           echo "🔍 Ejecutando sync..."
           
-          # Ejecutar el script de sync
-          python backend/sync_calendly.py
+          # Ejecutar el script desde el directorio correcto
+          cd backend
+          python -m sync_calendly
           
           echo "✅ Sync completado"
 
