@@ -26,14 +26,11 @@ jobs:
           pip install --no-cache-dir -r backend/requirements.txt
 
       - name: 🔌 Despertar Railway
-        env:
-          RAILWAY_SERVICE_NAME: ${{ secrets.RAILWAY_SERVICE_NAME }}
         run: |
           echo "🔌 Despertando Railway..."
           
-          # Construir URL del backend
-          BACKEND_URL="https://${RAILWAY_SERVICE_NAME}.up.railway.app"
-          echo "📍 URL: $BACKEND_URL"
+          BACKEND_URL="https://petruworkout-production.up.railway.app"
+          echo "📍 URL: $BACKEND_URL/health"
           
           # Hacer 3 intentos con delays incrementales
           for i in 1 2 3; do
@@ -52,13 +49,15 @@ jobs:
             fi
             
             if [ $i -lt 3 ]; then
-              sleep_time=$((i * 15))
+              sleep_time=$((i * 20))
               echo "⏳ Esperando ${sleep_time}s antes del siguiente intento..."
               sleep $sleep_time
+            else
+              echo "⚠️ Railway tardando en responder, continuando de todos modos..."
             fi
           done
           
-          echo "✅ Railway está listo"
+          echo "✅ Procediendo con el sync"
 
       - name: 🔄 Sync Calendly
         env:
