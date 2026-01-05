@@ -52,7 +52,7 @@ jobs:
           print('✅ Listo para sync')
           "
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RAILWAY_DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: 🔄 Ejecutar sync de Calendly
         run: |
@@ -65,15 +65,11 @@ jobs:
           echo "✅ DATABASE_URL configurado"
           python -m backend.sync_calendly
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RAILWAY_DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CALENDLY_API_KEY: ${{ secrets.CALENDLY_API_KEY }}
           CALENDLY_USER_URI: ${{ secrets.CALENDLY_USER_URI }}
           CALENDLY_EVENT_URL: ${{ secrets.CALENDLY_EVENT_URL }}
-          EMAIL_API: ${{ secrets.EMAIL_API }}
-          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-          SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
 
       - name: ✅ Sincronización completada
         run: |
