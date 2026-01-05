@@ -2,9 +2,9 @@ name: Sync Calendly Bookings
 
 on:
   schedule:
-    # Cada hora, todos los días
-    - cron: '0 * * * *'
-  workflow_dispatch: # Para poder ejecutarlo manualmente
+    # Todos los días a medianoche (00:00 UTC)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Para ejecutarlo manualmente
 
 jobs:
   sync:
@@ -28,36 +28,24 @@ jobs:
       - name: 🔌 Despertar Railway
         run: |
           echo "🔌 Despertando Railway..."
-          
           BACKEND_URL="https://petruworkout-production.up.railway.app"
           echo "📍 URL: $BACKEND_URL/health"
-          
-          # Hacer 3 intentos con delays incrementales
           for i in 1 2 3; do
-            echo "Intento $i/3..."
-            
             response=$(curl -s -o /dev/null -w "%{http_code}" \
-              --connect-timeout 30 \
-              --max-time 60 \
-              "${BACKEND_URL}/health" || echo "000")
-            
+              --connect-timeout 30 --max-time 60 "${BACKEND_URL}/health" || echo "000")
             echo "Response code: $response"
-            
             if [ "$response" = "200" ]; then
-              echo "✅ Railway despierto y respondiendo"
+              echo "✅ Railway despierto"
               break
             fi
-            
             if [ $i -lt 3 ]; then
               sleep_time=$((i * 20))
-              echo "⏳ Esperando ${sleep_time}s antes del siguiente intento..."
+              echo "⏳ Esperando ${sleep_time}s..."
               sleep $sleep_time
             else
-              echo "⚠️ Railway tardando en responder, continuando de todos modos..."
+              echo "⚠️ No respondió, seguimos..."
             fi
           done
-          
-          echo "✅ Procediendo con el sync"
 
       - name: 🔄 Sync Calendly
         env:
@@ -65,30 +53,22 @@ jobs:
           CALENDLY_API_KEY: ${{ secrets.CALENDLY_API_KEY }}
           CALENDLY_USER_URI: ${{ secrets.CALENDLY_USER_URI }}
           CALENDLY_EVENT_URL: ${{ secrets.CALENDLY_EVENT_URL }}
+          PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
         run: |
           echo "🔄 Iniciando sincronización de Calendly..."
-          
-          # Verificar que DATABASE_URL existe
+
           if [ -z "$DATABASE_URL" ]; then
-            echo "❌ RAILWAY_DATABASE_URL no está configurado en secrets"
+            echo "❌ RAILWAY_DATABASE_URL no está configurado"
             exit 1
           fi
-          
-          echo "✅ Variables de entorno configuradas"
-          echo "🔍 Ejecutando sync..."
-          
-          # Ejecutar el script desde el directorio correcto
-          cd backend
-          python -m sync_calendly
-          
-          echo "✅ Sync completado"
+
+          python -m backend.sync_calendly
 
       - name: 📊 Resumen
         if: always()
         run: |
           echo "================================"
           echo "📊 RESUMEN DE EJECUCIÓN"
-          echo "================================"
           echo "Fecha: $(date)"
           echo "Status: ${{ job.status }}"
           echo "================================"
