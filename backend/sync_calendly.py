@@ -212,32 +212,33 @@ def sync_calendly_bookings():
                 # ========================================
                 # CASO A: Viene de WhatsApp → Buscar clicks con via_whatsapp=True
                 # ========================================
-                logger.info(f"   🔍 Buscando clicks de WhatsApp (via_whatsapp=True)...")
+                logger.info(f"   🔍 Buscando clicks de WhatsApp (via_whatsapp=True) ANTERIORES al booking...")
 
                 clicks_whatsapp = db.query(CalendlyClick).filter(
                     CalendlyClick.timestamp >= ventana_inicio,
-                    CalendlyClick.timestamp <= booking_datetime_naive,
+                    CalendlyClick.timestamp < booking_datetime_naive,  # ANTES del booking
                     CalendlyClick.via_whatsapp == True
                 ).order_by(
                     CalendlyClick.timestamp.desc()
                 ).all()
 
-                logger.info(f"   📊 Clicks WhatsApp encontrados: {len(clicks_whatsapp)}")
+                logger.info(f"   📊 Clicks WhatsApp encontrados (anteriores): {len(clicks_whatsapp)}")
 
                 if clicks_whatsapp:
-                    # Buscar el más cercano
+                    # Buscar el más cercano ANTERIOR
                     mejor_match = None
                     menor_diferencia = float('inf')
 
                     for click in clicks_whatsapp:
                         click_timestamp = click.timestamp.replace(tzinfo=None)
-                        diferencia_segundos = abs(
-                            (booking_datetime_naive - click_timestamp).total_seconds()
-                        )
 
-                        if diferencia_segundos < menor_diferencia:
-                            menor_diferencia = diferencia_segundos
-                            mejor_match = click
+                        # Verificar que el click es ANTES del booking
+                        if click_timestamp < booking_datetime_naive:
+                            diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
+
+                            if diferencia_segundos < menor_diferencia:
+                                menor_diferencia = diferencia_segundos
+                                mejor_match = click
 
                     if mejor_match:
                         diferencia_minutos = menor_diferencia / 60
@@ -246,10 +247,11 @@ def sync_calendly_bookings():
                         traffic_source = mejor_match.traffic_source
                         via_whatsapp = True
 
-                        logger.info(f"   ✅ MATCH WhatsApp: {traffic_source} ({diferencia_minutos:.1f}min)")
+                        logger.info(f"   ✅ MATCH WhatsApp: {traffic_source} ({diferencia_minutos:.1f}min antes)")
                         logger.info(f"   📱 Button: {mejor_match.button_id}")
+                        logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
                 else:
-                    logger.info(f"   ℹ️  Sin clicks WhatsApp - usando traffic_source='whatsapp'")
+                    logger.info(f"   ℹ️  Sin clicks WhatsApp anteriores - usando traffic_source='whatsapp'")
                     traffic_source = "whatsapp"
                     via_whatsapp = True
 
@@ -257,32 +259,33 @@ def sync_calendly_bookings():
                 # ========================================
                 # CASO B: Acceso directo → Buscar clicks con via_whatsapp=False
                 # ========================================
-                logger.info(f"   🔍 Buscando clicks directos a Calendly (via_whatsapp=False)...")
+                logger.info(f"   🔍 Buscando clicks directos a Calendly (via_whatsapp=False) ANTERIORES al booking...")
 
                 clicks_calendly = db.query(CalendlyClick).filter(
                     CalendlyClick.timestamp >= ventana_inicio,
-                    CalendlyClick.timestamp <= booking_datetime_naive,
+                    CalendlyClick.timestamp < booking_datetime_naive,  # ANTES del booking
                     CalendlyClick.via_whatsapp == False
                 ).order_by(
                     CalendlyClick.timestamp.desc()
                 ).all()
 
-                logger.info(f"   📊 Clicks Calendly encontrados: {len(clicks_calendly)}")
+                logger.info(f"   📊 Clicks Calendly encontrados (anteriores): {len(clicks_calendly)}")
 
                 if clicks_calendly:
-                    # Buscar el más cercano
+                    # Buscar el más cercano ANTERIOR
                     mejor_match = None
                     menor_diferencia = float('inf')
 
                     for click in clicks_calendly:
                         click_timestamp = click.timestamp.replace(tzinfo=None)
-                        diferencia_segundos = abs(
-                            (booking_datetime_naive - click_timestamp).total_seconds()
-                        )
 
-                        if diferencia_segundos < menor_diferencia:
-                            menor_diferencia = diferencia_segundos
-                            mejor_match = click
+                        # Verificar que el click es ANTES del booking
+                        if click_timestamp < booking_datetime_naive:
+                            diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
+
+                            if diferencia_segundos < menor_diferencia:
+                                menor_diferencia = diferencia_segundos
+                                mejor_match = click
 
                     if mejor_match:
                         diferencia_minutos = menor_diferencia / 60
@@ -291,8 +294,9 @@ def sync_calendly_bookings():
                         traffic_source = mejor_match.traffic_source
                         via_whatsapp = False
 
-                        logger.info(f"   ✅ MATCH Calendly: {traffic_source} ({diferencia_minutos:.1f}min)")
+                        logger.info(f"   ✅ MATCH Calendly: {traffic_source} ({diferencia_minutos:.1f}min antes)")
                         logger.info(f"   📱 Button: {mejor_match.button_id}")
+                        logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
 
             # ========================================
             # FALLBACK: Si no hay match, analizar visitas
