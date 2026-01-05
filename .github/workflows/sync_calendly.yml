@@ -1,79 +1,94 @@
-name: 🔄 Sync Calendly
+name: Sync Calendly Bookings
 
 on:
   schedule:
-    - cron: '0 4 * * *'
-  workflow_dispatch:
+    # Cada hora, todos los días
+    - cron: '0 * * * *'
+  workflow_dispatch: # Para poder ejecutarlo manualmente
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: 📥 Checkout código
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
       - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
-      - name: 📦 Instalar dependencias
+      - name: 📦 Install dependencies
         run: |
-          pip install -r backend/requirements.txt
+          pip install --no-cache-dir -r backend/requirements.txt
 
-      - name: ☕ Despertar Railway Database
-        run: |
-          python -c "
-          import psycopg2
-          import time
-          import os
-          
-          database_url = os.getenv('DATABASE_URL')
-          
-          print('🔌 Intentando despertar Railway...')
-          
-          for i in range(1, 4):
-              try:
-                  print(f'Intento {i}/3...')
-                  conn = psycopg2.connect(database_url, connect_timeout=30)
-                  cursor = conn.cursor()
-                  cursor.execute('SELECT 1')
-                  conn.close()
-                  print(f'✅ Railway despierto en intento {i}')
-                  break
-              except Exception as e:
-                  print(f'⚠️ Intento {i} falló: {str(e)[:80]}')
-                  if i < 3:
-                      espera = i * 10
-                      print(f'⏳ Esperando {espera}s...')
-                      time.sleep(espera)
-          
-          print('✅ Listo para sync')
-          "
+      - name: 🔌 Despertar Railway
         env:
-          RAILWAY_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: 🔄 Ejecutar sync de Calendly
+          RAILWAY_SERVICE_NAME: ${{ secrets.RAILWAY_SERVICE_NAME }}
         run: |
-          echo "🔄 Iniciando sincronización de Calendly..."
-          echo "🔍 Verificando DATABASE_URL..."
-          if [ -z "$DATABASE_URL" ]; then
-            echo "❌ DATABASE_URL no está configurado"
-            exit 1
-          fi
-          echo "✅ DATABASE_URL configurado"
-          python -m backend.sync_calendly
+          echo "🔌 Despertando Railway..."
+          
+          # Construir URL del backend
+          BACKEND_URL="https://${RAILWAY_SERVICE_NAME}.up.railway.app"
+          echo "📍 URL: $BACKEND_URL"
+          
+          # Hacer 3 intentos con delays incrementales
+          for i in 1 2 3; do
+            echo "Intento $i/3..."
+            
+            response=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout 30 \
+              --max-time 60 \
+              "${BACKEND_URL}/health" || echo "000")
+            
+            echo "Response code: $response"
+            
+            if [ "$response" = "200" ]; then
+              echo "✅ Railway despierto y respondiendo"
+              break
+            fi
+            
+            if [ $i -lt 3 ]; then
+              sleep_time=$((i * 15))
+              echo "⏳ Esperando ${sleep_time}s antes del siguiente intento..."
+              sleep $sleep_time
+            fi
+          done
+          
+          echo "✅ Railway está listo"
+
+      - name: 🔄 Sync Calendly
         env:
-          RAILWAY_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
           CALENDLY_API_KEY: ${{ secrets.CALENDLY_API_KEY }}
           CALENDLY_USER_URI: ${{ secrets.CALENDLY_USER_URI }}
           CALENDLY_EVENT_URL: ${{ secrets.CALENDLY_EVENT_URL }}
-
-
-      - name: ✅ Sincronización completada
         run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "⏰ $(date -u)"
-          echo "✅ Workflow completado"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔄 Iniciando sincronización de Calendly..."
+          
+          # Verificar que DATABASE_URL existe
+          if [ -z "$DATABASE_URL" ]; then
+            echo "❌ RAILWAY_DATABASE_URL no está configurado en secrets"
+            exit 1
+          fi
+          
+          echo "✅ Variables de entorno configuradas"
+          echo "🔍 Ejecutando sync..."
+          
+          # Ejecutar el script de sync
+          python backend/sync_calendly.py
+          
+          echo "✅ Sync completado"
+
+      - name: 📊 Resumen
+        if: always()
+        run: |
+          echo "================================"
+          echo "📊 RESUMEN DE EJECUCIÓN"
+          echo "================================"
+          echo "Fecha: $(date)"
+          echo "Status: ${{ job.status }}"
+          echo "================================"
