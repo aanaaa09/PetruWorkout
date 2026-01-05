@@ -1,6 +1,9 @@
 # backend/sync_calendly.py
 """
 Sincronización de reservas de Calendly con matching inteligente basado en UTM
+- WhatsApp: Permite duplicados (múltiples bookings del mismo email)
+- Clientes: Excluido (NO se guarda en BD)
+- Directo: NO permite duplicados (un email = una sola reserva)
 """
 import requests
 import os
@@ -113,6 +116,7 @@ def sync_calendly_bookings():
 
         nuevas_reservas = 0
         reservas_existentes = 0
+        reservas_excluidas = 0
 
         for event in eventos_recientes:
             event_uri = event["uri"]
@@ -122,7 +126,7 @@ def sync_calendly_bookings():
             logger.info(f"\n{'=' * 60}")
             logger.info(f"📋 Procesando: {event_uri[-20:]}")
 
-            # Comprobar si ya existe
+            # Comprobar si ya existe ESTE evento específico
             existe = db.query(CalendlyBooking).filter(
                 CalendlyBooking.calendly_event_id == event_uri
             ).first()
@@ -153,19 +157,6 @@ def sync_calendly_bookings():
 
             logger.info(f"   👤 {name} ({email})")
 
-            # ========================================
-            # VERIFICAR SI EL EMAIL YA EXISTE
-            # ========================================
-            booking_existente = db.query(CalendlyBooking).filter(
-                CalendlyBooking.invitee_email == email
-            ).first()
-
-            if booking_existente:
-                logger.info(f"   ⚠️  EMAIL YA REGISTRADO en booking ID {booking_existente.id}")
-                logger.info(f"   ℹ️  Evento anterior: {booking_existente.calendly_event_id[-20:]}")
-                logger.info(f"   ⏭️  Saltando duplicado...")
-                continue
-
             # Parsear fechas
             try:
                 event_datetime = datetime.fromisoformat(event_start.replace("Z", "+00:00"))
@@ -189,13 +180,52 @@ def sync_calendly_bookings():
             tracking_data = invitee.get("tracking", {})
             utm_source = tracking_data.get("utm_source", "")
             utm_medium = tracking_data.get("utm_medium", "")
+            utm_campaign = tracking_data.get("utm_campaign", "")
 
-            viene_de_whatsapp = (utm_source == "whatsapp" or utm_medium == "whatsapp")
+            # ========================================
+            # ORIGENES EXCLUIDOS (NO SE GUARDAN EN BD)
+            # ========================================
+            ORIGENES_EXCLUIDOS = ["clientes"]
 
-            if viene_de_whatsapp:
-                logger.info(f"   📱 DETECTADO: Viene de WhatsApp (UTM)")
+            origen_excluido = (
+                    utm_source in ORIGENES_EXCLUIDOS or
+                    utm_medium in ORIGENES_EXCLUIDOS or
+                    utm_campaign in ORIGENES_EXCLUIDOS
+            )
+
+            if origen_excluido:
+                origen_detectado = utm_source or utm_medium or utm_campaign
+                logger.info(f"   🚫 ORIGEN EXCLUIDO: {origen_detectado.upper()}")
+                logger.info(f"   ⏭️  Este booking NO se guardará en BD - Saltando...")
+                reservas_excluidas += 1
+                continue
+
+            # Orígenes que permiten duplicados
+            ORIGENES_CON_DUPLICADOS = ["whatsapp"]
+
+            permite_duplicados = (
+                    utm_source in ORIGENES_CON_DUPLICADOS or
+                    utm_medium in ORIGENES_CON_DUPLICADOS or
+                    utm_campaign in ORIGENES_CON_DUPLICADOS
+            )
+
+            if permite_duplicados:
+                origen_detectado = utm_source or utm_medium or utm_campaign
+                logger.info(f"   📱 DETECTADO: Viene de {origen_detectado.upper()} (UTM)")
+                logger.info(f"   ✅ Este origen permite duplicados - NO verificar email")
             else:
-                logger.info(f"   🖥️  DETECTADO: Acceso directo a Calendly")
+                logger.info(f"   🌐 DETECTADO: Acceso desde WEB")
+
+                # Verificar duplicados solo para acceso web
+                booking_existente = db.query(CalendlyBooking).filter(
+                    CalendlyBooking.invitee_email == email
+                ).first()
+
+                if booking_existente:
+                    logger.info(f"   ⚠️  EMAIL YA REGISTRADO en booking ID {booking_existente.id}")
+                    logger.info(f"   ℹ️  Evento anterior: {booking_existente.calendly_event_id[-20:]}")
+                    logger.info(f"   ⏭️  Saltando duplicado...")
+                    continue
 
             # ========================================
             # MATCHING INTELIGENTE
@@ -208,31 +238,27 @@ def sync_calendly_bookings():
             via_whatsapp = False
             match_final = None
 
-            if viene_de_whatsapp:
-                # ========================================
-                # CASO A: Viene de WhatsApp → Buscar clicks con via_whatsapp=True
-                # ========================================
-                logger.info(f"   🔍 Buscando clicks de WhatsApp (via_whatsapp=True) ANTERIORES al booking...")
+            if permite_duplicados:
+                origen_detectado = utm_source or utm_medium or utm_campaign
+                logger.info(f"   🔍 Buscando clicks de {origen_detectado} (via_whatsapp=True) ANTERIORES al booking...")
 
-                clicks_whatsapp = db.query(CalendlyClick).filter(
+                clicks_permitidos = db.query(CalendlyClick).filter(
                     CalendlyClick.timestamp >= ventana_inicio,
-                    CalendlyClick.timestamp < booking_datetime_naive,  # ANTES del booking
+                    CalendlyClick.timestamp < booking_datetime_naive,
                     CalendlyClick.via_whatsapp == True
                 ).order_by(
                     CalendlyClick.timestamp.desc()
                 ).all()
 
-                logger.info(f"   📊 Clicks WhatsApp encontrados (anteriores): {len(clicks_whatsapp)}")
+                logger.info(f"   📊 Clicks encontrados (anteriores): {len(clicks_permitidos)}")
 
-                if clicks_whatsapp:
-                    # Buscar el más cercano ANTERIOR
+                if clicks_permitidos:
                     mejor_match = None
                     menor_diferencia = float('inf')
 
-                    for click in clicks_whatsapp:
+                    for click in clicks_permitidos:
                         click_timestamp = click.timestamp.replace(tzinfo=None)
 
-                        # Verificar que el click es ANTES del booking
                         if click_timestamp < booking_datetime_naive:
                             diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
 
@@ -247,23 +273,22 @@ def sync_calendly_bookings():
                         traffic_source = mejor_match.traffic_source
                         via_whatsapp = True
 
-                        logger.info(f"   ✅ MATCH WhatsApp: {traffic_source} ({diferencia_minutos:.1f}min antes)")
+                        logger.info(
+                            f"   ✅ MATCH {origen_detectado}: {traffic_source} ({diferencia_minutos:.1f}min antes)")
                         logger.info(f"   📱 Button: {mejor_match.button_id}")
                         logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
                 else:
-                    logger.info(f"   ℹ️  Sin clicks WhatsApp anteriores - usando traffic_source='whatsapp'")
-                    traffic_source = "whatsapp"
+                    logger.info(f"   ℹ️  Sin clicks anteriores - usando traffic_source='{origen_detectado}'")
+                    traffic_source = origen_detectado
                     via_whatsapp = True
 
             else:
-                # ========================================
-                # CASO B: Acceso directo → Buscar clicks con via_whatsapp=False
-                # ========================================
+                # Acceso directo desde web
                 logger.info(f"   🔍 Buscando clicks directos a Calendly (via_whatsapp=False) ANTERIORES al booking...")
 
                 clicks_calendly = db.query(CalendlyClick).filter(
                     CalendlyClick.timestamp >= ventana_inicio,
-                    CalendlyClick.timestamp < booking_datetime_naive,  # ANTES del booking
+                    CalendlyClick.timestamp < booking_datetime_naive,
                     CalendlyClick.via_whatsapp == False
                 ).order_by(
                     CalendlyClick.timestamp.desc()
@@ -272,14 +297,12 @@ def sync_calendly_bookings():
                 logger.info(f"   📊 Clicks Calendly encontrados (anteriores): {len(clicks_calendly)}")
 
                 if clicks_calendly:
-                    # Buscar el más cercano ANTERIOR
                     mejor_match = None
                     menor_diferencia = float('inf')
 
                     for click in clicks_calendly:
                         click_timestamp = click.timestamp.replace(tzinfo=None)
 
-                        # Verificar que el click es ANTES del booking
                         if click_timestamp < booking_datetime_naive:
                             diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
 
@@ -298,10 +321,8 @@ def sync_calendly_bookings():
                         logger.info(f"   📱 Button: {mejor_match.button_id}")
                         logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
 
-            # ========================================
-            # FALLBACK: Si no hay match, analizar visitas
-            # ========================================
-            if not match_final and not viene_de_whatsapp:
+            # Fallback: Si no hay match, analizar visitas
+            if not match_final and not permite_duplicados:
                 logger.info(f"   🔍 Fallback: Analizando visitas...")
 
                 visitas = db.query(PageVisit).filter(
@@ -335,7 +356,6 @@ def sync_calendly_bookings():
 
                 db.flush()
 
-                # Verificar que se guardó
                 verificar = db.query(CalendlyBooking).filter(
                     CalendlyBooking.calendly_event_id == event_uri
                 ).first()
@@ -344,7 +364,10 @@ def sync_calendly_bookings():
                     nuevas_reservas += 1
                     logger.info(f"   ✅ GUARDADO EN BD (ID: {verificar.id})")
                     logger.info(f"   🎯 Traffic Source: {traffic_source}")
-                    logger.info(f"   {'📱 Via WhatsApp: SÍ' if via_whatsapp else '🖥️  Via Calendly: DIRECTO'}")
+                    if via_whatsapp:
+                        logger.info(f"   📱 Via WhatsApp: SÍ (duplicados permitidos)")
+                    else:
+                        logger.info(f"   🌐 Via Web: DIRECTO (sin duplicados)")
                 else:
                     logger.error(f"   ❌ NO SE GUARDÓ EN BD")
 
@@ -368,6 +391,7 @@ def sync_calendly_bookings():
         logger.info(f"📊 Eventos totales: {len(eventos_recientes)}")
         logger.info(f"✨ Nuevas reservas: {nuevas_reservas}")
         logger.info(f"⏭️  Ya existentes: {reservas_existentes}")
+        logger.info(f"🚫 Excluidas (clientes): {reservas_excluidas}")
         logger.info(f"{'=' * 60}\n")
 
     except Exception as e:
@@ -383,4 +407,3 @@ def sync_calendly_bookings():
 if __name__ == "__main__":
     logger.info("🔄 Iniciando sync con Calendly...")
     sync_calendly_bookings()
-
