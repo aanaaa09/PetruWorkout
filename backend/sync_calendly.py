@@ -4,6 +4,8 @@ Sincronización de reservas de Calendly con matching inteligente basado en UTM
 - WhatsApp: Permite duplicados (múltiples bookings del mismo email)
 - Clientes: Excluido (NO se guarda en BD)
 - Directo: NO permite duplicados (un email = una sola reserva)
+
+🕐 IMPORTANTE: Convierte created_at de UTC a hora de España para matching correcto
 """
 import requests
 import os
@@ -157,7 +159,7 @@ def sync_calendly_bookings():
 
             logger.info(f"   👤 {name} ({email})")
 
-            # Parsear fechas
+            # Parsear fechas y convertir a hora de España
             try:
                 event_datetime = datetime.fromisoformat(event_start.replace("Z", "+00:00"))
             except:
@@ -165,14 +167,17 @@ def sync_calendly_bookings():
 
             try:
                 if created_at:
+                    # Parsear UTC
                     booking_datetime = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-                    booking_datetime_naive = booking_datetime.replace(tzinfo=None)
+                    # Convertir a hora de España (UTC+1)
+                    booking_datetime_naive = booking_datetime.replace(tzinfo=None) + timedelta(hours=1)
                 else:
-                    booking_datetime_naive = datetime.utcnow()
+                    # Si no hay created_at, usar hora actual de España
+                    booking_datetime_naive = datetime.utcnow() + timedelta(hours=1)
             except:
-                booking_datetime_naive = datetime.utcnow()
+                booking_datetime_naive = datetime.utcnow() + timedelta(hours=1)
 
-            logger.info(f"   🕐 Booking: {booking_datetime_naive.strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(f"   🕐 Booking (España): {booking_datetime_naive.strftime('%Y-%m-%d %H:%M:%S')}")
 
             # ========================================
             # DETECTAR ORIGEN POR UTM PARAMETERS
@@ -228,7 +233,7 @@ def sync_calendly_bookings():
                     continue
 
             # ========================================
-            # MATCHING INTELIGENTE
+            # MATCHING INTELIGENTE (AHORA EN HORA ESPAÑA)
             # ========================================
             ventana_dias = 7
             ventana_inicio = booking_datetime_naive - timedelta(days=ventana_dias)
