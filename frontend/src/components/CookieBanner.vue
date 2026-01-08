@@ -9,7 +9,7 @@
             <div class="cookie-message">
               <p class="cookie-title">Utilizamos cookies propias y de terceros</p>
               <p class="cookie-description">
-                Usamos cookies de análisis (Google Analytics) para mejorar tu experiencia y medir la efectividad de nuestras campañas.
+                Usamos cookies de análisis para mejorar tu experiencia y medir la efectividad de nuestras campañas.
                 <strong>Al continuar navegando, aceptas su uso.</strong>
               </p>
             </div>
@@ -17,9 +17,10 @@
 
           <!-- Botones -->
           <div class="cookie-actions">
-            <router-link to="/privacidad" class="btn-more-info">
+            <!-- ✅ MODIFICADO: Ahora navega a la sección de cookies -->
+            <button @click="goToCookiesSection" class="btn-more-info">
               Más información
-            </router-link>
+            </button>
 
             <button @click="acceptCookies" class="btn-accept">
               Aceptar
@@ -56,6 +57,15 @@ export default {
       // Guardar en localStorage que ya aceptó
       localStorage.setItem('cookies_accepted', 'true')
       this.visible = false
+    },
+
+    // ✅ NUEVO MÉTODO: Navega a la política de privacidad con ancla
+    goToCookiesSection() {
+      // Guardar la posición actual antes de navegar
+      sessionStorage.setItem('return_from_cookies', window.location.pathname)
+
+      // Navegar a la política de privacidad con el hash de cookies
+      this.$router.push('/info?legal=privacy#cookies')
     }
   }
 }
@@ -131,14 +141,16 @@ export default {
 .btn-more-info {
   font-size: 0.875rem;
   color: #e63946;
-  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: color 0.3s ease;
   white-space: nowrap;
+  text-decoration: underline;
 }
 
 .btn-more-info:hover {
   color: #ff4d5a;
-  text-decoration: underline;
 }
 
 .btn-accept {

@@ -1,7 +1,7 @@
 <template>
   <div class="info-view">
     <FullNavbar @scroll-to="scrollToSection" />
-    <main>
+    <main v-if="!currentLegalPage">
       <AboutSection id="sobre-mi" />
       <ServicesSection id="servicios" />
       <GuaranteeSection />
@@ -9,12 +9,15 @@
       <ContactForm id="contacto" />
       <WhatsAppButton />
     </main>
-    <FullFooter @show-legal="showLegalPage" />
 
+    <!-- ✅ MODIFICADO: Solo mostrar footer si no hay página legal activa -->
+    <FullFooter v-if="!currentLegalPage" @show-legal="showLegalPage" />
+
+    <!-- ✅ Páginas legales como overlay -->
     <component
       v-if="currentLegalPage"
       :is="currentLegalComponent"
-      @close="currentLegalPage = null"
+      @close="closeLegalPage"
     />
   </div>
 </template>
@@ -52,7 +55,6 @@ export default {
       currentLegalPage: null
     }
   },
-  // ✅ AÑADIR ESTO:
   mounted() {
     // Actualizar canonical para /info
     const canonical = document.querySelector('link[rel="canonical"]')
@@ -62,6 +64,15 @@ export default {
 
     // Actualizar title
     document.title = 'Servicios y Testimonios - PetruWorkout | Entrenador Personal'
+
+    // ✅ NUEVO: Verificar si viene con parámetro legal en la URL
+    this.checkLegalParam()
+  },
+  watch: {
+    // ✅ NUEVO: Observar cambios en la ruta
+    '$route.query'() {
+      this.checkLegalParam()
+    }
   },
   computed: {
     currentLegalComponent() {
@@ -80,9 +91,27 @@ export default {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
     },
+
     showLegalPage(pageType) {
       this.currentLegalPage = pageType
       window.scrollTo(0, 0)
+    },
+
+    // ✅ NUEVO: Cerrar página legal
+    closeLegalPage() {
+      this.currentLegalPage = null
+      // Limpiar el parámetro de la URL
+      this.$router.replace({ query: {} })
+      window.scrollTo(0, 0)
+    },
+
+    // ✅ NUEVO: Verificar parámetro legal en la URL
+    checkLegalParam() {
+      const legalParam = this.$route.query.legal
+      if (legalParam && ['privacy', 'terms', 'legal-notice'].includes(legalParam)) {
+        this.currentLegalPage = legalParam
+        window.scrollTo(0, 0)
+      }
     }
   }
 }

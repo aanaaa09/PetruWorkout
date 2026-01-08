@@ -31,51 +31,54 @@
           <p>Este sitio puede contener enlaces hacia y desde los sitios web de nuestras redes asociadas, anunciantes y otros terceros. Si sigue un enlace a cualquiera de estos sitios web, tenga en cuenta que tienen sus propias políticas de privacidad y que no aceptamos responsabilidad alguna por estas políticas. Consulte estas políticas antes de enviar datos a estos sitios web.</p>
         </section>
 
+        <!-- ✅ SECCIÓN DE COOKIES CON ID PARA EL ANCLA -->
+        <section id="cookies">
+          <h2>Cookies</h2>
+          <p>Una cookie es un pequeño archivo de información que se envía a su navegador y se almacena en su dispositivo. Utilizamos cookies para mejorar su experiencia y analizar el uso de nuestro sitio web.</p>
+
+          <h3>Tipos de cookies que utilizamos:</h3>
+          <ul>
+            <li><strong>Cookies analíticas (Google Analytics):</strong> Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio, qué páginas visitan y cuánto tiempo permanecen. Esta información se recopila de forma anónima.</li>
+            <li><strong>Cookies de seguimiento de conversiones:</strong> Utilizadas para medir la efectividad de nuestras campañas en redes sociales y rastrear el origen del tráfico.</li>
+            <li><strong>Cookies funcionales:</strong> Recordar sus preferencias y facilitar su acceso al área de usuarios registrados.</li>
+          </ul>
+
+          <p>Puede cambiar la configuración de su navegador para evitar que las cookies se almacenen en su dispositivo. Sin embargo, esto puede afectar la funcionalidad del sitio.</p>
+
+          <div class="info-box">
+            <p><strong>Importante:</strong> Las cookies analíticas no recopilan información personal identificable y se utilizan exclusivamente para mejorar nuestros servicios.</p>
+          </div>
+        </section>
+
         <section>
-  <h2>Cookies</h2>
-  <p>Una cookie es un pequeño archivo de información que se envía a su navegador y se almacena en su dispositivo. Utilizamos cookies para mejorar su experiencia y analizar el uso de nuestro sitio web.</p>
+          <h2>Análisis y Seguimiento de Conversiones</h2>
+          <p>Para mejorar nuestros servicios y entender mejor cómo los usuarios interactúan con nuestra plataforma, recopilamos información analítica de forma anónima mediante el uso de identificadores únicos (IDs).</p>
 
-  <h3>Tipos de cookies que utilizamos:</h3>
-  <ul>
-    <li><strong>Cookies analíticas (Google Analytics):</strong> Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio, qué páginas visitan y cuánto tiempo permanecen. Esta información se recopila de forma anónima.</li>
-    <li><strong>Cookies de seguimiento de conversiones:</strong> Utilizadas para medir la efectividad de nuestras campañas en redes sociales y rastrear el origen del tráfico.</li>
-    <li><strong>Cookies funcionales:</strong> Recordar sus preferencias y facilitar su acceso al área de usuarios registrados.</li>
-  </ul>
+          <h3>Información que recopilamos:</h3>
+          <ul>
+            <li><strong>Origen del tráfico:</strong> Registramos de forma anónima la red social o canal desde el cual nos visitas (Instagram, Facebook, TikTok, etc.) utilizando un ID único que no permite identificarte personalmente.</li>
+            <li><strong>Seguimiento del embudo de conversión:</strong> Monitorizamos de manera anónima las interacciones clave en nuestro sitio, incluyendo:
+              <ul>
+                <li>Clics en botones de contacto</li>
+                <li>Clics en el botón de agendar llamada</li>
+                <li>Navegación a través de las diferentes secciones del sitio</li>
+              </ul>
+            </li>
+          </ul>
 
-  <p>Puede cambiar la configuración de su navegador para evitar que las cookies se almacenen en su dispositivo. Sin embargo, esto puede afectar la funcionalidad del sitio.</p>
+          <h3>Uso de la información:</h3>
+          <p>Esta información analítica se utiliza exclusivamente para:</p>
+          <ul>
+            <li>Medir la efectividad de nuestras campañas en redes sociales</li>
+            <li>Optimizar la experiencia de usuario en nuestra web</li>
+            <li>Analizar el rendimiento de nuestro embudo de conversión</li>
+            <li>Mejorar nuestros servicios y contenido</li>
+          </ul>
 
-  <div class="info-box">
-    <p><strong>Importante:</strong> Las cookies analíticas no recopilan información personal identificable y se utilizan exclusivamente para mejorar nuestros servicios.</p>
-  </div>
-</section>
-  <h2>Análisis y Seguimiento de Conversiones</h2>
-  <p>Para mejorar nuestros servicios y entender mejor cómo los usuarios interactúan con nuestra plataforma, recopilamos información analítica de forma anónima mediante el uso de identificadores únicos (IDs).</p>
-
-  <h3>Información que recopilamos:</h3>
-  <ul>
-    <li><strong>Origen del tráfico:</strong> Registramos de forma anónima la red social o canal desde el cual nos visitas (Instagram, Facebook, TikTok, etc.) utilizando un ID único que no permite identificarte personalmente.</li>
-    <li><strong>Seguimiento del embudo de conversión:</strong> Monitorizamos de manera anónima las interacciones clave en nuestro sitio, incluyendo:
-      <ul>
-        <li>Clics en botones de contacto</li>
-        <li>Clics en el botón de agendar llamada</li>
-        <li>Navegación a través de las diferentes secciones del sitio</li>
-      </ul>
-    </li>
-  </ul>
-
-  <h3>Uso de la información:</h3>
-  <p>Esta información analítica se utiliza exclusivamente para:</p>
-  <ul>
-    <li>Medir la efectividad de nuestras campañas en redes sociales</li>
-    <li>Optimizar la experiencia de usuario en nuestra web</li>
-    <li>Analizar el rendimiento de nuestro embudo de conversión</li>
-    <li>Mejorar nuestros servicios y contenido</li>
-  </ul>
-
-  <div class="info-box">
-    <p><strong>Importante:</strong> Todos los datos de tracking se almacenan de forma completamente anónima mediante identificadores únicos. No vinculamos esta información con datos personales que permitan identificarte, a menos que decidas proporcionarlos voluntariamente al contactarnos y/o agendar una llamada con el entrenador.</p>
-  </div>
-
+          <div class="info-box">
+            <p><strong>Importante:</strong> Todos los datos de tracking se almacenan de forma completamente anónima mediante identificadores únicos. No vinculamos esta información con datos personales que permitan identificarte, a menos que decidas proporcionarlos voluntariamente al contactarnos y/o agendar una llamada con el entrenador.</p>
+          </div>
+        </section>
 
         <section>
           <h2>Verificando tus detalles</h2>
@@ -100,8 +103,34 @@
 <script>
 export default {
   name: 'PrivacyPolicy',
+  mounted() {
+    // ✅ NUEVO: Scroll automático a la sección de cookies si viene desde el banner
+    this.$nextTick(() => {
+      if (window.location.hash === '#cookies') {
+        setTimeout(() => {
+          const cookiesSection = document.getElementById('cookies')
+          if (cookiesSection) {
+            cookiesSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            // Añadir un pequeño offset para que no quede pegado al header
+            window.scrollBy(0, -80)
+          }
+        }, 100)
+      }
+    })
+  },
   methods: {
     goBack() {
+      // ✅ MEJORADO: Volver a la página desde donde vino
+      const returnPath = sessionStorage.getItem('return_from_cookies')
+
+      if (returnPath) {
+        sessionStorage.removeItem('return_from_cookies')
+        this.$router.push(returnPath)
+      } else {
+        // Si no hay ruta guardada, ir a info
+        this.$router.push('/info')
+      }
+
       window.scrollTo(0, 0)
       this.$emit('close')
     }
@@ -168,6 +197,8 @@ export default {
 
 .legal-content section {
   margin-bottom: 2.5rem;
+  /* ✅ NUEVO: Añadir scroll-margin para el ancla */
+  scroll-margin-top: 80px;
 }
 
 .legal-content h2 {
@@ -178,9 +209,25 @@ export default {
   border-bottom: 2px solid rgba(230, 57, 70, 0.3);
 }
 
+.legal-content h3 {
+  color: white;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
 .legal-content p {
   margin-bottom: 1rem;
   text-align: justify;
+}
+
+.legal-content ul {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.legal-content li {
+  margin-bottom: 0.5rem;
 }
 
 .legal-content a {
