@@ -31,7 +31,6 @@
           <p>Este sitio puede contener enlaces hacia y desde los sitios web de nuestras redes asociadas, anunciantes y otros terceros. Si sigue un enlace a cualquiera de estos sitios web, tenga en cuenta que tienen sus propias políticas de privacidad y que no aceptamos responsabilidad alguna por estas políticas. Consulte estas políticas antes de enviar datos a estos sitios web.</p>
         </section>
 
-        <!-- ✅ SECCIÓN DE COOKIES CON ID PARA EL ANCLA -->
         <section id="cookies">
           <h2>Cookies</h2>
           <p>Una cookie es un pequeño archivo de información que se envía a su navegador y se almacena en su dispositivo. Utilizamos cookies para mejorar su experiencia y analizar el uso de nuestro sitio web.</p>
@@ -104,7 +103,7 @@
 export default {
   name: 'PrivacyPolicy',
   mounted() {
-    // ✅ NUEVO: Scroll automático a la sección de cookies si viene desde el banner
+    // Scroll automático a la sección de cookies si viene desde el banner
     this.$nextTick(() => {
       if (window.location.hash === '#cookies') {
         setTimeout(() => {
@@ -120,15 +119,24 @@ export default {
   },
   methods: {
     goBack() {
-      // ✅ MEJORADO: Volver a la página desde donde vino
-      const returnPath = sessionStorage.getItem('return_from_cookies')
+      // ✅ NUEVO: Verificar si viene desde el banner de cookies
+      const fromCookieBanner = sessionStorage.getItem('from_cookie_banner')
 
-      if (returnPath) {
-        sessionStorage.removeItem('return_from_cookies')
-        this.$router.push(returnPath)
+      if (fromCookieBanner === 'true') {
+        // Limpiar el flag
+        sessionStorage.removeItem('from_cookie_banner')
+        // Ir a la home
+        this.$router.push('/')
       } else {
-        // Si no hay ruta guardada, ir a info
-        this.$router.push('/info')
+        // Comportamiento normal: volver a /info
+        const returnPath = sessionStorage.getItem('return_from_cookies')
+
+        if (returnPath) {
+          sessionStorage.removeItem('return_from_cookies')
+          this.$router.push(returnPath)
+        } else {
+          this.$router.push('/info')
+        }
       }
 
       window.scrollTo(0, 0)
@@ -197,7 +205,6 @@ export default {
 
 .legal-content section {
   margin-bottom: 2.5rem;
-  /* ✅ NUEVO: Añadir scroll-margin para el ancla */
   scroll-margin-top: 80px;
 }
 

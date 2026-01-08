@@ -17,7 +17,7 @@
 
           <!-- Botones -->
           <div class="cookie-actions">
-            <!-- ✅ MODIFICADO: Ahora navega a la sección de cookies -->
+            <!-- ✅ MODIFICADO: Ahora guarda la página actual antes de navegar -->
             <button @click="goToCookiesSection" class="btn-more-info">
               Más información
             </button>
@@ -43,29 +43,66 @@ export default {
   },
   mounted() {
     // Verificar si ya aceptó las cookies
-    const cookiesAccepted = localStorage.getItem('cookies_accepted')
+    let cookiesAccepted = false
+
+    try {
+      // Intentar leer de localStorage
+      cookiesAccepted = localStorage.getItem('cookies_accepted') === 'true'
+      console.log('📊 Estado de cookies (localStorage):', cookiesAccepted)
+    } catch (error) {
+      console.warn('⚠️ No se puede acceder a localStorage:', error)
+      // Fallback a sessionStorage
+      try {
+        cookiesAccepted = sessionStorage.getItem('cookies_accepted') === 'true'
+        console.log('📊 Estado de cookies (sessionStorage):', cookiesAccepted)
+      } catch (e) {
+        console.error('❌ No se puede acceder a ningún storage:', e)
+      }
+    }
 
     if (!cookiesAccepted) {
       // Mostrar después de 2 segundos
       setTimeout(() => {
         this.visible = true
+        console.log('🍪 Banner de cookies mostrado')
       }, 2000)
+    } else {
+      console.log('✅ Cookies ya aceptadas, no se muestra el banner')
     }
   },
   methods: {
     acceptCookies() {
-      // Guardar en localStorage que ya aceptó
-      localStorage.setItem('cookies_accepted', 'true')
-      this.visible = false
+      try {
+        // Guardar en localStorage que ya aceptó
+        localStorage.setItem('cookies_accepted', 'true')
+        console.log('✅ Cookies aceptadas y guardadas en localStorage')
+        this.visible = false
+      } catch (error) {
+        console.error('❌ Error al guardar en localStorage:', error)
+        // Si falla localStorage, intentar con sessionStorage como fallback
+        try {
+          sessionStorage.setItem('cookies_accepted', 'true')
+          console.log('⚠️ Guardado en sessionStorage como fallback')
+          this.visible = false
+        } catch (e) {
+          console.error('❌ Error crítico al guardar preferencia de cookies:', e)
+        }
+      }
     },
 
-    // ✅ NUEVO MÉTODO: Navega a la política de privacidad con ancla
+    // ✅ MODIFICADO: Guardar que viene desde el banner de cookies
     goToCookiesSection() {
-      // Guardar la posición actual antes de navegar
-      sessionStorage.setItem('return_from_cookies', window.location.pathname)
+      try {
+        // Marcar que viene desde el banner de cookies
+        sessionStorage.setItem('from_cookie_banner', 'true')
 
-      // Navegar a la política de privacidad con el hash de cookies
-      this.$router.push('/info?legal=privacy#cookies')
+        // Navegar a la política de privacidad con el hash de cookies
+        this.$router.push('/info?legal=privacy#cookies')
+      } catch (error) {
+        console.error('❌ Error al navegar:', error)
+        // Fallback: navegar sin sessionStorage
+        this.$router.push('/info?legal=privacy#cookies')
+      }
     }
   }
 }
@@ -231,7 +268,23 @@ export default {
   }
 }
 
+/* ✅ AÑADIDO: Ajuste móvil para no tapar el botón de WhatsApp */
 @media (max-width: 639px) {
+  .cookie-banner {
+    bottom: 0;
+    /* ✅ Añadir padding inferior en móvil para no tapar el botón flotante */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .cookie-container {
+    /* ✅ Reducir padding para ocupar menos espacio vertical */
+    padding-bottom: 0.5rem;
+  }
+
+  .cookie-content {
+    padding: 0.75rem 1rem;
+  }
+
   .cookie-icon {
     font-size: 1.5rem;
   }
@@ -243,6 +296,7 @@ export default {
   .btn-accept {
     width: 100%;
     justify-content: center;
+    padding: 0.625rem 1.25rem;
   }
 }
 </style>
