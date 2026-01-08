@@ -49,11 +49,10 @@
         </div>
 
         <p class="guarantee-note">
-          * La garantía aplica solo si sigues el programa al 100% y cumples con
-          los requisitos de seguimiento establecidos.
-          ** Al tratarse de un entrenamiento personalizado, el precio será establecido con el entrenador en
-          función de los objetivos y en plan escogido
+          * La garantía aplica solo si sigues el programa al 100% y cumples con los requisitos de seguimiento establecidos.
+          ** Al tratarse de un entrenamiento personalizado, el precio será establecido con el entrenador en función de los objetivos y el plan escogido
         </p>
+
       </div>
     </div>
   </section>
