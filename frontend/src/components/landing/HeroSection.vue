@@ -9,7 +9,7 @@
         <span class="hero-badge">🏋️ Entrenamiento Personal Online</span>
 
         <h1 class="hero-title">
-          Consigue menos de <span class="highlight">20% de grasa</span>
+          Reduce un <span class="highlight">20% de grasa</span>
           y <span class="highlight">+3kg de músculo</span> en
           <span class="accent">90 Días</span>
         </h1>
