@@ -35,6 +35,35 @@
           <h2>Cookies</h2>
           <p>Una cookie es un pequeño archivo de información que se envía a su computadora y se almacena en su disco duro. Si se ha registrado con nosotros, su computadora almacenará una cookie de identificación que le ahorrará tiempo cada vez que vuelva a visitar nuestro sitio, al recordar su dirección de correo electrónico. Puede cambiar la configuración de su navegador para evitar que las cookies se almacenen en su computadora sin su consentimiento explícito.</p>
         </section>
+        <section>
+  <h2>Análisis y Seguimiento de Conversiones</h2>
+  <p>Para mejorar nuestros servicios y entender mejor cómo los usuarios interactúan con nuestra plataforma, recopilamos información analítica de forma anónima mediante el uso de identificadores únicos (IDs).</p>
+
+  <h3>Información que recopilamos:</h3>
+  <ul>
+    <li><strong>Origen del tráfico:</strong> Registramos de forma anónima la red social o canal desde el cual nos visitas (Instagram, Facebook, TikTok, etc.) utilizando un ID único que no permite identificarte personalmente.</li>
+    <li><strong>Seguimiento del embudo de conversión:</strong> Monitorizamos de manera anónima las interacciones clave en nuestro sitio, incluyendo:
+      <ul>
+        <li>Clics en botones de contacto</li>
+        <li>Clics en el botón de agendar llamada</li>
+        <li>Navegación a través de las diferentes secciones del sitio</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>Uso de la información:</h3>
+  <p>Esta información analítica se utiliza exclusivamente para:</p>
+  <ul>
+    <li>Medir la efectividad de nuestras campañas en redes sociales</li>
+    <li>Optimizar la experiencia de usuario en nuestra web</li>
+    <li>Analizar el rendimiento de nuestro embudo de conversión</li>
+    <li>Mejorar nuestros servicios y contenido</li>
+  </ul>
+
+  <div class="info-box">
+    <p><strong>Importante:</strong> Todos los datos de tracking se almacenan de forma completamente anónima mediante identificadores únicos. No vinculamos esta información con datos personales que permitan identificarte, a menos que decidas proporcionarlos voluntariamente al contactarnos y/o agendar una llamada con el entrenador.</p>
+  </div>
+</section>
 
         <section>
           <h2>Verificando tus detalles</h2>
