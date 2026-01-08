@@ -80,6 +80,8 @@ export default {
   name: 'LegalNotice',
   methods: {
     goBack() {
+      // ✅ MODIFICADO: Siempre ir a la home
+      this.$router.push('/')
       window.scrollTo(0, 0)
       this.$emit('close')
     }
@@ -88,7 +90,6 @@ export default {
 </script>
 
 <style scoped>
-/* Reutilizar estilos de PrivacyPolicy */
 .legal-page {
   min-height: 100vh;
   background: var(--bg-primary);

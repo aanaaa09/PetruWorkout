@@ -7,19 +7,24 @@
           <div class="cookie-text">
             <span class="cookie-icon">🍪</span>
             <div class="cookie-message">
-              <p class="cookie-title">Utilizamos cookies propias y de terceros</p>
-              <p class="cookie-description">
+              <p class="cookie-title">Utilizamos cookies</p>
+              <!-- ✅ Texto más corto en móvil -->
+              <p class="cookie-description cookie-description-desktop">
                 Usamos cookies de análisis para mejorar tu experiencia y medir la efectividad de nuestras campañas.
                 <strong>Al continuar navegando, aceptas su uso.</strong>
+              </p>
+              <!-- ✅ NUEVO: Versión móvil más corta -->
+              <p class="cookie-description cookie-description-mobile">
+                Usamos cookies para mejorar tu experiencia.
+                <strong>Al continuar, aceptas su uso.</strong>
               </p>
             </div>
           </div>
 
           <!-- Botones -->
           <div class="cookie-actions">
-            <!-- ✅ MODIFICADO: Ahora guarda la página actual antes de navegar -->
             <button @click="goToCookiesSection" class="btn-more-info">
-              Más información
+              Más info
             </button>
 
             <button @click="acceptCookies" class="btn-accept">
@@ -90,7 +95,6 @@ export default {
       }
     },
 
-    // ✅ MODIFICADO: Guardar que viene desde el banner de cookies
     goToCookiesSection() {
       try {
         // Marcar que viene desde el banner de cookies
@@ -166,6 +170,15 @@ export default {
 .cookie-description strong {
   color: white;
   font-weight: 600;
+}
+
+/* ✅ Por defecto mostrar versión desktop */
+.cookie-description-mobile {
+  display: none;
+}
+
+.cookie-description-desktop {
+  display: block;
 }
 
 .cookie-actions {
@@ -268,35 +281,67 @@ export default {
   }
 }
 
-/* ✅ AÑADIDO: Ajuste móvil para no tapar el botón de WhatsApp */
+/* ✅ MODIFICADO: Versión móvil más compacta */
 @media (max-width: 639px) {
   .cookie-banner {
     bottom: 0;
-    /* ✅ Añadir padding inferior en móvil para no tapar el botón flotante */
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   .cookie-container {
-    /* ✅ Reducir padding para ocupar menos espacio vertical */
     padding-bottom: 0.5rem;
   }
 
   .cookie-content {
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.9rem; /* ✅ Reducido más el padding */
+    gap: 0.7rem; /* ✅ Menos espacio entre elementos */
+  }
+
+  .cookie-text {
+    gap: 0.7rem; /* ✅ Menos espacio entre icono y texto */
   }
 
   .cookie-icon {
-    font-size: 1.5rem;
+    font-size: 1.3rem; /* ✅ Icono más pequeño */
+    margin-top: 0;
   }
 
   .cookie-message {
-    font-size: 0.8125rem;
+    font-size: 0.75rem; /* ✅ Texto más pequeño */
+    line-height: 1.4; /* ✅ Altura de línea ajustada */
+  }
+
+  .cookie-title {
+    margin: 0 0 0.3rem 0; /* ✅ Menos margen */
+    font-size: 0.8rem; /* ✅ Título más pequeño */
+  }
+
+  /* ✅ Ocultar versión desktop y mostrar móvil */
+  .cookie-description-desktop {
+    display: none;
+  }
+
+  .cookie-description-mobile {
+    display: block;
+  }
+
+  .cookie-actions {
+    gap: 0.7rem; /* ✅ Menos espacio entre botones */
+  }
+
+  .btn-more-info {
+    font-size: 0.75rem; /* ✅ Botón más pequeño */
   }
 
   .btn-accept {
     width: 100%;
     justify-content: center;
-    padding: 0.625rem 1.25rem;
+    padding: 0.55rem 1rem; /* ✅ Padding reducido */
+    font-size: 0.8rem; /* ✅ Texto más pequeño */
+  }
+
+  .btn-icon {
+    font-size: 0.9rem;
   }
 }
 </style>

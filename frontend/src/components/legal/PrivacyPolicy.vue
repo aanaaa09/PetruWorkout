@@ -119,26 +119,8 @@ export default {
   },
   methods: {
     goBack() {
-      // ✅ NUEVO: Verificar si viene desde el banner de cookies
-      const fromCookieBanner = sessionStorage.getItem('from_cookie_banner')
-
-      if (fromCookieBanner === 'true') {
-        // Limpiar el flag
-        sessionStorage.removeItem('from_cookie_banner')
-        // Ir a la home
-        this.$router.push('/')
-      } else {
-        // Comportamiento normal: volver a /info
-        const returnPath = sessionStorage.getItem('return_from_cookies')
-
-        if (returnPath) {
-          sessionStorage.removeItem('return_from_cookies')
-          this.$router.push(returnPath)
-        } else {
-          this.$router.push('/info')
-        }
-      }
-
+      // ✅ MODIFICADO: Siempre ir a la home
+      this.$router.push('/')
       window.scrollTo(0, 0)
       this.$emit('close')
     }
