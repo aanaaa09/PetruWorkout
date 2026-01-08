@@ -32,10 +32,22 @@
         </section>
 
         <section>
-          <h2>Cookies</h2>
-          <p>Una cookie es un pequeño archivo de información que se envía a su computadora y se almacena en su disco duro. Si se ha registrado con nosotros, su computadora almacenará una cookie de identificación que le ahorrará tiempo cada vez que vuelva a visitar nuestro sitio, al recordar su dirección de correo electrónico. Puede cambiar la configuración de su navegador para evitar que las cookies se almacenen en su computadora sin su consentimiento explícito.</p>
-        </section>
-        <section>
+  <h2>Cookies</h2>
+  <p>Una cookie es un pequeño archivo de información que se envía a su navegador y se almacena en su dispositivo. Utilizamos cookies para mejorar su experiencia y analizar el uso de nuestro sitio web.</p>
+
+  <h3>Tipos de cookies que utilizamos:</h3>
+  <ul>
+    <li><strong>Cookies analíticas (Google Analytics):</strong> Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio, qué páginas visitan y cuánto tiempo permanecen. Esta información se recopila de forma anónima.</li>
+    <li><strong>Cookies de seguimiento de conversiones:</strong> Utilizadas para medir la efectividad de nuestras campañas en redes sociales y rastrear el origen del tráfico.</li>
+    <li><strong>Cookies funcionales:</strong> Recordar sus preferencias y facilitar su acceso al área de usuarios registrados.</li>
+  </ul>
+
+  <p>Puede cambiar la configuración de su navegador para evitar que las cookies se almacenen en su dispositivo. Sin embargo, esto puede afectar la funcionalidad del sitio.</p>
+
+  <div class="info-box">
+    <p><strong>Importante:</strong> Las cookies analíticas no recopilan información personal identificable y se utilizan exclusivamente para mejorar nuestros servicios.</p>
+  </div>
+</section>
   <h2>Análisis y Seguimiento de Conversiones</h2>
   <p>Para mejorar nuestros servicios y entender mejor cómo los usuarios interactúan con nuestra plataforma, recopilamos información analítica de forma anónima mediante el uso de identificadores únicos (IDs).</p>
 

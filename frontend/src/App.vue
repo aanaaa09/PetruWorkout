@@ -1,14 +1,17 @@
 <template>
   <div id="app">
     <router-view />
+    <CookieBanner />
   </div>
 </template>
 
 <script>
 import { initTracking, getOrCreateSessionId, getTrafficSourceFromSession } from './utils/tracking'
+import CookieBanner from "@/components/CookieBanner.vue";
 
 export default {
   name: 'App',
+  components: {CookieBanner},
   mounted() {
     // Inicializar tracking cuando la app se carga
     initTracking()
