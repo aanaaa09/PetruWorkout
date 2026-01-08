@@ -75,7 +75,7 @@
   <div class="info-box">
     <p><strong>Importante:</strong> Todos los datos de tracking se almacenan de forma completamente anónima mediante identificadores únicos. No vinculamos esta información con datos personales que permitan identificarte, a menos que decidas proporcionarlos voluntariamente al contactarnos y/o agendar una llamada con el entrenador.</p>
   </div>
-</section>
+
 
         <section>
           <h2>Verificando tus detalles</h2>
