@@ -170,25 +170,25 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: 📥 Checkout código
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 📦 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: 🌐 Instalar Chrome
+      - name: Instalar Chrome
         uses: browser-actions/setup-chrome@latest
 
-      - name: 📦 Instalar dependencias
+      - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
@@ -197,7 +197,7 @@ jobs:
           npm ci
           npm run build
 
-      - name: 🚀 Iniciar backend
+      - name: Iniciar backend
         env:
           DB_HOST: localhost
           DB_PORT: 5432
@@ -216,13 +216,13 @@ jobs:
           python -m uvicorn backend.main:app --host 0.0.0.0 --port 5000 &
           sleep 10
 
-      - name: 🚀 Iniciar frontend
+      - name: Iniciar frontend
         run: |
           cd frontend
           npm run preview -- --host 0.0.0.0 --port 5173 &
           sleep 10
 
-      - name: 🧪 Ejecutar tests E2E
+      - name: Ejecutar tests E2E
         env:
           CI: true
           DB_HOST: localhost
@@ -242,7 +242,7 @@ jobs:
           cd backend
           pytest tests/e2e/ -v
 
-      - name: 📸 Guardar screenshots si falla
+      - name: Guardar screenshots si falla
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -260,22 +260,22 @@ jobs:
     if: always()
 
     steps:
-      - name: ✅ Tests pasaron
+      - name: Tests pasaron
         if: |
           needs.backend-tests.result == 'success' && 
           needs.integration-tests.result == 'success' && 
           needs.e2e-tests.result == 'success'
         run: |
-          echo "✅ TODOS LOS TESTS PASARON"
-          echo "✅ Listo para merge/deploy"
+          echo " TODOS LOS TESTS PASARON"
+          echo "Listo para merge/deploy"
 
-      - name: ❌ Tests fallaron
+      - name: Tests fallaron
         if: |
           needs.backend-tests.result == 'failure' || 
           needs.integration-tests.result == 'failure' || 
           needs.e2e-tests.result == 'failure'
         run: |
-          echo "❌ TESTS FALLARON"
-          echo "❌ Merge/commit BLOQUEADO"
+          echo " TESTS FALLARON"
+          echo "Merge/commit BLOQUEADO"
           echo "🔧 Revisa los logs arriba para ver qué falló"
           exit 1

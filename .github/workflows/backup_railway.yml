@@ -1,4 +1,4 @@
-name: 📦 Backup Mensual Railway
+name: Backup Mensual Railway
 
 on:
   schedule:
@@ -12,61 +12,61 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: 📥 Checkout código
+      - name: Checkout código
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 📦 Instalar dependencias
+      - name: Instalar dependencias
         run: |
           pip install psycopg2-binary
 
-      - name: 📥 Descargar backup
+      - name: Descargar backup
         env:
           DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
         run: |
-          echo "🔄 Iniciando backup desde Railway..."
+          echo "Iniciando backup desde Railway..."
           python backend/backup_railway.py
 
-      - name: 📊 Mostrar estadísticas
+      - name: Mostrar estadísticas
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📦 RESUMEN DEL BACKUP"
+          echo " RESUMEN DEL BACKUP"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           ls -lh backups/*.sql 2>/dev/null | tail -1 || echo "Sin archivos SQL"
           echo ""
-          echo "📁 Archivos de backup:"
+          echo " Archivos de backup:"
           ls -1 backups/ 2>/dev/null || echo "Carpeta vacía"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      - name: 💾 Commit y push del backup
+      - name: Commit y push del backup
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add backups/
           
           if git diff --staged --quiet; then
-            echo "ℹ️  No hay datos nuevos"
+            echo "ℹ  No hay datos nuevos"
           else
             FECHA=$(date '+%Y-%m-%d')
             git commit -m "📦 Backup mensual - $FECHA"
             git push
-            echo "✅ Backup subido"
+            echo " Backup subido"
           fi
 
-      - name: ✅ Completado
+      - name: Completado
         if: success()
         run: |
-          echo "✅ BACKUP COMPLETADO"
-          echo "📅 $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "BACKUP COMPLETADO"
+          echo " $(date '+%Y-%m-%d %H:%M:%S')"
 
-      - name: ❌ Error
+      - name: Error
         if: failure()
         run: |
-          echo "❌ ERROR EN EL BACKUP"
+          echo "ERROR EN EL BACKUP"
           exit 1
