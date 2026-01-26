@@ -20,6 +20,7 @@ class LeadRegistrationRequest(BaseModel):
 def enviar_email_bienvenida(email: str, nombre: str) -> bool:
     """
     Envía email de bienvenida usando Brevo (SendinBlue)
+    BASADO EN EL CÓDIGO DE CONSULTAS QUE SÍ FUNCIONA
     """
     try:
         url = "https://api.brevo.com/v3/smtp/email"
@@ -49,88 +50,89 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 </head>
-                <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0d;">
-                    <div style="max-width: 600px; margin: 20px auto; background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
+                <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;">
+                    <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
                         <!-- Header -->
-                        <div style="background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); padding: 40px 30px; text-align: center;">
-                            <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 900; letter-spacing: -0.5px;">
-                                🎉 ¡BIENVENIDO AL EQUIPO!
+                        <div style="background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); padding: 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+                                🎉 ¡Bienvenido al Equipo!
                             </h1>
-                            <p style="margin: 15px 0 0 0; color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600;">
+                            <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
                                 Estás a punto de transformar tu vida
                             </p>
                         </div>
 
                         <!-- Contenido -->
-                        <div style="padding: 40px 30px; color: #edf2f4;">
-                            <p style="font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
+                        <div style="padding: 30px;">
+                            <p style="font-size: 16px; line-height: 1.6; color: #333333; margin: 0 0 15px 0;">
                                 Hola <strong style="color: #06d6a0;">{nombre}</strong>,
                             </p>
 
-                            <p style="font-size: 16px; line-height: 1.7; margin: 0 0 25px 0; color: #8d99ae;">
+                            <p style="font-size: 15px; line-height: 1.7; color: #666666; margin: 0 0 20px 0;">
                                 ¡Me alegro mucho de que hayas decidido dar el primer paso hacia tu transformación! 
                                 Has tomado una decisión que va a cambiar tu vida para siempre.
                             </p>
 
                             <!-- Beneficios -->
-                            <div style="background: rgba(6, 214, 160, 0.1); border-left: 4px solid #06d6a0; padding: 25px; border-radius: 12px; margin: 30px 0;">
-                                <h2 style="margin: 0 0 20px 0; color: #06d6a0; font-size: 20px; font-weight: 700;">
+                            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #06d6a0; margin: 25px 0;">
+                                <h2 style="margin: 0 0 15px 0; color: #06d6a0; font-size: 18px; font-weight: 600;">
                                     🎁 Tu regalo de bienvenida incluye:
                                 </h2>
-                                <ul style="margin: 0; padding-left: 20px; color: #edf2f4;">
-                                    <li style="margin-bottom: 12px; line-height: 1.6;">
+                                <ul style="margin: 0; padding-left: 20px; color: #333333;">
+                                    <li style="margin-bottom: 10px; line-height: 1.5;">
                                         <strong>Calculadora de calorías personalizada</strong> - Calcula exactamente cuánto necesitas comer
                                     </li>
-                                    <li style="margin-bottom: 12px; line-height: 1.6;">
+                                    <li style="margin-bottom: 10px; line-height: 1.5;">
                                         <strong>Acceso al grupo exclusivo de WhatsApp</strong> - Comunidad activa y motivadora
                                     </li>
-                                    <li style="margin-bottom: 12px; line-height: 1.6;">
+                                    <li style="margin-bottom: 10px; line-height: 1.5;">
                                         <strong>Contenido premium semanal</strong> - Tips, rutinas y consejos exclusivos
                                     </li>
-                                    <li style="line-height: 1.6;">
+                                    <li style="line-height: 1.5;">
                                         <strong>Soporte directo</strong> - Yo personalmente respondo tus dudas
                                     </li>
                                 </ul>
                             </div>
 
-                            <!-- CTA Button -->
-                            <div style="text-align: center; margin: 35px 0;">
+                            <!-- Botón CTA -->
+                            <div style="text-align: center; margin: 30px 0;">
                                 <a href="https://petrucalistenia.com/team" 
-                                   style="display: inline-block; background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); color: white; padding: 18px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 18px; box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);">
+                                   style="display: inline-block; background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);">
                                     📲 UNIRME AL GRUPO AHORA
                                 </a>
                             </div>
 
                             <!-- Nota importante -->
-                            <div style="background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 12px; padding: 20px; margin: 30px 0;">
-                                <p style="margin: 0; color: #ffd60a; font-size: 14px; line-height: 1.6;">
+                            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
                                     <strong>💡 Importante:</strong> Una vez dentro del grupo, recibirás tu calculadora de calorías 
                                     y toda la información necesaria para empezar tu transformación.
                                 </p>
                             </div>
 
                             <!-- Despedida -->
-                            <p style="font-size: 16px; line-height: 1.7; margin: 30px 0 0 0; color: #edf2f4;">
+                            <p style="font-size: 15px; line-height: 1.7; margin: 25px 0 0 0; color: #333333;">
                                 ¡Nos vemos dentro del grupo! 💪
                             </p>
 
-                            <p style="font-size: 16px; line-height: 1.7; margin: 10px 0 0 0; color: #06d6a0; font-weight: 700;">
+                            <p style="font-size: 15px; line-height: 1.7; margin: 10px 0 0 0; color: #06d6a0; font-weight: 600;">
                                 Petru<br>
-                                <span style="font-size: 14px; color: #8d99ae; font-weight: 400;">
+                                <span style="font-size: 13px; color: #666666; font-weight: 400;">
                                     Entrenador Personal Especializado en Calistenia
                                 </span>
                             </p>
                         </div>
 
                         <!-- Footer -->
-                        <div style="background: rgba(0, 0, 0, 0.3); padding: 25px 30px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-                            <p style="margin: 0 0 10px 0; color: #8d99ae; font-size: 13px;">
+                        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
+                            <p style="margin: 0; color: #666666; font-size: 13px;">
                                 PetruWorkout - Entrenador Personal de Calistenia
                             </p>
-                            <p style="margin: 0; color: #666; font-size: 12px;">
+                            <p style="margin: 8px 0 0 0; color: #999999; font-size: 12px;">
                                 📧 petruworkout@gmail.com | 🌐 <a href="https://petrucalistenia.com" style="color: #06d6a0; text-decoration: none;">petrucalistenia.com</a>
                             </p>
-                            <p style="margin: 15px 0 0 0; color: #666; font-size: 11px;">
+                            <p style="margin: 12px 0 0 0; color: #999999; font-size: 11px;">
                                 Has recibido este email porque te registraste en PetruWorkout
                             </p>
                         </div>
@@ -189,7 +191,7 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
             tipo_usuario=TipoUsuario.NEWSLETTER
         )
 
-        # Enviar email de bienvenida
+        # ✅ ENVIAR EMAIL DE BIENVENIDA
         email_enviado = enviar_email_bienvenida(data.email.lower(), nombre)
 
         if email_enviado:
@@ -206,4 +208,6 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
 
     except Exception as e:
         logger.error(f"❌ Error registrando lead {data.email}: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail="Error al registrar el email")
