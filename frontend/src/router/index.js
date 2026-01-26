@@ -1,7 +1,8 @@
 import HomeView from '@/views/HomeView.vue'
 import InfoView from '@/views/InfoView.vue'
+import TeamView from '@/views/TeamView.vue'
 
-// Exportar solo las rutas (sin crear el router aquí)
+
 const routes = [
   {
     path: '/',
@@ -25,6 +26,18 @@ const routes = [
       keywords: 'servicios calistenia, testimonios entrenamiento, clases online calistenia',
       ogImage: 'https://petrucalistenia.com/logo.png',
       canonical: 'https://petrucalistenia.com/info'
+    }
+  },
+  {
+    path: '/team',
+    name: 'team',
+    component: TeamView,
+    meta: {
+      title: 'Únete al Equipo - PetruWorkout | Grupo Exclusivo',
+      description: 'Accede a contenido exclusivo, rutinas premium y únete a nuestra comunidad de WhatsApp. Recibe tu regalo de bienvenida.',
+      keywords: 'grupo whatsapp fitness, comunidad calistenia, contenido exclusivo entrenamiento',
+      ogImage: 'https://petrucalistenia.com/logo.png',
+      canonical: 'https://petrucalistenia.com/team'
     }
   }
 ]
