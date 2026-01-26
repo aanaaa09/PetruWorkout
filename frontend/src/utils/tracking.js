@@ -47,13 +47,7 @@ function detectTrafficSource() {
     return 'twitter';
   }
 
-  // 7. WhatsApp
-  if (referrer.includes('whatsapp.com') ||
-      referrer.includes('wa.me')) {
-    return 'whatsapp';
-  }
-
-  // 8. BÚSQUEDA ORGÁNICA (Google, Bing, etc)
+  // 7. BÚSQUEDA ORGÁNICA (Google, Bing, etc)
   if (referrer.includes('google.com') ||
       referrer.includes('google.es') ||
       referrer.includes('bing.com') ||
@@ -65,13 +59,13 @@ function detectTrafficSource() {
     return 'organic_search';
   }
 
-  // 9. TRÁFICO INTERNO (de tu propia web)
+  // 8. TRÁFICO INTERNO (de tu propia web)
   if (referrer.includes('petrucalistenia.com') ||
       referrer.includes(window.location.hostname)) {
     return 'internal';
   }
 
-  // 10. Fallback a User-Agent para apps móviles sin referrer
+  // 9. Fallback a User-Agent para apps móviles sin referrer
   if (!referrer || referrer === '') {
     if (userAgent.includes('instagram')) {
       return 'instagram';
@@ -90,12 +84,12 @@ function detectTrafficSource() {
     }
   }
 
-  // 11. TRÁFICO DIRECTO (usuario escribió la URL o bookmark)
+  // 10. TRÁFICO DIRECTO (usuario escribió la URL o bookmark)
   if (!referrer || referrer === '') {
     return 'direct';
   }
 
-  // 12. OTRO REFERRER EXTERNO
+  // 11. OTRO REFERRER EXTERNO
   if (referrer && !referrer.includes(window.location.hostname)) {
     try {
       const refUrl = new URL(document.referrer);
@@ -106,7 +100,7 @@ function detectTrafficSource() {
     }
   }
 
-  // 13. DESCONOCIDO
+  // 12. DESCONOCIDO
   return 'unknown';
 }
 
@@ -199,8 +193,7 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
       traffic_source: trafficSource,
       button_id: buttonId || 'unknown',
       button_location: buttonLocation || 'unknown',
-      page_url: window.location.pathname,
-      via_whatsapp: false // ✅ Botón Calendly = false
+      page_url: window.location.pathname
     };
 
     const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
@@ -214,45 +207,10 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
     if (!response.ok) {
       console.error('Error al registrar click:', await response.text());
     } else {
-      console.log('✅ Click Calendly registrado - via_whatsapp: false');
+      console.log('✅ Click Calendly registrado');
     }
   } catch (error) {
     console.error('❌ Error al trackear click:', error);
-  }
-}
-
-/**
- * Registra un click en botón de WhatsApp
- */
-async function trackWhatsAppClick(buttonId, buttonLocation) {
-  try {
-    const sessionId = getOrCreateSessionId();
-    const trafficSource = getTrafficSourceFromSession();
-
-    const clickData = {
-      session_id: sessionId,
-      traffic_source: trafficSource,
-      button_id: buttonId || 'unknown-whatsapp',
-      button_location: buttonLocation || 'unknown',
-      page_url: window.location.pathname,
-      via_whatsapp: true // ✅ Botón WhatsApp = true
-    };
-
-    const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(clickData)
-    });
-
-    if (!response.ok) {
-      console.error('Error al registrar click WhatsApp:', await response.text());
-    } else {
-      console.log('✅ Click WhatsApp registrado - via_whatsapp: true');
-    }
-  } catch (error) {
-    console.error('❌ Error al trackear click WhatsApp:', error);
   }
 }
 
@@ -274,6 +232,5 @@ export {
   getTrafficSourceFromSession,
   trackPageVisit,
   trackCalendlyClick,
-  trackWhatsAppClick,
   initTracking
 };
