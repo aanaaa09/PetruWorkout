@@ -81,7 +81,11 @@
                 placeholder="tu@email.com"
                 required
                 class="email-input"
+                :class="{ 'input-error': emailError }"
+                @blur="validateEmail"
+                @input="emailError = ''"
               />
+              <span v-if="emailError" class="error-text">{{ emailError }}</span>
             </div>
 
             <div class="checkbox-group">
@@ -109,7 +113,7 @@
             <button
               type="submit"
               class="btn-submit"
-              :disabled="loading"
+              :disabled="loading || emailError"
             >
               {{ loading ? '⏳ Procesando...' : 'Accede al grupo y a mi regalo' }}
             </button>
@@ -137,12 +141,31 @@ export default {
       acceptPrivacy: false,
       loading: false,
       error: '',
-      success: ''
+      success: '',
+      emailError: ''
     }
   },
   methods: {
     handleImageError(e) {
       e.target.style.display = 'none'
+    },
+
+    validateEmail() {
+      // Regex para validar formato xxx@xxx.xxx
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+      if (!this.email) {
+        this.emailError = ''
+        return false
+      }
+
+      if (!emailRegex.test(this.email)) {
+        this.emailError = 'Formato de email incorrecto (debe ser xxx@xxx.xxx)'
+        return false
+      }
+
+      this.emailError = ''
+      return true
     },
 
     closeModal() {
@@ -156,6 +179,7 @@ export default {
       this.error = ''
       this.success = ''
       this.loading = false
+      this.emailError = ''
     },
 
     openPrivacy() {
@@ -164,6 +188,11 @@ export default {
     },
 
     async handleSubmit() {
+      // Validar email antes de enviar
+      if (!this.validateEmail()) {
+        return
+      }
+
       this.error = ''
       this.success = ''
 
@@ -184,10 +213,15 @@ export default {
         const data = await response.json()
 
         if (response.ok) {
-          this.success = '¡Perfecto! Redirigiendo al grupo...'
+          if (data.nuevo) {
+            this.success = '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
+          } else {
+            this.success = '¡Ya estás registrado! Redirigiendo al grupo...'
+          }
+
           setTimeout(() => {
             window.location.href = 'https://petrucalistenia.com/team'
-          }, 1500)
+          }, 2000)
         } else {
           this.error = data.error || 'Error al registrar. Intenta de nuevo.'
         }
@@ -415,6 +449,11 @@ export default {
   transition: all 0.3s ease;
 }
 
+.email-input.input-error {
+  border-color: rgba(239, 35, 60, 0.5);
+  background: rgba(239, 35, 60, 0.1);
+}
+
 .email-input::placeholder {
   color: var(--color-text-muted);
 }
@@ -423,6 +462,17 @@ export default {
   outline: none;
   border-color: var(--color-accent);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.email-input.input-error:focus {
+  border-color: rgba(239, 35, 60, 0.7);
+}
+
+.error-text {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: -0.25rem;
+  font-weight: 600;
 }
 
 .checkbox-group {
