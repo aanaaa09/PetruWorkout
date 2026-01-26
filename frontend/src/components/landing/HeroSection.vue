@@ -47,6 +47,19 @@
           @error="handleImageError"
         />
       </div>
+
+      <!-- Imagen móvil -->
+      <div class="hero-image hero-image-mobile">
+        <img
+          :src="mobileImage"
+          alt="Petru - Entrenador Personal de Calistenia"
+          width="300"
+          height="300"
+          fetchpriority="high"
+          loading="eager"
+          @error="handleImageError"
+        />
+      </div>
     </div>
 
     <!-- Modal para email -->
@@ -118,6 +131,7 @@ export default {
   data() {
     return {
       desktopImage: '/images/petru-hero-optimized.webp',
+      mobileImage: '/images/petru-hero-movil-optimized.webp',
       showModal: false,
       email: '',
       acceptPrivacy: false,
@@ -161,7 +175,6 @@ export default {
       this.loading = true
 
       try {
-        // Aquí guardarías el email en tu backend
         const response = await fetch('https://petruworkout-production.up.railway.app/api/lead/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -486,11 +499,15 @@ export default {
   cursor: not-allowed;
 }
 
-/* ===== IMAGEN ===== */
+/* ===== IMÁGENES ===== */
 .hero-image-desktop {
   position: relative;
   display: flex;
   justify-content: center;
+}
+
+.hero-image-mobile {
+  display: none;
 }
 
 .hero-image img {
@@ -565,9 +582,15 @@ export default {
     gap: 1.5rem;
   }
 
+  /* Ocultar imagen de escritorio en móvil */
   .hero-image-desktop {
-    order: 1;
+    display: none;
+  }
+
+  /* Mostrar imagen de móvil */
+  .hero-image-mobile {
     display: flex;
+    order: 1;
     justify-content: center;
     margin: 0;
   }
