@@ -1,10 +1,10 @@
 # backend/sync_calendly.py
 """
-Sincronización de reservas de Calendly con matching inteligente basado en UTM
-- Clientes: Excluido (NO se guarda en BD)
+Sincronización de reservas de Calendly con matching inteligente
 - Directo: NO permite duplicados (un email = una sola reserva)
+- Orígenes excluidos: "clientes" (NO se guardan en BD)
 
-🕐 IMPORTANTE: Convierte created_at de UTC a hora de España para matching correcto
+IMPORTANTE: Convierte created_at de UTC a hora de España para matching correcto
 """
 import requests
 import os
@@ -203,129 +203,68 @@ def sync_calendly_bookings():
                 reservas_excluidas += 1
                 continue
 
-            # Orígenes que permiten duplicados
-            ORIGENES_CON_DUPLICADOS = ["whatsapp"]
+            # ========================================
+            # VERIFICAR DUPLICADOS POR EMAIL
+            # ========================================
+            logger.info(f"   🌐 DETECTADO: Acceso desde WEB")
 
-            permite_duplicados = (
-                    utm_source in ORIGENES_CON_DUPLICADOS or
-                    utm_medium in ORIGENES_CON_DUPLICADOS or
-                    utm_campaign in ORIGENES_CON_DUPLICADOS
-            )
+            booking_existente = db.query(CalendlyBooking).filter(
+                CalendlyBooking.invitee_email == email
+            ).first()
 
-            if permite_duplicados:
-                origen_detectado = utm_source or utm_medium or utm_campaign
-                logger.info(f"   📱 DETECTADO: Viene de {origen_detectado.upper()} (UTM)")
-                logger.info(f"   ✅ Este origen permite duplicados - NO verificar email")
-            else:
-                logger.info(f"   🌐 DETECTADO: Acceso desde WEB")
-
-                # Verificar duplicados solo para acceso web
-                booking_existente = db.query(CalendlyBooking).filter(
-                    CalendlyBooking.invitee_email == email
-                ).first()
-
-                if booking_existente:
-                    logger.info(f"   ⚠️  EMAIL YA REGISTRADO en booking ID {booking_existente.id}")
-                    logger.info(f"   ℹ️  Evento anterior: {booking_existente.calendly_event_id[-20:]}")
-                    logger.info(f"   ⏭️  Saltando duplicado...")
-                    continue
+            if booking_existente:
+                logger.info(f"   ⚠️  EMAIL YA REGISTRADO en booking ID {booking_existente.id}")
+                logger.info(f"   ℹ️  Evento anterior: {booking_existente.calendly_event_id[-20:]}")
+                logger.info(f"   ⏭️  Saltando duplicado...")
+                continue
 
             # ========================================
-            # MATCHING INTELIGENTE (AHORA EN HORA ESPAÑA)
+            # MATCHING INTELIGENTE CON CLICKS
             # ========================================
             ventana_dias = 7
             ventana_inicio = booking_datetime_naive - timedelta(days=ventana_dias)
 
             session_id = None
             traffic_source = "direct"
-            via_whatsapp = False
             match_final = None
 
-            if permite_duplicados:
-                origen_detectado = utm_source or utm_medium or utm_campaign
-                logger.info(f"   🔍 Buscando clicks de {origen_detectado} (via_whatsapp=True) ANTERIORES al booking...")
+            logger.info(f"   🔍 Buscando clicks a Calendly ANTERIORES al booking...")
 
-                clicks_permitidos = db.query(CalendlyClick).filter(
-                    CalendlyClick.timestamp >= ventana_inicio,
-                    CalendlyClick.timestamp < booking_datetime_naive,
-                    CalendlyClick.via_whatsapp == True
-                ).order_by(
-                    CalendlyClick.timestamp.desc()
-                ).all()
+            clicks_calendly = db.query(CalendlyClick).filter(
+                CalendlyClick.timestamp >= ventana_inicio,
+                CalendlyClick.timestamp < booking_datetime_naive
+            ).order_by(
+                CalendlyClick.timestamp.desc()
+            ).all()
 
-                logger.info(f"   📊 Clicks encontrados (anteriores): {len(clicks_permitidos)}")
+            logger.info(f"   📊 Clicks encontrados (anteriores): {len(clicks_calendly)}")
 
-                if clicks_permitidos:
-                    mejor_match = None
-                    menor_diferencia = float('inf')
+            if clicks_calendly:
+                mejor_match = None
+                menor_diferencia = float('inf')
 
-                    for click in clicks_permitidos:
-                        click_timestamp = click.timestamp.replace(tzinfo=None)
+                for click in clicks_calendly:
+                    click_timestamp = click.timestamp.replace(tzinfo=None)
 
-                        if click_timestamp < booking_datetime_naive:
-                            diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
+                    if click_timestamp < booking_datetime_naive:
+                        diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
 
-                            if diferencia_segundos < menor_diferencia:
-                                menor_diferencia = diferencia_segundos
-                                mejor_match = click
+                        if diferencia_segundos < menor_diferencia:
+                            menor_diferencia = diferencia_segundos
+                            mejor_match = click
 
-                    if mejor_match:
-                        diferencia_minutos = menor_diferencia / 60
-                        match_final = mejor_match
-                        session_id = mejor_match.session_id
-                        traffic_source = mejor_match.traffic_source
-                        via_whatsapp = True
+                if mejor_match:
+                    diferencia_minutos = menor_diferencia / 60
+                    match_final = mejor_match
+                    session_id = mejor_match.session_id
+                    traffic_source = mejor_match.traffic_source
 
-                        logger.info(
-                            f"   ✅ MATCH {origen_detectado}: {traffic_source} ({diferencia_minutos:.1f}min antes)")
-                        logger.info(f"   📱 Button: {mejor_match.button_id}")
-                        logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
-                else:
-                    logger.info(f"   ℹ️  Sin clicks anteriores - usando traffic_source='{origen_detectado}'")
-                    traffic_source = origen_detectado
-                    via_whatsapp = True
-
-            else:
-                # Acceso directo desde web
-                logger.info(f"   🔍 Buscando clicks directos a Calendly (via_whatsapp=False) ANTERIORES al booking...")
-
-                clicks_calendly = db.query(CalendlyClick).filter(
-                    CalendlyClick.timestamp >= ventana_inicio,
-                    CalendlyClick.timestamp < booking_datetime_naive,
-                    CalendlyClick.via_whatsapp == False
-                ).order_by(
-                    CalendlyClick.timestamp.desc()
-                ).all()
-
-                logger.info(f"   📊 Clicks Calendly encontrados (anteriores): {len(clicks_calendly)}")
-
-                if clicks_calendly:
-                    mejor_match = None
-                    menor_diferencia = float('inf')
-
-                    for click in clicks_calendly:
-                        click_timestamp = click.timestamp.replace(tzinfo=None)
-
-                        if click_timestamp < booking_datetime_naive:
-                            diferencia_segundos = (booking_datetime_naive - click_timestamp).total_seconds()
-
-                            if diferencia_segundos < menor_diferencia:
-                                menor_diferencia = diferencia_segundos
-                                mejor_match = click
-
-                    if mejor_match:
-                        diferencia_minutos = menor_diferencia / 60
-                        match_final = mejor_match
-                        session_id = mejor_match.session_id
-                        traffic_source = mejor_match.traffic_source
-                        via_whatsapp = False
-
-                        logger.info(f"   ✅ MATCH Calendly: {traffic_source} ({diferencia_minutos:.1f}min antes)")
-                        logger.info(f"   📱 Button: {mejor_match.button_id}")
-                        logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+                    logger.info(f"   ✅ MATCH Calendly: {traffic_source} ({diferencia_minutos:.1f}min antes)")
+                    logger.info(f"   📱 Button: {mejor_match.button_id}")
+                    logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
 
             # Fallback: Si no hay match, analizar visitas
-            if not match_final and not permite_duplicados:
+            if not match_final:
                 logger.info(f"   🔍 Fallback: Analizando visitas...")
 
                 visitas = db.query(PageVisit).filter(
@@ -353,8 +292,7 @@ def sync_calendly_bookings():
                     event_start_time=event_datetime,
                     booking_timestamp=booking_datetime_naive,
                     session_id=session_id,
-                    traffic_source=traffic_source,
-                    via_whatsapp=via_whatsapp
+                    traffic_source=traffic_source
                 )
 
                 db.flush()
@@ -367,10 +305,6 @@ def sync_calendly_bookings():
                     nuevas_reservas += 1
                     logger.info(f"   ✅ GUARDADO EN BD (ID: {verificar.id})")
                     logger.info(f"   🎯 Traffic Source: {traffic_source}")
-                    if via_whatsapp:
-                        logger.info(f"   📱 Via WhatsApp: SÍ (duplicados permitidos)")
-                    else:
-                        logger.info(f"   🌐 Via Web: DIRECTO (sin duplicados)")
                 else:
                     logger.error(f"   ❌ NO SE GUARDÓ EN BD")
 

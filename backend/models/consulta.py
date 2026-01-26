@@ -16,9 +16,5 @@ class Consulta(Base):
     asunto = Column(String(300), nullable=False)
     mensaje = Column(Text, nullable=False)
 
-    # Estado
-    leida = Column(Boolean, default=False, index=True)
-    respondida = Column(Boolean, default=False)
-
     # Fecha
     fecha_envio = Column(DateTime(timezone=True), server_default=func.now())
