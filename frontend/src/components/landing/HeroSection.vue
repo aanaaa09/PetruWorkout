@@ -7,7 +7,7 @@
     <div class="hero-content">
       <div class="hero-text">
         <h1 class="hero-title">
-          El sistema para entrenar en casa o en el parque y conseguir
+          El Sistema para entrenar en Casa o en el Parque y conseguir
           <span class="highlight">fuerza real</span>
         </h1>
 
@@ -31,7 +31,7 @@
         </ul>
 
         <button @click="showModal = true" class="btn-gift">
-          🎁 Empieza hoy con ventaja y llévate un regalo exclusivo al unirte
+          Únete al grupo de WhatsApp + calculadora de calorías 🎁
         </button>
       </div>
 
