@@ -52,7 +52,7 @@ class TrackingCRUD:
             button_id: str = None,
             button_location: str = None,
             page_url: str = None,
-            via_whatsapp: bool = False  # ✅ NUEVO
+
     ) -> CalendlyClick:
         """Registra un click en botón de Calendly"""
         now_utc = datetime.utcnow()
@@ -64,7 +64,6 @@ class TrackingCRUD:
             button_id=button_id,
             button_location=button_location,
             page_url=page_url,
-            via_whatsapp=via_whatsapp,
             timestamp=now_spain,
             fecha=now_spain.date(),
             dia=now_spain.day,
@@ -85,8 +84,7 @@ class TrackingCRUD:
             event_start_time: datetime = None,
             booking_timestamp: datetime = None,
             session_id: str = None,
-            traffic_source: str = None,
-            via_whatsapp: bool = False  # ✅ NUEVO
+            traffic_source: str = None
     ) -> CalendlyBooking:
         """Registra una reserva completada en Calendly"""
 
@@ -111,7 +109,6 @@ class TrackingCRUD:
             invitee_email=invitee_email,
             invitee_name=invitee_name,
             event_start_time=event_start_time,
-            via_whatsapp=via_whatsapp,  # ✅ NUEVO
             timestamp=time_spain,
             fecha=time_spain.date(),
             dia=time_spain.day,
@@ -123,9 +120,6 @@ class TrackingCRUD:
         db.add(booking)
         db.commit()
         db.refresh(booking)
-
-        logger.info(f"✅ Booking guardado: {invitee_email} - Via WhatsApp: {via_whatsapp}")
-
         return booking
     def get_traffic_stats(self, db: Session, days: int = 30):
         """Obtiene estadísticas de tráfico por fuente"""

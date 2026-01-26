@@ -14,9 +14,6 @@ class CalendlyBooking(Base):
     invitee_name = Column(String(255), nullable=True)
     event_start_time = Column(DateTime(timezone=True), nullable=True, index=True)
 
-    # NUEVO - Tracking de WhatsApp
-    via_whatsapp = Column(Boolean, default=False, nullable=False, index=True)
-
     # Timestamp completo
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -41,9 +38,5 @@ class CalendlyBooking(Base):
         # Para detectar usuarios recurrentes
         Index('ix_calendly_bookings_email_fecha', 'invitee_email', 'fecha'),
 
-        # Para consultas de conversión vía WhatsApp
-        Index('ix_calendly_bookings_whatsapp_source', 'via_whatsapp', 'traffic_source'),
 
-        # Para análisis temporal de WhatsApp
-        Index('ix_calendly_bookings_whatsapp_fecha', 'via_whatsapp', 'fecha'),
     )

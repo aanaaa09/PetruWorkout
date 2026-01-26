@@ -17,7 +17,7 @@ class CalendlyClickCreate(BaseModel):
     button_id: Optional[str] = None
     button_location: Optional[str] = None
     page_url: Optional[str] = None
-    via_whatsapp: bool=False
+
 
 
 class CalendlyWebhook(BaseModel):

@@ -31,14 +31,7 @@
   @click="handleCalendlyClick"
 >Agendar Llamada
 </a>
-            <a
-            href="https://wa.link/svhddh"
-  target="_blank"
-  rel="noopener noreferrer"
-  @click="handleWhatsAppClick"
->
-  WhatsApp
-</a>
+
 
             <a href="#contacto" @click.prevent="scrollTo('contacto')">Formulario</a>
             <a href="mailto:petruworkout@gmail.com">Email</a>
@@ -97,12 +90,7 @@ export default {
     },
     handleCalendlyClick() {
       trackCalendlyClick('full-footer-cta-button', 'full-footer')
-    },
-    handleWhatsAppClick() {
-  import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
-    trackWhatsAppClick('full-footer-whatsapp-button', 'full-footer')
-  })
-}
+    }
   }
 }
 </script>

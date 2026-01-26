@@ -1,7 +1,6 @@
 # backend/sync_calendly.py
 """
 Sincronización de reservas de Calendly con matching inteligente basado en UTM
-- WhatsApp: Permite duplicados (múltiples bookings del mismo email)
 - Clientes: Excluido (NO se guarda en BD)
 - Directo: NO permite duplicados (un email = una sola reserva)
 
@@ -29,7 +28,6 @@ logger = logging.getLogger(__name__)
 def sync_calendly_bookings():
     """
     Obtiene eventos de Calendly y los vincula con clicks
-    Matching basado en UTM parameters para detectar origen WhatsApp
     """
     database_url = os.getenv('DATABASE_URL')
 

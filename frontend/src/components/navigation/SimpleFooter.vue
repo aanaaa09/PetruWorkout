@@ -18,15 +18,6 @@
         >
           📅 Agendar Llamada Gratuita
         </a>
-        <a
-          href="https://wa.link/svhddh"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="btn btn-whatsapp"
-  @click="handleWhatsAppClick"
->
-  💬 Contactar por WhatsApp
-</a>
         <router-link to="/info" class="btn btn-secondary" @click="scrollToTop">
           📋 Más Información
         </router-link>
@@ -83,12 +74,7 @@ export default {
     },
     handleCalendlyClick() {
       trackCalendlyClick('simple-footer-cta-button', 'simple-footer')
-    },
-    handleWhatsAppClick() {
-  import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
-    trackWhatsAppClick('simple-footer-whatsapp-button', 'simple-footer')
-  })
-}
+    }
   }
 }
 </script>
@@ -171,16 +157,6 @@ export default {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
-}
-.btn-whatsapp {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-}
-
-.btn-whatsapp:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
 }
 .footer-legal {
   display: flex;

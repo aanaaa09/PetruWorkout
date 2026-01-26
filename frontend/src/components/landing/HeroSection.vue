@@ -28,16 +28,7 @@
         </div>
 
         <div class="hero-cta">
-          <!-- Solo botón WhatsApp -->
-          <a
-            href="https://wa.link/svhddh"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-whatsapp"
-            @click="handleWhatsAppClick"
-          >
-            💬 CONTACTAR CON PETRU
-          </a>
+
         </div>
 
         <div class="guarantee-box">
@@ -71,7 +62,7 @@
 </template>
 
 <script>
-import { trackWhatsAppClick } from '@/utils/tracking.js'
+
 
 export default {
   name: 'HeroSection',
@@ -85,9 +76,6 @@ export default {
     handleImageError(e) {
       e.target.style.display = 'none'
     },
-    handleWhatsAppClick() {
-      trackWhatsAppClick('hero-whatsapp-button', 'hero-section')
-    }
   }
 }
 </script>
@@ -206,17 +194,6 @@ export default {
   width: 100%;
 }
 
-.btn-whatsapp {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white;
-  box-shadow: 0 10px 40px rgba(37, 211, 102, 0.5);
-  animation: pulse-whatsapp 2s infinite;
-}
-
-.btn-whatsapp:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 50px rgba(37, 211, 102, 0.6);
-}
 
 @keyframes pulse-whatsapp {
   0%, 100% {
@@ -371,21 +348,6 @@ export default {
   }
 
   /* ===== MÓVIL: Solo mostrar botón WhatsApp ===== */
-  .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 1.2rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 900;
-    margin-bottom: 0;
-  }
-
-  .btn-whatsapp {
-    width: 100%;
-    padding: 1.2rem 1.5rem;
-    font-size: 1rem;
-    margin-bottom: 0;
-  }
 
   .guarantee-box {
     text-align: center;

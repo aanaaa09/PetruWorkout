@@ -24,15 +24,6 @@
           </a>
         </li>
         <li>
-          <a
-            href="https://wa.link/svhddh"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn-whatsapp"
-            @click="handleWhatsAppClick"
-          >
-            💬 Contactar con Petru
-          </a>
         </li>
         <li>
           <router-link
@@ -79,13 +70,6 @@ export default {
     handleCalendlyClick() {
       this.menuOpen = false
       trackCalendlyClick('simple-navbar-cta-button', 'simple-navbar')
-    },
-
-    handleWhatsAppClick() {
-      this.menuOpen = false
-      import('@/utils/tracking.js').then(({ trackWhatsAppClick }) => {
-        trackWhatsAppClick('simple-navbar-whatsapp-button', 'simple-navbar')
-      })
     },
 
     handleMoreInfoClick() {
@@ -170,19 +154,6 @@ export default {
 /* ===== BOTONES BASE ===== */
 .btn-cta,
 .btn-info,
-.btn-whatsapp {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
 /* ===== BOTÓN CALENDLY ===== */
 .btn-cta {
   background: var(--gradient-primary);
@@ -195,17 +166,6 @@ export default {
   box-shadow: 0 6px 25px rgba(6, 214, 160, 0.5);
 }
 
-/* ===== BOTÓN WHATSAPP ===== */
-.btn-whatsapp {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-}
-
-.btn-whatsapp:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
-}
 
 /* ===== BOTÓN INFO ===== */
 .btn-info {

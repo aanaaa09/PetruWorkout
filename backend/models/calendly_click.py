@@ -13,8 +13,7 @@ class CalendlyClick(Base):
     button_location = Column(String(100), nullable=True, index=True)
     page_url = Column(String(255), nullable=True)
 
-    # Tracking de WhatsApp
-    via_whatsapp = Column(Boolean, default=False, nullable=False, index=True)
+
 
     # Timestamp completo
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
@@ -40,9 +39,4 @@ class CalendlyClick(Base):
         # Para análisis de ubicación de botones
         Index('ix_calendly_clicks_location_source', 'button_location', 'traffic_source'),
 
-        # Para consultas de conversión vía WhatsApp
-        Index('ix_calendly_clicks_whatsapp_source', 'via_whatsapp', 'traffic_source'),
-
-        # Para análisis temporal de WhatsApp
-        Index('ix_calendly_clicks_whatsapp_fecha', 'via_whatsapp', 'fecha'),
     )

@@ -45,19 +45,7 @@
         </div>
       </div>
 
-      <!--CTA WhatsApp -->
-      <div class="whatsapp-cta">
-        <p class="cta-text">¿Te gustaría conseguir resultados como estos?</p>
-        <a
-          href="https://wa.link/svhddh"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-whatsapp-cta"
-          @click="handleWhatsAppClick"
-        >
-          💬 Contactar con Petru
-        </a>
-      </div>
+
 
       <!--SECCIÓN DE VIDEOS -->
       <div class="videos-section">
@@ -104,7 +92,9 @@
 </template>
 
 <script>
-import { trackCalendlyClick, trackWhatsAppClick } from '@/utils/tracking.js'
+
+
+import {trackCalendlyClick} from "@/utils/tracking.js";
 
 export default {
   name: 'ResultsSection',
@@ -187,9 +177,7 @@ export default {
     handleCalendlyClick() {
       trackCalendlyClick('results-cta-button', 'results-section')
     },
-    handleWhatsAppClick() {
-      trackWhatsAppClick('results-whatsapp-cta-button', 'results-section')
-    }
+
   }
 }
 </script>
@@ -324,41 +312,11 @@ export default {
   margin-top: 0.25rem;
 }
 
-/* ===== CTA WHATSAPP ===== */
-.whatsapp-cta {
-  text-align: center;
-  margin: 3rem 0;
-  padding: 2.5rem;
-  background: linear-gradient(135deg, rgba(37, 211, 102, 0.1) 0%, rgba(18, 140, 126, 0.05) 100%);
-  border-radius: 20px;
-  border: 2px solid rgba(37, 211, 102, 0.3);
-}
-
 .whatsapp-cta .cta-text {
   font-size: 1.5rem;
   font-weight: 700;
   color: white;
   margin: 0 0 1.5rem 0;
-}
-
-.btn-whatsapp-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1.25rem 2.5rem;
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white;
-  text-decoration: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
-}
-
-.btn-whatsapp-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(37, 211, 102, 0.6);
 }
 
 .videos-section {

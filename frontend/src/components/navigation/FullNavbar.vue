@@ -27,17 +27,6 @@
             📅 Agendar Llamada
           </a>
         </li>
-        <li class="nav-cta">
-          <a
-            href="https://wa.link/svhddh"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn-whatsapp"
-            @click="handleWhatsAppClick"
-          >
-            💬 Contactar con Petru
-          </a>
-        </li>
       </ul>
     </div>
   </nav>

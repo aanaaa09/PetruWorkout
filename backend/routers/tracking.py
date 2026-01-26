@@ -47,11 +47,6 @@ async def register_calendly_click(
 ):
     """Registra un click en botón de Calendly"""
     try:
-        # ✅ ESTO FALTABA: Leer via_whatsapp del request
-        via_whatsapp = click_data.via_whatsapp
-
-        # ✅ LOG para verificar qué llega
-        logger.info(f"📥 Request recibido - via_whatsapp: {via_whatsapp}, button_id: {click_data.button_id}")
 
         click = tracking_crud.create_calendly_click(
             db=db,
@@ -59,8 +54,7 @@ async def register_calendly_click(
             traffic_source=click_data.traffic_source,
             button_id=click_data.button_id,
             button_location=click_data.button_location,
-            page_url=click_data.page_url,
-            via_whatsapp=via_whatsapp
+            page_url=click_data.page_url
         )
 
         return {
