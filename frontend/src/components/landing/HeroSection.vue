@@ -265,7 +265,7 @@ export default {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+   gap: 0.5rem;
 }
 
 .benefits-list li {
@@ -274,7 +274,7 @@ export default {
   gap: 0.75rem;
   font-size: 1.1rem;
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
 .check {
