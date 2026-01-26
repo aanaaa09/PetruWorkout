@@ -82,7 +82,6 @@
                 required
                 class="email-input"
                 :class="{ 'input-error': emailError }"
-                @blur="validateEmail"
                 @input="emailError = ''"
               />
               <span v-if="emailError" class="error-text">{{ emailError }}</span>
@@ -113,7 +112,7 @@
             <button
               type="submit"
               class="btn-submit"
-              :disabled="loading || emailError"
+              :disabled="loading"
             >
               {{ loading ? '⏳ Procesando...' : 'Accede al grupo y a mi regalo' }}
             </button>
@@ -151,16 +150,16 @@ export default {
     },
 
     validateEmail() {
-      // Regex para validar formato xxx@xxx.xxx
+      // Regex para validar formato xxx@xxx.xxx (mínimo)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
       if (!this.email) {
         this.emailError = ''
-        return false
+        return true // No mostrar error si está vacío
       }
 
       if (!emailRegex.test(this.email)) {
-        this.emailError = 'Formato de email incorrecto (debe ser xxx@xxx.xxx)'
+        this.emailError = 'Formato de email incorrecto (ejemplo: correo@gmail.com)'
         return false
       }
 
@@ -188,13 +187,16 @@ export default {
     },
 
     async handleSubmit() {
-      // Validar email antes de enviar
-      if (!this.validateEmail()) {
-        return
-      }
-
+      // Limpiar errores previos
       this.error = ''
       this.success = ''
+      this.emailError = ''
+
+      // Validar email antes de enviar
+      if (!this.validateEmail()) {
+        this.error = 'Por favor, introduce un email válido'
+        return
+      }
 
       if (!this.acceptPrivacy) {
         this.error = 'Debes aceptar la política de privacidad'
