@@ -122,9 +122,10 @@ export default {
   name: 'TermsConditions',
   methods: {
     goBack() {
-      this.$router.push('/')
-      window.scrollTo(0, 0)
-      this.$emit('close')
+       this.$router.push('/')
+      this.$nextTick(() => {
+        window.scrollTo(0, 0)
+      })
     }
   }
 }

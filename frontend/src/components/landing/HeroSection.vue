@@ -267,11 +267,10 @@ export default {
   flex-direction: column;
    gap: 0.5rem;
 }
-
 .benefits-list li {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.1rem;
   color: var(--color-text-secondary);
   line-height: 1.3;
@@ -281,6 +280,7 @@ export default {
   color: var(--color-accent);
   font-size: 1.3rem;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 /* ===== BOTÓN REGALO ===== */
@@ -482,6 +482,67 @@ export default {
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+/* ===== RESPONSIVE MÓVIL ===== */
+@media (max-width: 640px) {
+  .hero-section {
+    padding: 5rem 1rem 2rem;
+  }
+
+  /* ✅ NUEVO: Reordenar elementos en móvil */
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .hero-text {
+    order: 1; /* Título primero */
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-image-desktop {
+    order: 2; /* Imagen segundo */
+    display: flex; /* ✅ Mostrar en móvil */
+    justify-content: center;
+  }
+
+  .hero-image img {
+    max-width: 280px; /* ✅ Tamaño adecuado para móvil */
+  }
+
+  .btn-gift {
+    order: 3; /* Botón tercero */
+  }
+
+  .benefits-list {
+    order: 4; /* Checks al final */
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .benefits-list li {
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
+
+  .check {
+    font-size: 1.2rem;
+  }
+
+  .btn-gift {
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
 }
 
 /* ===== IMAGEN ===== */

@@ -80,10 +80,10 @@ export default {
   name: 'LegalNotice',
   methods: {
     goBack() {
-      // ✅ MODIFICADO: Siempre ir a la home
-      this.$router.push('/')
-      window.scrollTo(0, 0)
-      this.$emit('close')
+       this.$router.push('/')
+      this.$nextTick(() => {
+        window.scrollTo(0, 0)
+      })
     }
   }
 }
