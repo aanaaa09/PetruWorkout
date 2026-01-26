@@ -13,7 +13,7 @@
         <!-- Thumbnail mientras no se carga -->
         <div v-if="!videoLoaded" class="video-thumbnail">
           <img
-            src="https://img.youtube.com/vi/yCDxpnd_Dz0/maxresdefault.jpg"
+            src="https://img.youtube.com/vi/eozE3EyZWNg/maxresdefault.jpg"
             alt="Video thumbnail"
           >
           <button class="play-button" aria-label="Reproducir video">
@@ -30,7 +30,7 @@
           class="video-frame"
           width="100%"
           height="100%"
-          :src="`https://www.youtube.com/embed/yCDxpnd_Dz0?autoplay=1&rel=0&modestbranding=1`"
+          :src="`https://www.youtube.com/embed/eozE3EyZWNg?autoplay=1&rel=0&modestbranding=1`"
           title="Petru Workout - Método de Entrenamiento"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -38,9 +38,13 @@
         ></iframe>
       </div>
 
-      <!-- ✅ NUEVO: Botón CTA debajo del video -->
+      <!-- ✅ CTA ACTUALIZADO -->
       <div class="video-cta">
-        <p class="cta-text">¿Listo para tu transformación?</p>
+        <h3 class="cta-title">¿Listo para tu cambio?</h3>
+        <p class="cta-description">
+          En la llamada analizamos tu situación sin compromiso y te muestro cómo empezar, sin presión.
+          Si te interesa, mis precios son accesibles y justos para todos
+        </p>
         <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
@@ -182,11 +186,21 @@ export default {
   border: 2px solid rgba(6, 214, 160, 0.3);
 }
 
-.cta-text {
-  font-size: 1.5rem;
+.cta-title {
+  font-size: 1.75rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
+}
+
+.cta-description {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 2rem 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
 }
 
 .btn-calendly-cta {
@@ -223,8 +237,12 @@ export default {
     margin-top: 2rem;
   }
 
-  .cta-text {
-    font-size: 1.25rem;
+  .cta-title {
+    font-size: 1.5rem;
+  }
+
+  .cta-description {
+    font-size: 1rem;
   }
 
   .btn-calendly-cta {

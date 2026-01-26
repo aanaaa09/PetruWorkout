@@ -4,50 +4,16 @@
       <router-link to="/" class="logo" @click="scrollToTop">
         <span class="logo-accent">PETRU</span>WORKOUT
       </router-link>
-
-      <button class="mobile-toggle" @click="menuOpen = !menuOpen" :class="{ 'active': menuOpen }">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      <ul class="nav-links" :class="{ 'open': menuOpen }">
-        <li>
-          <a
-            href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn-cta"
-            @click="handleCalendlyClick"
-          >
-            📅 Agendar Llamada
-          </a>
-        </li>
-        <li>
-        </li>
-        <li>
-          <router-link
-            to="/info"
-            class="btn-info"
-            @click="handleMoreInfoClick"
-          >
-            📋 Más Información
-          </router-link>
-        </li>
-      </ul>
     </div>
   </nav>
 </template>
 
 <script>
-import { trackCalendlyClick } from '@/utils/tracking.js'
-
 export default {
   name: 'SimpleNavbar',
   data() {
     return {
-      isScrolled: false,
-      menuOpen: false
+      isScrolled: false
     }
   },
   mounted() {
@@ -65,31 +31,6 @@ export default {
       this.$nextTick(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       })
-    },
-
-    handleCalendlyClick() {
-      this.menuOpen = false
-      trackCalendlyClick('simple-navbar-cta-button', 'simple-navbar')
-    },
-
-    handleMoreInfoClick() {
-      this.menuOpen = false
-      this.scrollToTop()
-    },
-
-    trackMoreInfoClick() {
-      this.menuOpen = false
-
-      if (window.gtag) {
-        window.gtag('event', 'view_more_info', {
-          'source': 'navbar',
-          'from_page': window.location.pathname
-        })
-      } else {
-        console.log('GA - Evento: Más Información desde navbar')
-      }
-
-      this.scrollToTop()
     }
   }
 }
@@ -120,7 +61,7 @@ export default {
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
@@ -137,115 +78,9 @@ export default {
   color: var(--color-accent);
 }
 
-/* ===== LINKS DE NAVEGACIÓN ===== */
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem; /* ✅ MÁS espacio horizontal entre botones en escritorio */
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-links li {
-  display: flex;
-}
-
-/* ===== BOTONES BASE ===== */
-.btn-cta,
-.btn-info,
-/* ===== BOTÓN CALENDLY ===== */
-.btn-cta {
-  background: var(--gradient-primary);
-  color: white;
-  box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
-}
-
-.btn-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(6, 214, 160, 0.5);
-}
-
-
-/* ===== BOTÓN INFO ===== */
-.btn-info {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-info:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* ===== TOGGLE MÓVIL ===== */
-.mobile-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-}
-
-.mobile-toggle span {
-  width: 25px;
-  height: 2px;
-  background: white;
-  transition: all 0.3s ease;
-}
-
-.mobile-toggle.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-toggle.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-toggle.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(5px, -5px);
-}
-
-/* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 768px) {
-  .mobile-toggle {
-    display: flex;
-  }
-
-  .nav-links {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: rgba(13, 13, 13, 0.98);
-    flex-direction: column;
-    padding: 2rem;
-    gap: 1rem; /* ✅ Espacio vertical entre botones en móvil */
-    transform: translateY(-150%);
-    opacity: 0;
-    transition: all 0.3s ease;
-    align-items: stretch; /* ✅ Para que los <li> ocupen todo el ancho */
-  }
-
-  .nav-links.open {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .nav-links li {
-    width: 100%; /* ✅ Los <li> ocupan todo el ancho */
-  }
-
-  /* ✅ TODOS los botones ocupan el ancho completo y están centrados */
-  .btn-cta,
-  .btn-info,
-  .btn-whatsapp {
-    width: 100%;
-    justify-content: center;
-    padding: 1rem 1.5rem;
+  .logo {
+    font-size: 1.25rem;
   }
 }
 </style>
