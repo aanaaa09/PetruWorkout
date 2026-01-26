@@ -97,7 +97,7 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
 
                             <!-- Botón CTA -->
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="https://petrucalistenia.com/team" 
+                                <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1" 
                                    style="display: inline-block; background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);">
                                     📲 UNIRME AL GRUPO AHORA
                                 </a>
