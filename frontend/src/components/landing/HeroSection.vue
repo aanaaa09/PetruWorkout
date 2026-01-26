@@ -265,22 +265,24 @@ export default {
   margin: 0;
   display: flex;
   flex-direction: column;
-   gap: 0.5rem;
+  gap: 1rem;
 }
+
 .benefits-list li {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   font-size: 1.1rem;
   color: var(--color-text-secondary);
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .check {
   color: var(--color-accent);
   font-size: 1.3rem;
   flex-shrink: 0;
-  line-height: 1;
+  line-height: 1.4;
+  margin-top: 0;
 }
 
 /* ===== BOTÓN REGALO ===== */
@@ -483,67 +485,6 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
 }
-/* ===== RESPONSIVE MÓVIL ===== */
-@media (max-width: 640px) {
-  .hero-section {
-    padding: 5rem 1rem 2rem;
-  }
-
-  /* ✅ NUEVO: Reordenar elementos en móvil */
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .hero-text {
-    order: 1; /* Título primero */
-    align-items: center;
-    text-align: center;
-  }
-
-  .hero-image-desktop {
-    order: 2; /* Imagen segundo */
-    display: flex; /* ✅ Mostrar en móvil */
-    justify-content: center;
-  }
-
-  .hero-image img {
-    max-width: 280px; /* ✅ Tamaño adecuado para móvil */
-  }
-
-  .btn-gift {
-    order: 3; /* Botón tercero */
-  }
-
-  .benefits-list {
-    order: 4; /* Checks al final */
-    align-items: flex-start;
-    width: 100%;
-  }
-
-  .hero-title {
-    font-size: 1.5rem;
-  }
-
-  .benefits-list li {
-    font-size: 1rem;
-    gap: 0.5rem;
-  }
-
-  .check {
-    font-size: 1.2rem;
-  }
-
-  .btn-gift {
-    font-size: 1rem;
-    padding: 1rem 1.5rem;
-  }
-
-  .scroll-indicator {
-    display: none;
-  }
-}
 
 /* ===== IMAGEN ===== */
 .hero-image-desktop {
@@ -587,7 +528,7 @@ export default {
 @media (max-width: 1024px) {
   .hero-content {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 3rem;
     text-align: center;
   }
 
@@ -598,6 +539,7 @@ export default {
   .benefits-list {
     align-items: flex-start;
     max-width: 600px;
+    text-align: left;
   }
 
   .hero-image-desktop {
@@ -608,32 +550,73 @@ export default {
 /* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 640px) {
   .hero-section {
-    padding: 5rem 1rem 2rem;
+    padding: 5rem 1.5rem 3rem;
+  }
+
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .hero-text {
+    order: 2;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .hero-image-desktop {
+    order: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .hero-image img {
+    max-width: 300px;
+    width: 100%;
+    height: auto;
   }
 
   .hero-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    order: 1;
+  }
+
+  .benefits-list {
+    order: 3;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    gap: 0.875rem;
   }
 
   .benefits-list li {
     font-size: 1rem;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .check {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin-top: 0.1rem;
   }
 
   .btn-gift {
+    order: 2;
     font-size: 1rem;
-    padding: 1rem 1.5rem;
+    padding: 1.1rem 1.5rem;
+    width: 100%;
   }
 
   .modal-content {
     padding: 2rem 1.5rem;
+    margin: 1rem;
   }
 
   .modal-title {
     font-size: 1.5rem;
-  }
-
-  .hero-image-desktop {
-    display: none;
   }
 
   .scroll-indicator {
