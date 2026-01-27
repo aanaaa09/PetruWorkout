@@ -8,10 +8,6 @@
         <div class="team-header">
           <div class="success-icon">🎉</div>
           <h1>¡Bienvenido al equipo!</h1>
-          <p class="subtitle">
-            Estás a un paso de acceder a contenido exclusivo y unirte a una comunidad de personas
-            comprometidas con su transformación física
-          </p>
         </div>
 
         <div class="email-reminder">
