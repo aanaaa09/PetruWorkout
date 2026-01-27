@@ -40,7 +40,7 @@
         <h3 class="cta-title">¿Listo para tu cambio?</h3>
         <p class="cta-description">
           En la llamada analizamos tu situación sin compromiso y te muestro cómo empezar, sin presión.
-          Si te interesa, mis precios son accesibles y justos para todos
+          Si te interesa, mis precios son accesibles y justos para todoAnalizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión.
         </p>
         <a
           href="https://calendly.com/petruworkout/reunion"
@@ -49,7 +49,7 @@
           class="btn-calendly-cta"
           @click="handleCalendlyClick"
         >
-          📅 Llama GRATIS: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión.
+          📅 Agendar Llamada GRATIS
         </a>
       </div>
     </div>
