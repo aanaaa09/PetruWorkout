@@ -4,9 +4,6 @@
       <div class="section-header">
         <span class="section-tag">CONOCE MI MÉTODO</span>
         <h2 class="section-title">Así trabajo con mis clientes</h2>
-        <p class="section-subtitle">
-          Mira cómo transformo vidas con mi método de entrenamiento personalizado
-        </p>
       </div>
 
       <div class="video-wrapper" @click="loadVideo">
@@ -52,7 +49,7 @@
           class="btn-calendly-cta"
           @click="handleCalendlyClick"
         >
-          📅 AGENDAR LLAMADA GRATUITA
+          📅 Llama GRATIS: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión.
         </a>
       </div>
     </div>
