@@ -45,96 +45,68 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
             "subject": "🎁 ¡Bienvenido al equipo PetruWorkout!",
             "htmlContent": f"""
                 <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                </head>
-                <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;">
-                    <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <!-- Header -->
-                        <div style="background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); padding: 30px; text-align: center;">
-                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
-                                🎉 ¡Bienvenido al Equipo!
-                            </h1>
-                            <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
-                                Estás a punto de transformar tu vida
-                            </p>
-                        </div>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color:#ffffff; color:#333333;">
 
-                        <!-- Contenido -->
-                        <div style="padding: 30px;">
-                            <p style="font-size: 16px; line-height: 1.6; color: #333333; margin: 0 0 15px 0;">
-                                Hola <strong style="color: #06d6a0;">{nombre}</strong>,
-                            </p>
+  <div style="max-width:600px; margin:0 auto; padding:20px;">
 
-                            <p style="font-size: 15px; line-height: 1.7; color: #666666; margin: 0 0 20px 0;">
-                                ¡Me alegro mucho de que hayas decidido dar el primer paso hacia tu transformación! 
-                                Has tomado una decisión que va a cambiar tu vida para siempre.
-                            </p>
+    <p style="font-size:15px; line-height:1.6; margin-bottom:15px;">
+      Hola <strong>{nombre}</strong>,
+    </p>
 
-                            <!-- Beneficios -->
-                            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #06d6a0; margin: 25px 0;">
-                                <h2 style="margin: 0 0 15px 0; color: #06d6a0; font-size: 18px; font-weight: 600;">
-                                    🎁 Tu regalo de bienvenida:
-                                </h2>
-                                <ul style="margin: 0; padding-left: 20px; color: #333333;">
-                                    <li style="margin-bottom: 10px; line-height: 1.5;">
-                                        <strong>Calculadora de calorías personalizada</strong> - Calcula exactamente cuánto necesitas comer
-                                    </li>
-                                    <li style="margin-bottom: 10px; line-height: 1.5;">
-                                        <strong>Acceso al grupo exclusivo de WhatsApp</strong> - Comunidad activa y motivadora
-                                    </li>
-                                    <li style="margin-bottom: 10px; line-height: 1.5;">
-                                        <strong>Contenido premium semanal</strong> - Tips, rutinas y consejos exclusivos
-                                    </li>
-                                    <li style="line-height: 1.5;">
-                                        <strong>Soporte directo</strong> - Yo personalmente respondo tus dudas
-                                    </li>
-                                </ul>
-                            </div>
+    <p style="font-size:15px; line-height:1.6; margin-bottom:15px;">
+      Me alegro mucho de que hayas decidido dar el primer paso hacia tu transformación.
+      A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, sin complicarte.
+    </p>
 
-                            <!-- Botón CTA -->
-                            <div style="text-align: center; margin: 30px 0;">
-                                <a href="https://petrucalistenia.com/calculator" 
-                                   style="display: inline-block; background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);">
-                                    🔥 CALCULAR MIS CALORÍAS AHORA
-                                </a>
-                            </div>
+    <p style="font-size:15px; line-height:1.6; margin-bottom:20px;">
+      Aquí tienes tu <strong>calculadora de calorías personalizada</strong>.
+      Úsala para saber exactamente cuánto necesitas comer según tu objetivo.
+    </p>
 
-                            <!-- Nota importante -->
-                            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0;">
-                                <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                                    <strong>💡 Importante:</strong> Calcula tus calorías y 
-                                    únete al grupo de WhatsApp donde recibirás soporte directo y 
-                                    contenido exclusivo para maximizar tus resultados.
-                                </p>
-                            </div>
+    <!-- Botón CTA -->
+    <div style="margin:25px 0;">
+      <a href="https://petrucalistenia.com/calculator"
+         style="display:inline-block;
+                background-color:#06d6a0;
+                color:#ffffff;
+                padding:12px 24px;
+                text-decoration:none;
+                border-radius:6px;
+                font-size:15px;
+                font-weight:bold;">
+        Calcular mis calorías
+      </a>
+    </div>
 
-                            <!-- Despedida -->
-                            <p style="font-size: 15px; line-height: 1.7; margin: 10px 0 0 0; color: #06d6a0; font-weight: 600;">
-                                Petru<br>
-                                <span style="font-size: 13px; color: #666666; font-weight: 400;">
-                                    Entrenador Personal Especializado en Calistenia
-                                </span>
-                            </p>
-                        </div>
+    <p style="font-size:14px; line-height:1.6; color:#555555; margin-bottom:20px;">
+      Cuando hayas hecho el cálculo, podrás unirte al grupo de WhatsApp donde comparto
+      consejos, rutinas y respondo dudas.
+    </p>
 
-                        <!-- Footer -->
-                        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
-                            <p style="margin: 0; color: #666666; font-size: 13px;">
-                                PetruWorkout - Entrenador Personal de Calistenia
-                            </p>
-                            <p style="margin: 8px 0 0 0; color: #999999; font-size: 12px;">
-                                📧 petruworkout@gmail.com | 🌐 <a href="https://petrucalistenia.com" style="color: #06d6a0; text-decoration: none;">petrucalistenia.com</a>
-                            </p>
-                            <p style="margin: 12px 0 0 0; color: #999999; font-size: 11px;">
-                                Has recibido este email porque te registraste en PetruWorkout
-                            </p>
-                        </div>
-                    </div>
-                </body>
-                </html>
+    <p style="font-size:15px; line-height:1.6; margin-top:25px;">
+      Un abrazo,<br>
+      <strong>Petru</strong><br>
+      <span style="font-size:13px; color:#666666;">
+        Entrenador Personal de Calistenia
+      </span>
+    </p>
+
+    <hr style="border:none; border-top:1px solid #eeeeee; margin:30px 0;">
+
+    <p style="font-size:12px; color:#999999; line-height:1.5;">
+      Has recibido este email porque te registraste en PetruWorkout.<br>
+      📧 petruworkout@gmail.com · 🌐 petrucalistenia.com
+    </p>
+
+  </div>
+
+</body>
+</html>
+
             """
         }
 
