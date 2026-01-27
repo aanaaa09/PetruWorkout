@@ -25,10 +25,6 @@
 
         <!-- CTA Principal -->
         <div class="cta-section">
-          <p class="intro-text">
-            Únete ahora al grupo exclusivo y comienza tu transformación con el apoyo de toda la comunidad
-          </p>
-
           <a
             href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
             target="_blank"
