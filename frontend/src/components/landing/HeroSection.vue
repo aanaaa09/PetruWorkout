@@ -563,7 +563,8 @@ export default {
 }
 
 .hero-image img {
-  max-width: 100%;
+  max-width: 550px; /* ✅ AUMENTADO de 450px a 550px para escritorio */
+  width: 100%;
   height: auto;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
@@ -613,6 +614,10 @@ export default {
 
   .hero-image-desktop {
     order: -1;
+  }
+
+  .hero-image img {
+    max-width: 450px; /* Tamaño medio para tablets */
   }
 }
 
