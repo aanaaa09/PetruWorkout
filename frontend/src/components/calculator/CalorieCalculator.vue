@@ -94,6 +94,11 @@
         <button type="submit" class="btn-calculate" :disabled="calculating">
           {{ calculating ? '⏳ Calculando...' : '🔥 Calcular Calorías' }}
         </button>
+
+        <!-- Mensaje de error -->
+        <div v-if="errorMessage" class="error-message">
+          ❌ {{ errorMessage }}
+        </div>
       </form>
 
       <!-- Resultados -->
@@ -201,14 +206,6 @@
             </p>
             <div class="cta-buttons">
               <a
-                href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn-whatsapp"
-              >
-                💬 Únete al Grupo de WhatsApp
-              </a>
-              <a
                 href="https://calendly.com/petruworkout/reunion"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -238,82 +235,54 @@ export default {
         goal: ''
       },
       results: null,
-      calculating: false
+      calculating: false,
+      errorMessage: ''
     }
   },
   methods: {
-    calculateCalories() {
+    async calculateCalories() {
       this.calculating = true
+      this.errorMessage = ''
 
-      // Simular delay para mejor UX
-      setTimeout(() => {
-        // 1. Calcular IMC
-        const heightInMeters = this.formData.height / 100
-        const bmi = (this.formData.weight / (heightInMeters * heightInMeters)).toFixed(1)
+      try {
+        // Llamar a la API del backend
+        const response = await fetch('https://petruworkout-production.up.railway.app/api/calculator/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            gender: this.formData.gender,
+            age: this.formData.age,
+            weight: this.formData.weight,
+            height: this.formData.height,
+            activity_level: this.formData.activityLevel,
+            goal: this.formData.goal
+          })
+        })
 
-        // 2. Calcular Gasto Energético Basal (GEB) - Fórmula de Harris-Benedict
-        let bmr
-        if (this.formData.gender === 'male') {
-          bmr = Math.round(
-            88.362 +
-            (13.397 * this.formData.weight) +
-            (4.799 * this.formData.height) -
-            (5.677 * this.formData.age)
-          )
-        } else {
-          bmr = Math.round(
-            447.593 +
-            (9.247 * this.formData.weight) +
-            (3.098 * this.formData.height) -
-            (4.330 * this.formData.age)
-          )
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.detail || 'Error al calcular calorías')
         }
 
-        // 3. Calcular Gasto Energético Total (GET)
-        const activityMultipliers = {
-          sedentary: 1.2,
-          light: 1.375,
-          moderate: 1.55,
-          active: 1.725,
-          very_active: 1.9
-        }
-        const tdee = Math.round(bmr * activityMultipliers[this.formData.activityLevel])
+        const data = await response.json()
 
-        // 4. Ajustar según objetivo
-        let recommended
-        if (this.formData.goal === 'lose') {
-          recommended = Math.round(tdee - 500) // Déficit de 500 kcal
-        } else if (this.formData.goal === 'maintain') {
-          recommended = tdee
-        } else {
-          recommended = Math.round(tdee + 300) // Superávit de 300 kcal
-        }
-
-        // 5. Calcular macronutrientes (40% carbs, 30% proteína, 30% grasa)
-        const proteinCal = Math.round(recommended * 0.30)
-        const carbsCal = Math.round(recommended * 0.40)
-        const fatsCal = Math.round(recommended * 0.30)
-
-        const protein = Math.round(proteinCal / 4) // 4 kcal por gramo
-        const carbs = Math.round(carbsCal / 4) // 4 kcal por gramo
-        const fats = Math.round(fatsCal / 9) // 9 kcal por gramo
-
+        // Mapear la respuesta del backend al formato del frontend
         this.results = {
-          bmi,
-          bmr,
-          tdee,
-          recommended,
+          bmi: data.bmi,
+          bmr: data.bmr,
+          tdee: data.tdee,
+          recommended: data.recommended,
           macros: {
-            protein,
-            carbs,
-            fats,
-            proteinCal,
-            carbsCal,
-            fatsCal
+            protein: data.macros.protein,
+            carbs: data.macros.carbs,
+            fats: data.macros.fats,
+            proteinCal: data.macros.protein_cal,
+            carbsCal: data.macros.carbs_cal,
+            fatsCal: data.macros.fats_cal
           }
         }
-
-        this.calculating = false
 
         // Scroll a resultados
         this.$nextTick(() => {
@@ -322,7 +291,12 @@ export default {
             resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }
         })
-      }, 500)
+      } catch (error) {
+        console.error('Error al calcular calorías:', error)
+        this.errorMessage = error.message || 'Error al calcular calorías. Por favor, intenta de nuevo.'
+      } finally {
+        this.calculating = false
+      }
     },
 
     getBMIStatus() {
@@ -355,6 +329,7 @@ export default {
 </script>
 
 <style scoped>
+/* (Los estilos permanecen exactamente igual que antes) */
 .calculator-page {
   min-height: 100vh;
   background: var(--bg-primary);
@@ -366,7 +341,6 @@ export default {
   margin: 0 auto;
 }
 
-/* ===== HEADER ===== */
 .calculator-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -389,7 +363,6 @@ export default {
   line-height: 1.6;
 }
 
-/* ===== FORMULARIO ===== */
 .calculator-form {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -492,7 +465,16 @@ export default {
   cursor: not-allowed;
 }
 
-/* ===== RESULTADOS ===== */
+.error-message {
+  background: rgba(239, 35, 60, 0.15);
+  border: 1px solid rgba(239, 35, 60, 0.3);
+  color: #ff6b6b;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+}
+
 .results-section {
   margin-top: 4rem;
   animation: fadeIn 0.5s ease;
@@ -588,7 +570,6 @@ export default {
   color: #ef233c;
 }
 
-/* ===== MACRONUTRIENTES ===== */
 .macros-section {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -640,7 +621,6 @@ export default {
   color: var(--color-text-muted);
 }
 
-/* ===== CONSEJOS ===== */
 .tips-section {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -679,7 +659,6 @@ export default {
   font-weight: 700;
 }
 
-/* ===== CTA ===== */
 .cta-section {
   background: linear-gradient(135deg, rgba(6, 214, 160, 0.15) 0%, rgba(6, 214, 160, 0.05) 100%);
   border: 2px solid var(--color-accent);
@@ -746,7 +725,6 @@ export default {
   box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
 }
 
-/* ===== ANIMACIONES ===== */
 .fade-enter-active {
   animation: fadeIn 0.5s ease;
 }
@@ -762,7 +740,6 @@ export default {
   }
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .calculator-page {
     padding: 6rem 1rem 3rem;

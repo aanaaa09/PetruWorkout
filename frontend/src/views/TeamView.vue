@@ -14,6 +14,21 @@
           </p>
         </div>
 
+        <!-- ✅ NUEVO: Recordatorio de revisar email -->
+        <div class="email-reminder">
+          <div class="reminder-icon">📧</div>
+          <div class="reminder-content">
+            <h3>¡No olvides revisar tu correo!</h3>
+            <p>
+              Te hemos enviado un email de bienvenida con tu <strong>calculadora de calorías personalizada</strong>
+              y otros recursos exclusivos. Si no lo ves en tu bandeja de entrada, revisa tu carpeta de spam.
+            </p>
+            <router-link to="/calculator" class="btn-calculator-link">
+              🔥 Ir a la Calculadora de Calorías
+            </router-link>
+          </div>
+        </div>
+
         <!-- CTA Principal -->
         <div class="cta-section">
           <p class="intro-text">
@@ -141,6 +156,67 @@ export default {
   margin: 0 auto;
 }
 
+/* ===== NUEVO: RECORDATORIO DE EMAIL ===== */
+.email-reminder {
+  background: linear-gradient(135deg, rgba(6, 214, 160, 0.15) 0%, rgba(6, 214, 160, 0.08) 100%);
+  border: 2px solid rgba(6, 214, 160, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.reminder-icon {
+  font-size: 3.5rem;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+.reminder-content {
+  flex: 1;
+}
+
+.reminder-content h3 {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+}
+
+.reminder-content p {
+  font-size: 1.05rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin: 0 0 1.5rem 0;
+}
+
+.reminder-content strong {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.btn-calculator-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: var(--gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(6, 214, 160, 0.3);
+}
+
+.btn-calculator-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.5);
+}
+
 /* ===== BENEFICIOS ===== */
 .benefits-section {
   background: rgba(255, 255, 255, 0.03);
@@ -246,6 +322,36 @@ export default {
   margin-top: 1.5rem;
 }
 
+/* ===== ANIMACIONES ===== */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 968px) {
   .team-container {
@@ -258,6 +364,16 @@ export default {
 
   .benefits-grid {
     grid-template-columns: 1fr;
+  }
+
+  .email-reminder {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .reminder-icon {
+    font-size: 3rem;
   }
 }
 
@@ -272,6 +388,23 @@ export default {
 
   .subtitle {
     font-size: 1rem;
+  }
+
+  .email-reminder {
+    padding: 1.5rem;
+  }
+
+  .reminder-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .reminder-content p {
+    font-size: 0.95rem;
+  }
+
+  .btn-calculator-link {
+    width: 100%;
+    justify-content: center;
   }
 
   .benefits-section {
@@ -296,15 +429,6 @@ export default {
   .btn-whatsapp-main svg {
     width: 24px;
     height: 24px;
-  }
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
   }
 }
 </style>
