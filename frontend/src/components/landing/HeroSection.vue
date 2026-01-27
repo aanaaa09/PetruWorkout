@@ -563,9 +563,9 @@ export default {
 }
 
 .hero-image img {
-  max-width: 550px; /* ✅ AUMENTADO de 450px a 550px para escritorio */
+  max-width: 750px;
   width: 100%;
-  height: auto;
+  height: 450px;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
