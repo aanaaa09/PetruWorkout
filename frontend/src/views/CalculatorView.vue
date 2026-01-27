@@ -25,7 +25,7 @@ export default {
   name: 'CalculatorView',
   components: {
     SimpleNavbar,
-    CalorieCalculator,
+    CalorieCalculator: CalorieCalculator,
     SimpleFooter,
     PrivacyPolicy,
     TermsConditions,
