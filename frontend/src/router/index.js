@@ -1,6 +1,7 @@
 import HomeView from '@/views/HomeView.vue'
 import InfoView from '@/views/InfoView.vue'
 import TeamView from '@/views/TeamView.vue'
+import CalculatorView from '@/views/CalculatorView.vue'
 
 
 const routes = [
@@ -38,6 +39,18 @@ const routes = [
       keywords: 'grupo whatsapp fitness, comunidad calistenia, contenido exclusivo entrenamiento',
       ogImage: 'https://petrucalistenia.com/logo.png',
       canonical: 'https://petrucalistenia.com/team'
+    }
+  },
+  {
+    path: '/calculator',
+    name: 'calculator',
+    component: CalculatorView,
+    meta: {
+      title: 'Calculadora de Calorías - PetruWorkout | Calcula tus Macros',
+      description: 'Calculadora gratuita de calorías y macronutrientes. Descubre cuántas calorías necesitas según tu objetivo: perder grasa, mantener peso o ganar músculo.',
+      keywords: 'calculadora calorías, calcular macros, IMC, déficit calórico, superávit calórico, nutrición deportiva',
+      ogImage: 'https://petrucalistenia.com/logo.png',
+      canonical: 'https://petrucalistenia.com/calculator'
     }
   }
 ]

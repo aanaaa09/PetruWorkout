@@ -52,7 +52,6 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
                 </head>
                 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;">
                     <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-
                         <!-- Header -->
                         <div style="background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); padding: 30px; text-align: center;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
@@ -77,7 +76,7 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
                             <!-- Beneficios -->
                             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #06d6a0; margin: 25px 0;">
                                 <h2 style="margin: 0 0 15px 0; color: #06d6a0; font-size: 18px; font-weight: 600;">
-                                    🎁 Tu regalo de bienvenida incluye:
+                                    🎁 Tu regalo de bienvenida:
                                 </h2>
                                 <ul style="margin: 0; padding-left: 20px; color: #333333;">
                                     <li style="margin-bottom: 10px; line-height: 1.5;">
@@ -97,25 +96,22 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
 
                             <!-- Botón CTA -->
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1" 
+                                <a href="https://petrucalistenia.com/calculator" 
                                    style="display: inline-block; background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);">
-                                    📲 UNIRME AL GRUPO AHORA
+                                    🔥 CALCULAR MIS CALORÍAS AHORA
                                 </a>
                             </div>
 
                             <!-- Nota importante -->
                             <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0;">
                                 <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                                    <strong>💡 Importante:</strong> Una vez dentro del grupo, recibirás tu calculadora de calorías 
-                                    y toda la información necesaria para empezar tu transformación.
+                                    <strong>💡 Importante:</strong> Calcula tus calorías y 
+                                    únete al grupo de WhatsApp donde recibirás soporte directo y 
+                                    contenido exclusivo para maximizar tus resultados.
                                 </p>
                             </div>
 
                             <!-- Despedida -->
-                            <p style="font-size: 15px; line-height: 1.7; margin: 25px 0 0 0; color: #333333;">
-                                ¡Nos vemos dentro del grupo! 💪
-                            </p>
-
                             <p style="font-size: 15px; line-height: 1.7; margin: 10px 0 0 0; color: #06d6a0; font-weight: 600;">
                                 Petru<br>
                                 <span style="font-size: 13px; color: #666666; font-weight: 400;">
