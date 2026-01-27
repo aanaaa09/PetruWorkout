@@ -15,8 +15,10 @@
           <div class="reminder-content">
             <h3>¡No olvides revisar tu correo!</h3>
             <p>
-              Te hemos enviado un email de bienvenida con tu <strong>calculadora de calorías personalizada</strong>
-              y otros recursos exclusivos. Si no lo ves en tu bandeja de entrada, revisa tu carpeta de spam.
+              ¡Ey, te acabo de escribir! 📩<br><br>
+              Te he enviado un email con acceso a tu <strong>calculadora de calorías personalizada</strong>.
+              A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, de manera simple y sin complicaciones.<br><br>
+              Si no ves el email, revisa la carpeta de <strong>spam</strong> o <strong>promociones</strong> 😉
             </p>
           </div>
         </div>
