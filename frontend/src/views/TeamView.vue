@@ -14,7 +14,6 @@
           </p>
         </div>
 
-        <!-- ✅ NUEVO: Recordatorio de revisar email -->
         <div class="email-reminder">
           <div class="reminder-icon">📧</div>
           <div class="reminder-content">
@@ -23,9 +22,6 @@
               Te hemos enviado un email de bienvenida con tu <strong>calculadora de calorías personalizada</strong>
               y otros recursos exclusivos. Si no lo ves en tu bandeja de entrada, revisa tu carpeta de spam.
             </p>
-            <router-link to="/calculator" class="btn-calculator-link">
-              🔥 Ir a la Calculadora de Calorías
-            </router-link>
           </div>
         </div>
 
