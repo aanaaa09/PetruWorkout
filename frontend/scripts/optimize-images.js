@@ -22,7 +22,7 @@ const CONFIGS = [
   // Imagen hero móvil
   {
     inputDir: 'public/images',
-    files: ['petru-hero-movil.webp'],
+    files: ['petru-hero-nuevo.webp'],
     sizes: {
       optimized: 342
     }
@@ -84,8 +84,8 @@ async function optimizeImages() {
   console.log('  📁 public/images/results/*-medium.webp (660px)');
   console.log('  📁 public/images/results/*-large.webp (1000px)');
   console.log('  📁 public/videos/thumbs/*-small.webp (378px)');
-  console.log('  📁 public/images/petru-hero-movil-optimized.webp (342px)');
-  console.log('  📁 public/images/petru-hero-optimized.webp (441px)');
+  console.log('  📁 public/images/petru-hero-nuevo.webp (342px)');
+  console.log('  📁 public/images/petru-hero-nuevo.webp (441px)');
 }
 
 optimizeImages().catch(console.error);

@@ -133,8 +133,8 @@ export default {
   name: 'HeroSection',
   data() {
     return {
-      desktopImage: '/images/petru-hero-optimized.webp',
-      mobileImage: '/images/petru-hero-movil-optimized.webp',
+      desktopImage: '/images/petru-hero-nuevo.webp',
+      mobileImage: '/images/petru-hero-nuevo.webp',
       showModal: false,
       email: '',
       acceptPrivacy: false,
