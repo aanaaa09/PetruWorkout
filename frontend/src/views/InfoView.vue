@@ -7,17 +7,6 @@
       <ServicesSection id="servicios" />
       <GuaranteeSection />
 
-      <!-- ✅ Botón del grupo justo después del texto principal -->
-      <section id="join-group" class="join-group-section">
-        <p class="join-text">Estás a un paso de unirte al grupo y recibir tu regalo exclusivo</p>
-        <button
-          @click="goToGroup"
-          class="btn-join-group"
-        >
-          🎁 Accede al grupo de WhatsApp
-        </button>
-      </section>
-
       <ContactForm id="contacto" />
     </main>
 
