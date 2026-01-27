@@ -13,9 +13,8 @@
         <div class="email-reminder">
           <div class="reminder-icon">📧</div>
           <div class="reminder-content">
-            <h3>¡No olvides revisar tu correo!</h3>
+            <h3>¡Ey, te acabo de escribir!</h3>
             <p>
-              ¡Ey, te acabo de escribir! 📩<br><br>
               Te he enviado un email con acceso a tu <strong>calculadora de calorías personalizada</strong>.
               A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, de manera simple y sin complicaciones.<br><br>
               Si no ves el email, revisa la carpeta de <strong>spam</strong> o <strong>promociones</strong> 😉

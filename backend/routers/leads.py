@@ -53,22 +53,38 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
 
   <div style="max-width:600px; margin:0 auto; padding:20px;">
 
-    <p style="font-size:15px; line-height:1.6; margin-bottom:15px;">
+    <p style="font-size:16px; line-height:1.6; margin-bottom:15px;">
       Hola <strong>{nombre}</strong>,
     </p>
 
-    <p style="font-size:15px; line-height:1.6; margin-bottom:15px;">
-      Me alegro mucho de que hayas decidido dar el primer paso hacia tu transformación.
-      A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, sin complicarte.
+    <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
+      ¡Me alegro mucho de que hayas decidido dar el primer paso hacia tu transformación! 
+      Has tomado una decisión que va a cambiar tu vida para siempre.
     </p>
 
-    <p style="font-size:15px; line-height:1.6; margin-bottom:20px;">
-      Aquí tienes tu <strong>calculadora de calorías personalizada</strong>.
-      Úsala para saber exactamente cuánto necesitas comer según tu objetivo.
-    </p>
+    <!-- Beneficios -->
+    <div style="margin:25px 0;">
+      <p style="font-size:15px; margin-bottom:10px;">
+        🎁 <strong>Tu regalo de bienvenida:</strong>
+      </p>
+      <ul style="padding-left:20px; font-size:15px; line-height:1.6;">
+        <li>
+          <strong>Calculadora de calorías personalizada</strong> - Calcula exactamente cuánto necesitas comer
+        </li>
+        <li>
+          <strong>Acceso al grupo exclusivo de WhatsApp</strong> - Comunidad activa y motivadora
+        </li>
+        <li>
+          <strong>Contenido premium semanal</strong> - Tips, rutinas y consejos exclusivos
+        </li>
+        <li>
+          <strong>Soporte directo</strong> - Yo personalmente respondo tus dudas
+        </li>
+      </ul>
+    </div>
 
     <!-- Botón CTA -->
-    <div style="margin:25px 0;">
+    <div style="margin:30px 0;">
       <a href="https://petrucalistenia.com/calculator"
          style="display:inline-block;
                 background-color:#06d6a0;
@@ -77,29 +93,33 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
                 text-decoration:none;
                 border-radius:6px;
                 font-size:15px;
-                font-weight:bold;">
-        Calcular mis calorías
+                font-weight:600;">
+        🔥 CALCULAR MIS CALORÍAS AHORA
       </a>
     </div>
 
+    <!-- Nota importante -->
     <p style="font-size:14px; line-height:1.6; color:#555555; margin-bottom:20px;">
-      Cuando hayas hecho el cálculo, podrás unirte al grupo de WhatsApp donde comparto
-      consejos, rutinas y respondo dudas.
+      <strong>💡 Importante:</strong> Calcula tus calorías y 
+      únete al grupo de WhatsApp donde recibirás soporte directo y 
+      contenido exclusivo para maximizar tus resultados.
     </p>
 
-    <p style="font-size:15px; line-height:1.6; margin-top:25px;">
-      Un abrazo,<br>
+    <!-- Despedida -->
+    <p style="font-size:15px; line-height:1.7; margin-top:25px;">
       <strong>Petru</strong><br>
       <span style="font-size:13px; color:#666666;">
-        Entrenador Personal de Calistenia
+        Entrenador Personal Especializado en Calistenia
       </span>
     </p>
 
     <hr style="border:none; border-top:1px solid #eeeeee; margin:30px 0;">
 
+    <!-- Footer -->
     <p style="font-size:12px; color:#999999; line-height:1.5;">
-      Has recibido este email porque te registraste en PetruWorkout.<br>
-      📧 petruworkout@gmail.com · 🌐 petrucalistenia.com
+      PetruWorkout - Entrenador Personal de Calistenia<br>
+      📧 petruworkout@gmail.com · 🌐 petrucalistenia.com<br>
+      Has recibido este email porque te registraste en PetruWorkout
     </p>
 
   </div>
