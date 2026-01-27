@@ -566,9 +566,13 @@ export default {
   max-width: 750px;
   width: 100%;
   height: 450px;
+
+  object-fit: cover;
+  object-position: center;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
+
 
 /* ===== INDICADOR DE SCROLL ===== */
 .scroll-indicator {
