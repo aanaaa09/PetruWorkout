@@ -16,8 +16,8 @@
             <h3>¡Ey, te acabo de escribir!</h3>
             <p>
               Te he enviado un email con acceso a tu <strong>calculadora de calorías personalizada</strong>.
-              A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, de manera simple y sin complicaciones.<br><br>
-              Si no ves el email, revisa la carpeta de <strong>spam</strong> o <strong>promociones</strong> 😉
+              A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, sin complicarte.<br><br>
+              Si no te llega, revisa la carpeta de <strong>spam</strong> 😉
             </p>
           </div>
         </div>
