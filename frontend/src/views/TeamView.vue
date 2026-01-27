@@ -15,10 +15,17 @@
           <div class="reminder-content">
             <h3>¡Ey, te acabo de escribir!</h3>
             <p>
-              Te he enviado un email con acceso a tu <strong>calculadora de calorías</strong> personalizada.<br><br>
-              A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, sin complicarte.<br><br>
-              Si no te llega, revisa la carpeta de <strong>spam</strong>
+              Te he enviado un email con acceso a tu <strong>calculadora de calorías</strong> personalizada.
             </p>
+
+            <p>
+              A partir de ahora te iré enseñando cómo ponerte en forma con calistenia, sin complicarte.
+            </p>
+
+            <p>
+               Si no te llega, revisa la carpeta de <strong>spam</strong>.
+          </p>
+
           </div>
         </div>
 
