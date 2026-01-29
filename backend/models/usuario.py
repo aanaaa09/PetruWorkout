@@ -40,7 +40,7 @@ class Usuario(Base):
 
     calculator_token = Column(String(255), unique=True, nullable=True, index=True)
     calculator_token_created = Column(DateTime(timezone=True), nullable=True)
-    team_access_grante=Column(Boolean, default=False,nullable=False)
+    team_access_granted=Column(Boolean, default=False,nullable=False)
     # Relaciones
     sesiones = relationship("Sesion", back_populates="usuario", cascade="all, delete-orphan")
 
