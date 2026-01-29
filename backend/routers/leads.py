@@ -54,34 +54,37 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
   <div style="max-width:600px; margin:0 auto; padding:20px;">
 
     <p style="font-size:16px; line-height:1.6; margin-bottom:15px;">
-      Hola <strong>{nombre}</strong>,
+      ¡Ey, te escribe <strong>Petru</strong>!
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin-bottom:15px;">
+      Me alegra un montón que estés aquí, de verdad.<br>
+      Dar este primer paso ya dice mucho de ti.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin-bottom:15px;">
+      Quiero que sepas algo desde ya: <strong>no vas a estar solo</strong>.
     </p>
 
     <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
-      ¡Me alegro mucho de que hayas decidido dar el primer paso hacia tu transformación! 
-      Has tomado una decisión que va a cambiar tu vida para siempre.
+      He creado el grupo de WhatsApp para que sepas cómo organizar tus rutinas, 
+      te ayudo con la alimentación, puedes preguntarme todas las dudas, mandar videos 
+      y no ir perdido.
     </p>
 
-    <!-- Beneficios -->
-    <div style="margin:25px 0;">
-      <p style="font-size:15px; margin-bottom:10px;">
-        🎁 <strong>Tu regalo de bienvenida:</strong>
-      </p>
-      <ul style="padding-left:20px; font-size:15px; line-height:1.6;">
-        <li>
-          <strong>Calculadora de calorías personalizada</strong> - Calcula exactamente cuánto necesitas comer
-        </li>
-        <li>
-          <strong>Acceso al grupo exclusivo de WhatsApp</strong> - Comunidad activa y motivadora
-        </li>
-        <li>
-          <strong>Contenido premium semanal</strong> - Tips, rutinas y consejos exclusivos
-        </li>
-        <li>
-          <strong>Soporte directo</strong> - Yo personalmente respondo tus dudas
-        </li>
-      </ul>
-    </div>
+    <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
+      Estoy dentro y respondo yo, así que si no te has unido aún,
+      <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
+         style="color:#06d6a0; font-weight:bold; text-decoration:none;">
+        <strong>Haz clic aquí</strong>
+      </a>.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
+      Y ahora sí, vamos a lo importante 😏<br>
+      Te dejo este regalito para que lo aproveches y sepas 
+      <strong>cuánto comer según tu objetivo</strong>, sin líos ni cálculos raros.
+    </p>
 
     <!-- Botón CTA -->
     <div style="margin:30px 0;">
@@ -98,15 +101,11 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
       </a>
     </div>
 
-    <!-- Nota importante -->
-    <p style="font-size:14px; line-height:1.6; color:#555555; margin-bottom:20px;">
-      <strong>💡 Importante:</strong> Calcula tus calorías y 
-      únete al grupo de WhatsApp donde recibirás soporte directo y 
-      contenido exclusivo para maximizar tus resultados.
+    <p style="font-size:15px; line-height:1.7; margin-top:25px;">
+      Nos vemos dentro 💪
     </p>
 
-    <!-- Despedida -->
-    <p style="font-size:15px; line-height:1.7; margin-top:25px;">
+    <p style="font-size:15px; line-height:1.7; margin-top:15px;">
       <strong>Petru</strong><br>
       <span style="font-size:13px; color:#666666;">
         Entrenador Personal Especializado en Calistenia
@@ -115,7 +114,6 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
 
     <hr style="border:none; border-top:1px solid #eeeeee; margin:30px 0;">
 
-    <!-- Footer -->
     <p style="font-size:12px; color:#999999; line-height:1.5;">
       PetruWorkout - Entrenador Personal de Calistenia<br>
       📧 petruworkout@gmail.com · 🌐 petrucalistenia.com<br>
@@ -126,6 +124,7 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
 
 </body>
 </html>
+
 
             """
         }

@@ -6,14 +6,12 @@
       <div class="team-content">
         <!-- Header -->
         <div class="team-header">
-          <div class="success-icon">🎉</div>
-          <h1>¡Bienvenido al equipo!</h1>
+          <h1>¡Ey, te acabo de escribir!</h1>
         </div>
 
         <div class="email-reminder">
           <div class="reminder-icon">📧</div>
           <div class="reminder-content">
-            <h3>¡Ey, te acabo de escribir!</h3>
             <p>
               Te he enviado un email con acceso a tu <strong>calculadora de calorías</strong> personalizada.
             </p>
