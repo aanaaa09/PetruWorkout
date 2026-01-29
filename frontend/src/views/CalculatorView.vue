@@ -53,6 +53,17 @@ export default {
     }
   },
   mounted() {
+     const urlParams = new URLSearchParams(window.location.search)
+  const token = urlParams.get('token')
+  const savedToken = sessionStorage.getItem('petru_calculator_token')
+
+  if (token) {
+    sessionStorage.setItem('petru_calculator_token', token)
+    window.history.replaceState({}, '', '/calculator')
+  } else if (!savedToken) {
+    this.$router.push('/')
+    return
+  }
     // SEO
     const canonical = document.querySelector('link[rel="canonical"]')
     if (canonical) canonical.href = 'https://petrucalistenia.com/calculator'

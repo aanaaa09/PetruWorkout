@@ -213,7 +213,7 @@ export default {
         })
 
         const data = await response.json()
-
+        sessionStorage.setItem('petru_has_team_access', 'true')
         if (response.ok) {
           if (data.nuevo) {
             this.success = '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
@@ -221,9 +221,10 @@ export default {
             this.success = '¡Ya estás registrado! Redirigiendo al grupo...'
           }
 
-          setTimeout(() => {
-            window.location.href = 'https://petrucalistenia.com/team'
-          }, 2000)
+
+           setTimeout(() => {
+            this.$router.push('/team')  // ← CAMBIO AQUÍ
+            }, 2000)
         } else {
           this.error = data.error || 'Error al registrar. Intenta de nuevo.'
         }

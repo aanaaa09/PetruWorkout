@@ -93,6 +93,12 @@ export default {
     SimpleNavbar,
     SimpleFooter
   },
+  mounted() {
+    const hasAccess = sessionStorage.getItem('petru_has_team_access')
+    if (!hasAccess) {
+      this.$router.push('/')
+    }
+  },
   methods: {
     trackWhatsAppClick() {
       // Tracking del click al grupo de WhatsApp

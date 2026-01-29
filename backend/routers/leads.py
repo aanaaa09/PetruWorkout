@@ -144,11 +144,15 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
         usuario_existente = usuario_crud.get_by_email(db, data.email.lower())
 
         if usuario_existente:
-            logger.info(f"Lead ya existente: {data.email}")
+            if not usuario_existente.team_access_granted:
+                usuario_existente.team_access_granted = True
+                db.commit()
+
             return {
                 'success': True,
                 'mensaje': 'Email ya registrado',
-                'nuevo': False
+                'nuevo': False,
+                'has_team_access': True
             }
 
         # Crear nuevo usuario tipo NEWSLETTER sin contraseña
@@ -166,6 +170,9 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
             password=temp_password,
             tipo_usuario=TipoUsuario.NEWSLETTER
         )
+        usuario.team_access_granted = True
+        db.commit()
+        db.refresh(usuario)
 
         # GENERAR TOKEN DE CALCULADORA
         from ..services.calculator_token_service import calculator_token_service
@@ -190,7 +197,8 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
             'success': True,
             'mensaje': 'Email registrado correctamente. Revisa tu bandeja de entrada.',
             'nuevo': True,
-            'email_enviado': email_enviado
+            'email_enviado': email_enviado,
+            'has_team_access': True
         }
 
     except Exception as e:
