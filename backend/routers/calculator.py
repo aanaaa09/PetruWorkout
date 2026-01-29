@@ -114,3 +114,5 @@ def calculate_calories(data: CalorieCalculatorRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al calcular calorías: {str(e)}")
+
+

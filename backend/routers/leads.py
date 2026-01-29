@@ -17,7 +17,7 @@ class LeadRegistrationRequest(BaseModel):
     email: EmailStr
 
 
-def enviar_email_bienvenida(email: str, nombre: str) -> bool:
+def enviar_email_bienvenida(email: str, nombre: str,  calculator_url: str) -> bool:
     """
     Envía email de bienvenida usando Brevo (SendinBlue)
     """
@@ -74,7 +74,7 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
 
     <!-- Botón CTA -->
     <div style="margin:30px 0; text-align:center;">
-      <a href="https://petrucalistenia.com/calculator"
+      <a href="{calculator_url}"
          style="display:inline-block; background-color:#06d6a0; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-size:15px; font-weight:600;">
         🔥 CALCULAR MIS CALORÍAS AHORA
       </a>
@@ -167,8 +167,19 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
             tipo_usuario=TipoUsuario.NEWSLETTER
         )
 
-        # ✅ ENVIAR EMAIL DE BIENVENIDA
-        email_enviado = enviar_email_bienvenida(data.email.lower(), nombre)
+        # GENERAR TOKEN DE CALCULADORA
+        from ..services.calculator_token_service import calculator_token_service
+
+        token_result = calculator_token_service.create_token_for_user(db, data.email.lower())
+
+        if not token_result['success']:
+            logger.error(f"No se pudo crear token para {data.email}")
+            calculator_url = "https://petrucalistenia.com/calculator"
+        else:
+            calculator_url = token_result['url']
+
+        # ENVIAR EMAIL CON EL LINK PERSONALIZADO
+        email_enviado = enviar_email_bienvenida(data.email.lower(), nombre, calculator_url)
 
         if email_enviado:
             logger.info(f"✅ Nuevo lead registrado con email de bienvenida: {data.email}")

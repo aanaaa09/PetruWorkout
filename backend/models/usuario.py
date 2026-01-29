@@ -38,6 +38,9 @@ class Usuario(Base):
     fecha_registro = Column(DateTime(timezone=True), server_default=func.now())
     ultima_conexion = Column(DateTime(timezone=True), nullable=True)
 
+    calculator_token = Column(String(255), unique=True, nullable=True, index=True)
+    calculator_token_created = Column(DateTime(timezone=True), nullable=True)
+
     # Relaciones
     sesiones = relationship("Sesion", back_populates="usuario", cascade="all, delete-orphan")
 
