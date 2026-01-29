@@ -20,7 +20,6 @@ class LeadRegistrationRequest(BaseModel):
 def enviar_email_bienvenida(email: str, nombre: str) -> bool:
     """
     Envía email de bienvenida usando Brevo (SendinBlue)
-    BASADO EN EL CÓDIGO DE CONSULTAS QUE SÍ FUNCIONA
     """
     try:
         url = "https://api.brevo.com/v3/smtp/email"
@@ -31,30 +30,17 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
             "content-type": "application/json"
         }
 
-        payload = {
-            "sender": {
-                "name": "PetruWorkout",
-                "email": "petruworkout@gmail.com"
-            },
-            "to": [
-                {
-                    "email": email,
-                    "name": nombre
-                }
-            ],
-            "subject": "🎁 ¡Bienvenido al equipo PetruWorkout!",
-            "htmlContent": f"""
-                <!DOCTYPE html>
+        html_content = f"""
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
 </head>
 <body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color:#ffffff; color:#333333;">
-
   <div style="max-width:600px; margin:0 auto; padding:20px;">
 
     <p style="font-size:16px; line-height:1.6; margin-bottom:15px;">
-      ¡Ey, te escribe <strong>Petru</strong>!
+      ¡Ey, te escribe Petru!
     </p>
 
     <p style="font-size:15px; line-height:1.7; margin-bottom:15px;">
@@ -73,11 +59,11 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
     </p>
 
     <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
-      Estoy dentro y respondo yo, así que si no te has unido aún,
-      <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
+      Estoy dentro y respondo yo, asique si no te has unido aún. 
+      <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1" 
          style="color:#06d6a0; font-weight:bold; text-decoration:none;">
         <strong>Haz clic aquí</strong>
-      </a>.
+      </a>
     </p>
 
     <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
@@ -87,16 +73,9 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
     </p>
 
     <!-- Botón CTA -->
-    <div style="margin:30px 0;">
+    <div style="margin:30px 0; text-align:center;">
       <a href="https://petrucalistenia.com/calculator"
-         style="display:inline-block;
-                background-color:#06d6a0;
-                color:#ffffff;
-                padding:12px 24px;
-                text-decoration:none;
-                border-radius:6px;
-                font-size:15px;
-                font-weight:600;">
+         style="display:inline-block; background-color:#06d6a0; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-size:15px; font-weight:600;">
         🔥 CALCULAR MIS CALORÍAS AHORA
       </a>
     </div>
@@ -121,12 +100,23 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
     </p>
 
   </div>
-
 </body>
 </html>
+"""
 
-
-            """
+        payload = {
+            "sender": {
+                "name": "PetruWorkout",
+                "email": "petruworkout@gmail.com"
+            },
+            "to": [
+                {
+                    "email": email,
+                    "name": nombre
+                }
+            ],
+            "subject": "🎁 ¡Bienvenido al equipo PetruWorkout!",
+            "htmlContent": html_content
         }
 
         response = requests.post(url, json=payload, headers=headers, timeout=10)
@@ -141,7 +131,6 @@ def enviar_email_bienvenida(email: str, nombre: str) -> bool:
     except Exception as e:
         logger.error(f"❌ Excepción enviando email con Brevo: {e}")
         return False
-
 
 @router.post("/register")
 def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
