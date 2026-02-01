@@ -2,6 +2,7 @@
 Backup incremental desde Railway a GitHub
 Primera ejecución: backup completo histórico
 Siguientes: solo registros del último mes
+
 """
 import os
 import sys
@@ -10,6 +11,7 @@ from pathlib import Path
 import psycopg2
 import json
 import logging
+import time
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,12 +46,50 @@ class RailwayBackup:
 
         logger.info(f"🔌 Conectando a Railway...")
 
-        try:
-            self.conn = psycopg2.connect(database_url)
-            logger.info("✅ Conectado a Railway")
-        except Exception as e:
-            logger.error(f"❌ Error conectando a Railway: {e}")
-            sys.exit(1)
+        # Conectar con reintentos (despertar BD si está dormida)
+        self.conn = self._conectar_con_reintentos(database_url)
+
+    def _conectar_con_reintentos(self, database_url, max_intentos=5, tiempo_espera=10):
+        """
+        Conecta a Railway con reintentos para despertar la BD si está dormida.
+        Railway puede tardar hasta 30-60 segundos en despertar una BD inactiva.
+        """
+        for intento in range(1, max_intentos + 1):
+            try:
+                logger.info(f"🔄 Intento {intento}/{max_intentos}...")
+                conn = psycopg2.connect(database_url, connect_timeout=30)
+
+                # Verificar que la conexión funciona
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.close()
+
+                logger.info("✅ Conectado a Railway")
+                return conn
+
+            except psycopg2.OperationalError as e:
+                error_msg = str(e)
+
+                if intento < max_intentos:
+                    if "server closed the connection" in error_msg or "Connection refused" in error_msg:
+                        logger.warning(
+                            f"⏳ BD dormida o iniciando... Esperando {tiempo_espera}s antes del siguiente intento")
+                    else:
+                        logger.warning(f"⚠️ Error de conexión: {error_msg}")
+
+                    time.sleep(tiempo_espera)
+                else:
+                    logger.error(f"❌ Error conectando tras {max_intentos} intentos: {e}")
+                    logger.error("💡 Posibles causas:")
+                    logger.error("   - Verifica que DATABASE_URL sea correcta")
+                    logger.error("   - Verifica que el servicio esté activo en Railway")
+                    logger.error("   - Revisa los límites de tu plan en Railway")
+                    sys.exit(1)
+
+            except Exception as e:
+                logger.error(f"❌ Error inesperado conectando a Railway: {e}")
+                sys.exit(1)
+
     def cargar_log(self):
         """Carga registro de últimos backups"""
         if self.log_file.exists():
@@ -228,7 +268,7 @@ class RailwayBackup:
                 sql_file.write(f"-- ========================================\n")
                 sql_file.write(f"-- BACKUP {tipo_backup} - RAILWAY\n")
                 sql_file.write(f"-- Fecha: {fecha_actual.strftime('%Y-%m-%d %H:%M:%S')}\n")
-                sql_file.write(f"-- Base de datos: {os.getenv('DB_NAME')}\n")
+                sql_file.write(f"-- Base de datos: {os.getenv('DB_NAME', 'railway')}\n")
                 sql_file.write(f"-- ========================================\n\n")
 
                 sql_file.write("BEGIN;\n\n")
