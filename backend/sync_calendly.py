@@ -32,7 +32,7 @@ def sync_calendly_bookings():
     database_url = os.getenv('DATABASE_URL')
 
     if database_url:
-        logger.info("🚂 Conectando a Railway via DATABASE_URL (GitHub Actions)")
+        logger.info("Conectando a Railway via DATABASE_URL (GitHub Actions)")
         try:
             engine = create_engine(
                 database_url,
@@ -43,18 +43,18 @@ def sync_calendly_bookings():
             SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
             db = SessionLocal()
             db.execute(text("SELECT 1"))
-            logger.info("✅ Conexión a Railway exitosa")
+            logger.info("Conexión a Railway exitosa")
         except Exception as e:
-            logger.error(f"❌ Error conectando a Railway: {e}")
+            logger.error(f"Error conectando a Railway: {e}")
             return
     else:
-        logger.info("💻 Conectando a BD local via settings")
+        logger.info("Conectando a BD local via settings")
         from backend.config.database import SessionLocal
         db = SessionLocal()
 
     try:
         if settings.CALENDLY_API_KEY == "test_key":
-            logger.error("❌ CALENDLY_API_KEY es de test, no puede funcionar")
+            logger.error("CALENDLY_API_KEY es de test, no puede funcionar")
             return
 
         headers = {
@@ -66,7 +66,7 @@ def sync_calendly_bookings():
         min_time = (datetime.utcnow() - timedelta(hours=26)).isoformat() + "Z"
         max_time = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
 
-        logger.info(f"🔍 Buscando eventos desde: {min_time}")
+        logger.info(f"Buscando eventos desde: {min_time}")
 
         url = "https://api.calendly.com/scheduled_events"
         params = {
@@ -80,15 +80,15 @@ def sync_calendly_bookings():
         response = requests.get(url, headers=headers, params=params, timeout=30)
 
         if response.status_code != 200:
-            logger.error(f"❌ Error API Calendly: {response.status_code}")
+            logger.error(f"Error API Calendly: {response.status_code}")
             logger.error(f"Response: {response.text}")
             return
 
         events = response.json().get('collection', [])
-        logger.info(f"📅 Total eventos encontrados: {len(events)}")
+        logger.info(f"Total eventos encontrados: {len(events)}")
 
         if len(events) == 0:
-            logger.info("ℹ️  No hay eventos en el rango de fechas")
+            logger.info("No hay eventos en el rango de fechas")
             return
 
         # Filtrar eventos recientes (booking en últimas 26h)
@@ -108,10 +108,10 @@ def sync_calendly_bookings():
             else:
                 eventos_recientes.append(event)
 
-        logger.info(f"📌 Eventos con booking reciente: {len(eventos_recientes)}")
+        logger.info(f"Eventos con booking reciente: {len(eventos_recientes)}")
 
         if len(eventos_recientes) == 0:
-            logger.info("ℹ️  No hay eventos nuevos para procesar")
+            logger.info("No hay eventos nuevos para procesar")
             return
 
         nuevas_reservas = 0
@@ -124,7 +124,7 @@ def sync_calendly_bookings():
             created_at = event.get("created_at")
 
             logger.info(f"\n{'=' * 60}")
-            logger.info(f"📋 Procesando: {event_uri[-20:]}")
+            logger.info(f"Procesando: {event_uri[-20:]}")
 
             # Comprobar si ya existe ESTE evento específico
             existe = db.query(CalendlyBooking).filter(
@@ -132,30 +132,30 @@ def sync_calendly_bookings():
             ).first()
 
             if existe:
-                logger.info(f"   ⏭️  Ya existe en BD")
+                logger.info(f"Ya existe en BD")
                 reservas_existentes += 1
                 continue
 
-            logger.info(f"   ✨ NUEVO - obteniendo detalles...")
+            logger.info(f" NUEVO - obteniendo detalles...")
 
             # Obtener invitees
             invitees_url = f"{event_uri}/invitees"
             inv_response = requests.get(invitees_url, headers=headers, timeout=30)
 
             if inv_response.status_code != 200:
-                logger.warning(f"   ⚠️  Error obteniendo invitees")
+                logger.warning(f" Error obteniendo invitees")
                 continue
 
             invitees = inv_response.json().get("collection", [])
             if not invitees:
-                logger.warning(f"   ⚠️  Sin invitees")
+                logger.warning(f" Sin invitees")
                 continue
 
             invitee = invitees[0]
             email = invitee.get("email", "unknown@email.com")
             name = invitee.get("name", "Unknown")
 
-            logger.info(f"   👤 {name} ({email})")
+            logger.info(f" {name} ({email})")
 
             # Parsear fechas y convertir a hora de España
             try:
@@ -175,7 +175,7 @@ def sync_calendly_bookings():
             except:
                 booking_datetime_naive = datetime.utcnow() + timedelta(hours=1)
 
-            logger.info(f"   🕐 Booking (España): {booking_datetime_naive.strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(f" Booking (España): {booking_datetime_naive.strftime('%Y-%m-%d %H:%M:%S')}")
 
             # ========================================
             # DETECTAR ORIGEN POR UTM PARAMETERS
@@ -198,24 +198,24 @@ def sync_calendly_bookings():
 
             if origen_excluido:
                 origen_detectado = utm_source or utm_medium or utm_campaign
-                logger.info(f"   🚫 ORIGEN EXCLUIDO: {origen_detectado.upper()}")
-                logger.info(f"   ⏭️  Este booking NO se guardará en BD - Saltando...")
+                logger.info(f"  ORIGEN EXCLUIDO: {origen_detectado.upper()}")
+                logger.info(f"  Este booking NO se guardará en BD - Saltando...")
                 reservas_excluidas += 1
                 continue
 
             # ========================================
             # VERIFICAR DUPLICADOS POR EMAIL
             # ========================================
-            logger.info(f"   🌐 DETECTADO: Acceso desde WEB")
+            logger.info(f"  DETECTADO: Acceso desde WEB")
 
             booking_existente = db.query(CalendlyBooking).filter(
                 CalendlyBooking.invitee_email == email
             ).first()
 
             if booking_existente:
-                logger.info(f"   ⚠️  EMAIL YA REGISTRADO en booking ID {booking_existente.id}")
-                logger.info(f"   ℹ️  Evento anterior: {booking_existente.calendly_event_id[-20:]}")
-                logger.info(f"   ⏭️  Saltando duplicado...")
+                logger.info(f"   EMAIL YA REGISTRADO en booking ID {booking_existente.id}")
+                logger.info(f"   Evento anterior: {booking_existente.calendly_event_id[-20:]}")
+                logger.info(f"   saltando duplicado...")
                 continue
 
             # ========================================
@@ -228,7 +228,7 @@ def sync_calendly_bookings():
             traffic_source = "direct"
             match_final = None
 
-            logger.info(f"   🔍 Buscando clicks a Calendly ANTERIORES al booking...")
+            logger.info(f" Buscando clicks a Calendly ANTERIORES al booking...")
 
             clicks_calendly = db.query(CalendlyClick).filter(
                 CalendlyClick.timestamp >= ventana_inicio,
@@ -237,7 +237,7 @@ def sync_calendly_bookings():
                 CalendlyClick.timestamp.desc()
             ).all()
 
-            logger.info(f"   📊 Clicks encontrados (anteriores): {len(clicks_calendly)}")
+            logger.info(f" Clicks encontrados (anteriores): {len(clicks_calendly)}")
 
             if clicks_calendly:
                 mejor_match = None
@@ -259,13 +259,13 @@ def sync_calendly_bookings():
                     session_id = mejor_match.session_id
                     traffic_source = mejor_match.traffic_source
 
-                    logger.info(f"   ✅ MATCH Calendly: {traffic_source} ({diferencia_minutos:.1f}min antes)")
-                    logger.info(f"   📱 Button: {mejor_match.button_id}")
-                    logger.info(f"   🕐 Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+                    logger.info(f"  MATCH Calendly: {traffic_source} ({diferencia_minutos:.1f}min antes)")
+                    logger.info(f"  Button: {mejor_match.button_id}")
+                    logger.info(f"  Click: {mejor_match.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
 
             # Fallback: Si no hay match, analizar visitas
             if not match_final:
-                logger.info(f"   🔍 Fallback: Analizando visitas...")
+                logger.info(f"  Fallback: Analizando visitas...")
 
                 visitas = db.query(PageVisit).filter(
                     PageVisit.timestamp >= ventana_inicio,
@@ -276,9 +276,9 @@ def sync_calendly_bookings():
                     sources = [v.traffic_source for v in visitas]
                     source_counts = Counter(sources)
                     traffic_source = source_counts.most_common(1)[0][0]
-                    logger.info(f"   📊 Source por visitas: {traffic_source}")
+                    logger.info(f"  Source por visitas: {traffic_source}")
                 else:
-                    logger.info(f"   ℹ️  Sin visitas - usando 'direct'")
+                    logger.info(f"   Sin visitas - usando 'direct'")
 
             # ========================================
             # GUARDAR EN BD
@@ -303,13 +303,13 @@ def sync_calendly_bookings():
 
                 if verificar:
                     nuevas_reservas += 1
-                    logger.info(f"   ✅ GUARDADO EN BD (ID: {verificar.id})")
-                    logger.info(f"   🎯 Traffic Source: {traffic_source}")
+                    logger.info(f"   GUARDADO EN BD (ID: {verificar.id})")
+                    logger.info(f"   Traffic Source: {traffic_source}")
                 else:
-                    logger.error(f"   ❌ NO SE GUARDÓ EN BD")
+                    logger.error(f"   NO SE GUARDÓ EN BD")
 
             except Exception as e:
-                logger.error(f"   ❌ Error guardando: {e}")
+                logger.error(f"   Error guardando: {e}")
                 db.rollback()
                 import traceback
                 traceback.print_exc()
@@ -317,30 +317,30 @@ def sync_calendly_bookings():
         # Commit final
         try:
             db.commit()
-            logger.info(f"\n💾 Commit final exitoso")
+            logger.info(f"\n Commit final exitoso")
         except Exception as e:
-            logger.error(f"❌ Error en commit final: {e}")
+            logger.error(f"Error en commit final: {e}")
             db.rollback()
 
         # Resumen
         logger.info(f"\n{'=' * 60}")
-        logger.info(f"🎉 SINCRONIZACIÓN COMPLETADA")
-        logger.info(f"📊 Eventos totales: {len(eventos_recientes)}")
-        logger.info(f"✨ Nuevas reservas: {nuevas_reservas}")
-        logger.info(f"⏭️  Ya existentes: {reservas_existentes}")
-        logger.info(f"🚫 Excluidas (clientes): {reservas_excluidas}")
+        logger.info(f"SINCRONIZACIÓN COMPLETADA")
+        logger.info(f"Eventos totales: {len(eventos_recientes)}")
+        logger.info(f"Nuevas reservas: {nuevas_reservas}")
+        logger.info(f"Ya existentes: {reservas_existentes}")
+        logger.info(f"Excluidas (clientes): {reservas_excluidas}")
         logger.info(f"{'=' * 60}\n")
 
     except Exception as e:
-        logger.error(f"❌ Error general: {e}")
+        logger.error(f"Error general: {e}")
         import traceback
         traceback.print_exc()
 
     finally:
         db.close()
-        logger.info("🔌 Conexión cerrada")
+        logger.info("Conexión cerrada")
 
 
 if __name__ == "__main__":
-    logger.info("🔄 Iniciando sync con Calendly...")
+    logger.info("Iniciando sync con Calendly...")
     sync_calendly_bookings()

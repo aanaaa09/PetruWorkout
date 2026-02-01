@@ -177,12 +177,12 @@ def enviar_email_brevo(data: EnviarConsultaRequest) -> bool:
         response = requests.post(url, json=payload, headers=headers, timeout=10)
 
         if response.status_code == 201:
-            logger.info(f"✅ Email enviado correctamente a Petru desde {data.email}")
+            logger.info(f"Email enviado correctamente a Petru desde {data.email}")
             return True
         else:
-            logger.error(f"❌ Error enviando email con Brevo: {response.status_code} - {response.text}")
+            logger.error(f"Error enviando email con Brevo: {response.status_code} - {response.text}")
             return False
 
     except Exception as e:
-        logger.error(f"❌ Excepción enviando email con Brevo: {e}")
+        logger.error(f"Excepción enviando email con Brevo: {e}")
         return False

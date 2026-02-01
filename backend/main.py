@@ -11,7 +11,7 @@ from .config.database import Base, engine, close_db_connections
 from .init_db import crear_base_datos
 
 # --------------------------
-# Logging MUY reducido
+# Logging
 # --------------------------
 logging.basicConfig(
     level=logging.ERROR,  # Solo errores críticos
@@ -79,7 +79,7 @@ async def cleanup_middleware(request: Request, call_next):
     """Libera memoria después de cada request"""
     response = await call_next(request)
 
-    # ✅ Forzar GC cada 50 requests
+    # Forzar GC cada 50 requests
     if not hasattr(app.state, 'request_count'):
         app.state.request_count = 0
 
@@ -144,7 +144,7 @@ async def sync_calendly_endpoint():
 
 
 # --------------------------
-# Arrancar servidor ULTRA OPTIMIZADO
+# Arrancar servidor
 # --------------------------
 if __name__ == "__main__":
     import uvicorn

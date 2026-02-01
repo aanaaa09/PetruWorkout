@@ -18,7 +18,7 @@ async def register_page_visit(
 ):
     """Registra una visita a la página"""
     try:
-        # ❌ NO obtener IP del cliente (ya no la guardamos)
+
 
         visit = tracking_crud.create_page_visit(
             db=db,
@@ -27,7 +27,7 @@ async def register_page_visit(
             referrer_url=visit_data.referrer_url,
             user_agent=visit_data.user_agent,
             landing_page=visit_data.landing_page
-            # ❌ ELIMINADO: ip_address=ip_address
+
         )
 
         return {

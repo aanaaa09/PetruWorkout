@@ -12,9 +12,9 @@ response = requests.get('https://api.calendly.com/users/me', headers=headers)
 if response.status_code == 200:
     data = response.json()
     user_uri = data['resource']['uri']
-    print("✅ Tu User URI es:")
+    print("Tu User URI es:")
     print(user_uri)
     print("\nCópialo y pégalo en tu .env")
 else:
-    print(f"❌ Error: {response.status_code}")
+    print(f"Error: {response.status_code}")
     print(response.text)

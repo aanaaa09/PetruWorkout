@@ -30,17 +30,17 @@ def crear_base_datos():
 
         if not exists:
             cursor.execute(f'CREATE DATABASE "{settings.DB_NAME}"')
-            logger.info(f"✅ Base de datos '{settings.DB_NAME}' creada correctamente")
+            logger.info(f"Base de datos '{settings.DB_NAME}' creada correctamente")
         else:
-            logger.info(f"ℹ️  Base de datos '{settings.DB_NAME}' ya existe")
+            logger.info(f"Base de datos '{settings.DB_NAME}' ya existe")
 
         cursor.close()
         conn.close()
         return True
 
     except Exception as e:
-        logger.error(f"❌ Error al crear la base de datos: {e}")
-        logger.info("💡 Asegúrate de que PostgreSQL esté corriendo y las credenciales sean correctas")
+        logger.error(f"Error al crear la base de datos: {e}")
+        logger.info("Asegúrate de que PostgreSQL esté corriendo y las credenciales sean correctas")
         return False
 
 

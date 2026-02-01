@@ -41,10 +41,10 @@ class RailwayBackup:
         database_url = os.getenv('DATABASE_URL')
 
         if not database_url:
-            logger.error("❌ DATABASE_URL no configurada")
+            logger.error("DATABASE_URL no configurada")
             sys.exit(1)
 
-        logger.info(f"🔌 Conectando a Railway...")
+        logger.info(f"Conectando a Railway...")
 
         # Conectar con reintentos (despertar BD si está dormida)
         self.conn = self._conectar_con_reintentos(database_url)
@@ -56,7 +56,7 @@ class RailwayBackup:
         """
         for intento in range(1, max_intentos + 1):
             try:
-                logger.info(f"🔄 Intento {intento}/{max_intentos}...")
+                logger.info(f"Intento {intento}/{max_intentos}...")
                 conn = psycopg2.connect(database_url, connect_timeout=30)
 
                 # Verificar que la conexión funciona
@@ -64,7 +64,7 @@ class RailwayBackup:
                 cursor.execute("SELECT 1")
                 cursor.close()
 
-                logger.info("✅ Conectado a Railway")
+                logger.info("Conectado a Railway")
                 return conn
 
             except psycopg2.OperationalError as e:
@@ -75,19 +75,19 @@ class RailwayBackup:
                         logger.warning(
                             f"⏳ BD dormida o iniciando... Esperando {tiempo_espera}s antes del siguiente intento")
                     else:
-                        logger.warning(f"⚠️ Error de conexión: {error_msg}")
+                        logger.warning(f"⚠Error de conexión: {error_msg}")
 
                     time.sleep(tiempo_espera)
                 else:
-                    logger.error(f"❌ Error conectando tras {max_intentos} intentos: {e}")
-                    logger.error("💡 Posibles causas:")
+                    logger.error(f"Error conectando tras {max_intentos} intentos: {e}")
+                    logger.error("Posibles causas:")
                     logger.error("   - Verifica que DATABASE_URL sea correcta")
                     logger.error("   - Verifica que el servicio esté activo en Railway")
                     logger.error("   - Revisa los límites de tu plan en Railway")
                     sys.exit(1)
 
             except Exception as e:
-                logger.error(f"❌ Error inesperado conectando a Railway: {e}")
+                logger.error(f"Error inesperado conectando a Railway: {e}")
                 sys.exit(1)
 
     def cargar_log(self):
@@ -122,7 +122,7 @@ class RailwayBackup:
         registros = cursor.fetchall()
 
         if not registros:
-            logger.info(f"ℹ️  {tabla}: Vacía")
+            logger.info(f" {tabla}: Vacía")
             return 0
 
         # Obtener nombres de columnas
@@ -160,7 +160,7 @@ class RailwayBackup:
             )
 
         sql_file.write("\n")
-        logger.info(f"✅ {tabla}: {len(registros)} registros (TODOS)")
+        logger.info(f"{tabla}: {len(registros)} registros (TODOS)")
         return len(registros)
 
     def exportar_tabla_incremental(self, tabla, cursor, sql_file):
@@ -184,7 +184,7 @@ class RailwayBackup:
         columna_fecha = columna_fecha_map.get(tabla)
 
         if not columna_fecha:
-            logger.warning(f"⚠️ No se encontró columna de fecha para {tabla}")
+            logger.warning(f"No se encontró columna de fecha para {tabla}")
             return 0
 
         # Obtener registros nuevos desde el último backup
@@ -198,7 +198,7 @@ class RailwayBackup:
         registros = cursor.fetchall()
 
         if not registros:
-            logger.info(f"ℹ️  {tabla}: Sin registros nuevos")
+            logger.info(f"{tabla}: Sin registros nuevos")
             return 0
 
         # Obtener nombres de columnas
@@ -236,7 +236,7 @@ class RailwayBackup:
             )
 
         sql_file.write("\n")
-        logger.info(f"✅ {tabla}: {len(registros)} registros nuevos")
+        logger.info(f"{tabla}: {len(registros)} registros nuevos")
         return len(registros)
 
     def ejecutar_backup(self):
@@ -250,15 +250,15 @@ class RailwayBackup:
             # Primer backup: nombre especial con "completo"
             archivo_backup = self.backup_dir / f"backup-completo-inicial.sql"
             tipo_backup = "COMPLETO HISTÓRICO"
-            logger.info("🎯 PRIMER BACKUP: Se descargarán TODOS los datos históricos")
+            logger.info("PRIMER BACKUP: Se descargarán TODOS los datos históricos")
         else:
             # Backups siguientes: nombre con mes/año
             mes_año = fecha_actual.strftime('%Y-%m-%B')
             archivo_backup = self.backup_dir / f"backup-{mes_año}.sql"
             tipo_backup = "INCREMENTAL"
-            logger.info("📅 Backup incremental: Solo datos nuevos desde el último backup")
+            logger.info("Backup incremental: Solo datos nuevos desde el último backup")
 
-        logger.info(f"📁 Archivo: {archivo_backup.name}")
+        logger.info(f"Archivo: {archivo_backup.name}")
 
         total_registros = 0
 
@@ -279,7 +279,7 @@ class RailwayBackup:
                 for tabla in self.TABLAS_A_RESPALDAR:
                     try:
                         if primer_backup:
-                            # Primer backup: TODO
+                            # Primer backup:
                             registros = self.exportar_tabla_completa(tabla, cursor, sql_file)
                         else:
                             # Backups siguientes: solo nuevos
@@ -287,7 +287,7 @@ class RailwayBackup:
 
                         total_registros += registros
                     except Exception as e:
-                        logger.error(f"❌ Error en tabla {tabla}: {e}")
+                        logger.error(f"Error en tabla {tabla}: {e}")
 
                 sql_file.write("COMMIT;\n")
 
@@ -303,15 +303,15 @@ class RailwayBackup:
             tamaño_mb = archivo_backup.stat().st_size / (1024 * 1024)
 
             logger.info("=" * 50)
-            logger.info(f"✅ BACKUP COMPLETADO")
-            logger.info(f"📊 Tipo: {tipo_backup}")
-            logger.info(f"📝 Total registros: {total_registros}")
-            logger.info(f"📁 Archivo: {archivo_backup.name}")
-            logger.info(f"💾 Tamaño: {tamaño_mb:.2f} MB")
+            logger.info(f"BACKUP COMPLETADO")
+            logger.info(f"Tipo: {tipo_backup}")
+            logger.info(f"Total registros: {total_registros}")
+            logger.info(f"Archivo: {archivo_backup.name}")
+            logger.info(f"Tamaño: {tamaño_mb:.2f} MB")
             logger.info("=" * 50)
 
         except Exception as e:
-            logger.error(f"❌ Error en backup: {e}")
+            logger.error(f"Error en backup: {e}")
             import traceback
             traceback.print_exc()
             sys.exit(1)
@@ -321,12 +321,12 @@ class RailwayBackup:
 
 if __name__ == "__main__":
     logger.info("=" * 60)
-    logger.info("🚀 BACKUP RAILWAY → GITHUB")
+    logger.info("BACKUP RAILWAY → GITHUB")
     logger.info("=" * 60)
 
     backup = RailwayBackup()
     backup.ejecutar_backup()
 
     logger.info("=" * 60)
-    logger.info("✅ PROCESO COMPLETADO")
+    logger.info("PROCESO COMPLETADO")
     logger.info("=" * 60)

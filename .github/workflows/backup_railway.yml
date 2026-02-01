@@ -54,7 +54,7 @@ jobs:
             echo "ℹ  No hay datos nuevos"
           else
             FECHA=$(date '+%Y-%m-%d')
-            git commit -m "📦 Backup mensual - $FECHA"
+            git commit -m "Backup mensual - $FECHA"
             git push
             echo " Backup subido"
           fi

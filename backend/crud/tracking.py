@@ -20,7 +20,7 @@ class TrackingCRUD:
             referrer_url: str = None,
             user_agent: str = None,
             landing_page: str = None
-            # ❌ ELIMINADO: ip_address
+
     ) -> PageVisit:
         """Registra una visita a la página"""
         now_utc = datetime.utcnow()
@@ -32,7 +32,6 @@ class TrackingCRUD:
             referrer_url=referrer_url,
             user_agent=user_agent,
             landing_page=landing_page,
-            # ❌ ELIMINADO: ip_address=ip_address,
             timestamp=now_spain,
             fecha=now_spain.date(),
             dia=now_spain.day,

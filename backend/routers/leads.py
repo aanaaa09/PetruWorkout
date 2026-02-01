@@ -122,14 +122,14 @@ def enviar_email_bienvenida(email: str, nombre: str,  calculator_url: str) -> bo
         response = requests.post(url, json=payload, headers=headers, timeout=10)
 
         if response.status_code == 201:
-            logger.info(f"✅ Email de bienvenida enviado a {email}")
+            logger.info(f"Email de bienvenida enviado a {email}")
             return True
         else:
-            logger.error(f"❌ Error enviando email con Brevo: {response.status_code} - {response.text}")
+            logger.error(f"Error enviando email con Brevo: {response.status_code} - {response.text}")
             return False
 
     except Exception as e:
-        logger.error(f"❌ Excepción enviando email con Brevo: {e}")
+        logger.error(f"Excepción enviando email con Brevo: {e}")
         return False
 
 @router.post("/register")
@@ -189,9 +189,9 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
         email_enviado = enviar_email_bienvenida(data.email.lower(), nombre, calculator_url)
 
         if email_enviado:
-            logger.info(f"✅ Nuevo lead registrado con email de bienvenida: {data.email}")
+            logger.info(f"Nuevo lead registrado con email de bienvenida: {data.email}")
         else:
-            logger.warning(f"⚠️ Lead registrado pero email no enviado: {data.email}")
+            logger.warning(f"Lead registrado pero email no enviado: {data.email}")
 
         return {
             'success': True,
@@ -202,7 +202,7 @@ def register_lead(data: LeadRegistrationRequest, db: Session = Depends(get_db)):
         }
 
     except Exception as e:
-        logger.error(f"❌ Error registrando lead {data.email}: {e}")
+        logger.error(f"Error registrando lead {data.email}: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Error al registrar el email")
