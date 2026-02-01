@@ -96,13 +96,13 @@
               />
               <label for="privacy">
                 Acepto la
-                <button
-                  type="button"
-                  @click="openPrivacy"
+                <router-link
+                  to="/info?legal=privacy"
                   class="link-button"
+                  @click="closeModal"
                 >
                   política de privacidad
-                </button>
+                </router-link>
               </label>
             </div>
 
@@ -179,11 +179,6 @@ export default {
       this.success = ''
       this.loading = false
       this.emailError = ''
-    },
-
-    openPrivacy() {
-      this.$router.push('/info?legal=privacy')
-      this.closeModal()
     },
 
     async handleSubmit() {
@@ -495,14 +490,14 @@ export default {
 }
 
 .link-button {
-  background: none;
-  border: none;
   color: var(--color-accent);
   text-decoration: underline;
   cursor: pointer;
   font-size: inherit;
   padding: 0;
   font-family: inherit;
+  background: none;
+  border: none;
 }
 
 .link-button:hover {

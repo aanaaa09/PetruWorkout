@@ -39,15 +39,15 @@
 
           <div class="link-group">
             <h4>Legal</h4>
-            <button @click="$emit('show-legal', 'privacy')" class="footer-link-btn">
+            <router-link to="/info?legal=privacy" class="footer-link-btn">
               Política de Privacidad
-            </button>
-            <button @click="$emit('show-legal', 'terms')" class="footer-link-btn">
+            </router-link>
+            <router-link to="/info?legal=terms" class="footer-link-btn">
               Términos y Condiciones
-            </button>
-            <button @click="$emit('show-legal', 'legal-notice')" class="footer-link-btn">
+            </router-link>
+            <router-link to="/info?legal=legal-notice" class="footer-link-btn">
               Aviso Legal
-            </button>
+            </router-link>
           </div>
         </div>
       </div>

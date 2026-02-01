@@ -1,24 +1,30 @@
 <template>
   <div class="info-view">
-    <FullNavbar @scroll-to="scrollToSection" />
+    <!-- DEBUG: Mostrar qué página legal está activa -->
+    <!-- <div style="position: fixed; top: 0; left: 0; background: red; color: white; padding: 10px; z-index: 99999;">
+      Legal: {{ currentLegalPage }} | Query: {{ $route.query.legal }}
+    </div> -->
 
-    <main>
+    <!-- Navbar solo si NO hay página legal -->
+    <FullNavbar v-if="!currentLegalPage" @scroll-to="scrollToSection" />
+
+    <!-- Contenido principal - SOLO si NO hay página legal -->
+    <main v-if="!currentLegalPage">
       <AboutSection id="sobre-mi" />
       <ServicesSection id="servicios" />
       <GuaranteeSection />
-
       <ContactForm id="contacto" />
     </main>
 
-    <!-- Footer solo si no hay legal -->
-    <FullFooter v-if="!currentLegalPage" @show-legal="showLegalPage" />
+    <!-- Footer solo si NO hay página legal -->
+    <FullFooter v-if="!currentLegalPage" />
 
-    <!-- Páginas legales -->
-    <component
-      v-if="currentLegalPage"
-      :is="currentLegalComponent"
-      @close="closeLegalPage"
-    />
+    <!-- Páginas legales - Se muestran SOLO cuando están activas -->
+    <div v-if="currentLegalPage" class="legal-page-container">
+      <PrivacyPolicy v-if="currentLegalPage === 'privacy'" />
+      <TermsConditions v-if="currentLegalPage === 'terms'" />
+      <LegalNotice v-if="currentLegalPage === 'legal-notice'" />
+    </div>
   </div>
 </template>
 
@@ -51,51 +57,96 @@ export default {
       currentLegalPage: null
     }
   },
+  // ✅ IMPORTANTE: beforeMount se ejecuta ANTES de renderizar
+  beforeMount() {
+    this.checkLegalParam()
+  },
   mounted() {
     const canonical = document.querySelector('link[rel="canonical"]')
     if (canonical) canonical.href = 'https://petrucalistenia.com/info'
-    document.title = 'Servicios - PetruWorkout | Entrenador Personal'
 
+    // Volver a revisar por si acaso
     this.checkLegalParam()
+
+    if (!this.currentLegalPage) {
+      document.title = 'Servicios - PetruWorkout | Entrenador Personal'
+    }
+
+    console.log('📍 InfoView mounted - Legal page:', this.currentLegalPage)
   },
   watch: {
-    '$route.query'() {
-      this.checkLegalParam()
-    }
-  },
-  computed: {
-    currentLegalComponent() {
-      const components = {
-        'privacy': PrivacyPolicy,
-        'terms': TermsConditions,
-        'legal-notice': LegalNotice
-      }
-      return components[this.currentLegalPage]
+    // ✅ Vigilar cambios en la ruta completa
+    '$route': {
+      handler(to, from) {
+        console.log('🔄 Route changed:', to.query.legal)
+        this.checkLegalParam()
+      },
+      immediate: true
     }
   },
   methods: {
     scrollToSection(sectionId) {
-      const el = document.getElementById(sectionId)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    },
-    showLegalPage(pageType) {
-      this.currentLegalPage = pageType
-      window.scrollTo(0, 0)
+      // Primero cerrar cualquier página legal
+      if (this.currentLegalPage) {
+        this.closeLegalPage()
+      }
+
+      // Esperar a que se cierre la página legal
+      this.$nextTick(() => {
+        setTimeout(() => {
+          const el = document.getElementById(sectionId)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 100)
+      })
     },
     closeLegalPage() {
+      console.log('🚪 Closing legal page')
       this.currentLegalPage = null
-      this.$router.replace({ query: {} })
-      window.scrollTo(0, 0)
+
+      // Limpiar el query param sin recargar
+      if (this.$route.query.legal) {
+        this.$router.replace({ path: '/info', query: {} })
+      }
+
+      // Scroll al inicio
+      this.$nextTick(() => {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+        document.title = 'Servicios - PetruWorkout | Entrenador Personal'
+      })
     },
     checkLegalParam() {
       const legalParam = this.$route.query.legal
-      if (legalParam && ['privacy', 'terms', 'legal-notice'].includes(legalParam)) {
+
+      console.log('🔍 Checking legal param:', legalParam)
+      console.log('🔍 Full route query:', this.$route.query)
+
+      // Lista válida de páginas legales
+      const validPages = ['privacy', 'terms', 'legal-notice']
+
+      if (legalParam && validPages.includes(legalParam)) {
+        console.log('✅ Valid legal page detected:', legalParam)
         this.currentLegalPage = legalParam
-        window.scrollTo(0, 0)
+
+        // Scroll al inicio inmediatamente
+        this.$nextTick(() => {
+          window.scrollTo({ top: 0, behavior: 'auto' })
+
+          // Actualizar título según la página
+          const titles = {
+            'privacy': 'Política de Privacidad - PetruWorkout',
+            'terms': 'Términos y Condiciones - PetruWorkout',
+            'legal-notice': 'Aviso Legal - PetruWorkout'
+          }
+          document.title = titles[legalParam] || document.title
+        })
+      } else {
+        console.log('❌ No valid legal param, showing normal content')
+        if (this.currentLegalPage !== null) {
+          this.currentLegalPage = null
+        }
       }
-    },
-    goToGroup() {
-      window.location.href = 'https://petrucalistenia.com/team'
     }
   }
 }
@@ -108,37 +159,8 @@ export default {
   background: var(--bg-primary);
 }
 
-/* ===== SECCIÓN JOIN GROUP ===== */
-.join-group-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 3rem 1rem;
-  gap: 1.5rem;
-}
-
-.join-text {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.btn-join-group {
-  background: var(--gradient-primary);
-  color: white;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
-}
-
-.btn-join-group:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
+.legal-page-container {
+  width: 100%;
+  min-height: 100vh;
 }
 </style>

@@ -24,17 +24,17 @@
       </div>
 
       <div class="footer-legal">
-        <button @click="$emit('show-legal', 'privacy')" class="legal-link">
+        <router-link to="/info?legal=privacy" class="legal-link">
           Política de Privacidad
-        </button>
+        </router-link>
         <span class="separator">•</span>
-        <button @click="$emit('show-legal', 'terms')" class="legal-link">
+        <router-link to="/info?legal=terms" class="legal-link">
           Términos y Condiciones
-        </button>
+        </router-link>
         <span class="separator">•</span>
-        <button @click="$emit('show-legal', 'legal-notice')" class="legal-link">
+        <router-link to="/info?legal=legal-notice" class="legal-link">
           Aviso Legal
-        </button>
+        </router-link>
       </div>
 
       <div class="footer-bottom">
@@ -178,6 +178,7 @@ export default {
   transition: color 0.3s ease;
   padding: 0;
   font-family: inherit;
+  text-decoration: none;
 }
 
 .legal-link:hover {
