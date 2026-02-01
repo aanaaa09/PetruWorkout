@@ -34,7 +34,6 @@
         </p>
       </div>
 
-      <!-- ✅ Solo se carga cuando el usuario hace clic -->
       <div v-else class="calendly-widget">
         <div
           class="calendly-inline-widget"

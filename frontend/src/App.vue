@@ -16,7 +16,7 @@ export default {
     // Inicializar tracking cuando la app se carga
     initTracking()
 
-    // ✅ NUEVO: Escuchar eventos de Calendly
+    // Escuchar eventos de Calendly
     this.setupCalendlyListener()
 
     // Añadir preconnect para Google Fonts si no existe
@@ -70,12 +70,12 @@ export default {
           })
 
           if (response.ok) {
-            console.log('✅ Reserva guardada en la base de datos')
+            console.log('Reserva guardada en la base de datos')
           } else {
-            console.error('❌ Error al guardar reserva:', await response.text())
+            console.error('Error al guardar reserva:', await response.text())
           }
         } catch (error) {
-          console.error('❌ Error de conexión al guardar reserva:', error)
+          console.error('Error de conexión al guardar reserva:', error)
         }
       }
     }

@@ -173,10 +173,10 @@ async function trackPageVisit() {
     if (!response.ok) {
       console.error('Error al registrar visita:', await response.text());
     } else {
-      console.log('✅ Visita registrada - Source:', savedSource);
+      console.log('Visita registrada - Source:', savedSource);
     }
   } catch (error) {
-    console.error('❌ Error al trackear visita:', error);
+    console.error('Error al trackear visita:', error);
   }
 }
 
@@ -207,10 +207,10 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
     if (!response.ok) {
       console.error('Error al registrar click:', await response.text());
     } else {
-      console.log('✅ Click Calendly registrado');
+      console.log('Click Calendly registrado');
     }
   } catch (error) {
-    console.error('❌ Error al trackear click:', error);
+    console.error('Error al trackear click:', error);
   }
 }
 
@@ -220,10 +220,10 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
 function initTracking() {
   trackPageVisit();
 
-  console.log('🔍 Tracking inicializado');
-  console.log('📱 Session ID:', getOrCreateSessionId());
-  console.log('🌐 Traffic Source:', getTrafficSourceFromSession());
-  console.log('🔗 Referrer:', document.referrer || 'ninguno');
+  console.log('Tracking inicializado');
+  console.log('Session ID:', getOrCreateSessionId());
+  console.log('Traffic Source:', getTrafficSourceFromSession());
+  console.log('Referrer:', document.referrer || 'ninguno');
 }
 
 export {

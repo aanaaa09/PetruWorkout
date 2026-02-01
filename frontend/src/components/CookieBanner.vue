@@ -8,12 +8,12 @@
             <span class="cookie-icon">🍪</span>
             <div class="cookie-message">
               <p class="cookie-title">Utilizamos cookies</p>
-              <!-- ✅ Texto más corto en móvil -->
+
               <p class="cookie-description cookie-description-desktop">
                 Usamos cookies de análisis para mejorar tu experiencia y medir la efectividad de nuestras campañas.
                 <strong>Al continuar navegando, aceptas su uso.</strong>
               </p>
-              <!-- ✅ NUEVO: Versión móvil más corta -->
+
               <p class="cookie-description cookie-description-mobile">
                 Usamos cookies para mejorar tu experiencia.
                 <strong>Al continuar, aceptas su uso.</strong>
@@ -53,15 +53,15 @@ export default {
     try {
       // Intentar leer de localStorage
       cookiesAccepted = localStorage.getItem('cookies_accepted') === 'true'
-      console.log('📊 Estado de cookies (localStorage):', cookiesAccepted)
+      console.log('Estado de cookies (localStorage):', cookiesAccepted)
     } catch (error) {
-      console.warn('⚠️ No se puede acceder a localStorage:', error)
+      console.warn('No se puede acceder a localStorage:', error)
       // Fallback a sessionStorage
       try {
         cookiesAccepted = sessionStorage.getItem('cookies_accepted') === 'true'
-        console.log('📊 Estado de cookies (sessionStorage):', cookiesAccepted)
+        console.log('Estado de cookies (sessionStorage):', cookiesAccepted)
       } catch (e) {
-        console.error('❌ No se puede acceder a ningún storage:', e)
+        console.error('No se puede acceder a ningún storage:', e)
       }
     }
 
@@ -69,10 +69,10 @@ export default {
       // Mostrar después de 2 segundos
       setTimeout(() => {
         this.visible = true
-        console.log('🍪 Banner de cookies mostrado')
+        console.log('Banner de cookies mostrado')
       }, 2000)
     } else {
-      console.log('✅ Cookies ya aceptadas, no se muestra el banner')
+      console.log('Cookies ya aceptadas, no se muestra el banner')
     }
   },
   methods: {
@@ -80,17 +80,17 @@ export default {
       try {
         // Guardar en localStorage que ya aceptó
         localStorage.setItem('cookies_accepted', 'true')
-        console.log('✅ Cookies aceptadas y guardadas en localStorage')
+        console.log('Cookies aceptadas y guardadas en localStorage')
         this.visible = false
       } catch (error) {
-        console.error('❌ Error al guardar en localStorage:', error)
+        console.error('Error al guardar en localStorage:', error)
         // Si falla localStorage, intentar con sessionStorage como fallback
         try {
           sessionStorage.setItem('cookies_accepted', 'true')
-          console.log('⚠️ Guardado en sessionStorage como fallback')
+          console.log('Guardado en sessionStorage como fallback')
           this.visible = false
         } catch (e) {
-          console.error('❌ Error crítico al guardar preferencia de cookies:', e)
+          console.error('Error crítico al guardar preferencia de cookies:', e)
         }
       }
     },
@@ -103,7 +103,7 @@ export default {
         // Navegar a la política de privacidad con el hash de cookies
         this.$router.push('/info?legal=privacy#cookies')
       } catch (error) {
-        console.error('❌ Error al navegar:', error)
+        console.error('Error al navegar:', error)
         // Fallback: navegar sin sessionStorage
         this.$router.push('/info?legal=privacy#cookies')
       }

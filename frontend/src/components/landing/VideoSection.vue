@@ -35,7 +35,7 @@
         ></iframe>
       </div>
 
-      <!-- ✅ CTA ACTUALIZADO -->
+
       <div class="video-cta">
         <h3 class="cta-title">¿Listo para tu cambio?</h3>
         <p class="cta-description">

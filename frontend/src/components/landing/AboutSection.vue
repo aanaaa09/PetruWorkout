@@ -2,7 +2,7 @@
   <section id="sobre-mi" class="about-section">
     <div class="about-container">
       <div class="about-image">
-        <!-- ✅ CORREGIDO: dimensiones reales de la imagen y prioridad alta -->
+
         <img
           src="/images/petru-about.webp"
           alt="Petru - Entrenador Personal"

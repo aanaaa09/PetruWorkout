@@ -122,7 +122,7 @@ export default {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem; /* ✅ MÁS espacio horizontal entre elementos en escritorio */
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;

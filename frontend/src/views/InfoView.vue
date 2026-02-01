@@ -1,9 +1,5 @@
 <template>
   <div class="info-view">
-    <!-- DEBUG: Mostrar qué página legal está activa -->
-    <!-- <div style="position: fixed; top: 0; left: 0; background: red; color: white; padding: 10px; z-index: 99999;">
-      Legal: {{ currentLegalPage }} | Query: {{ $route.query.legal }}
-    </div> -->
 
     <!-- Navbar solo si NO hay página legal -->
     <FullNavbar v-if="!currentLegalPage" @scroll-to="scrollToSection" />
@@ -57,7 +53,7 @@ export default {
       currentLegalPage: null
     }
   },
-  // ✅ IMPORTANTE: beforeMount se ejecuta ANTES de renderizar
+
   beforeMount() {
     this.checkLegalParam()
   },
@@ -75,10 +71,9 @@ export default {
     console.log('📍 InfoView mounted - Legal page:', this.currentLegalPage)
   },
   watch: {
-    // ✅ Vigilar cambios en la ruta completa
     '$route': {
       handler(to, from) {
-        console.log('🔄 Route changed:', to.query.legal)
+        console.log('Route changed:', to.query.legal)
         this.checkLegalParam()
       },
       immediate: true
@@ -102,7 +97,7 @@ export default {
       })
     },
     closeLegalPage() {
-      console.log('🚪 Closing legal page')
+      console.log('Closing legal page')
       this.currentLegalPage = null
 
       // Limpiar el query param sin recargar
@@ -119,14 +114,14 @@ export default {
     checkLegalParam() {
       const legalParam = this.$route.query.legal
 
-      console.log('🔍 Checking legal param:', legalParam)
-      console.log('🔍 Full route query:', this.$route.query)
+      console.log('Checking legal param:', legalParam)
+      console.log('Full route query:', this.$route.query)
 
       // Lista válida de páginas legales
       const validPages = ['privacy', 'terms', 'legal-notice']
 
       if (legalParam && validPages.includes(legalParam)) {
-        console.log('✅ Valid legal page detected:', legalParam)
+        console.log('Valid legal page detected:', legalParam)
         this.currentLegalPage = legalParam
 
         // Scroll al inicio inmediatamente
@@ -142,7 +137,7 @@ export default {
           document.title = titles[legalParam] || document.title
         })
       } else {
-        console.log('❌ No valid legal param, showing normal content')
+        console.log('No valid legal param, showing normal content')
         if (this.currentLegalPage !== null) {
           this.currentLegalPage = null
         }
