@@ -1,5 +1,5 @@
 # ========================================
-# NUEVO ARCHIVO: backend/services/calculator_token_service.py
+# ARCHIVO CORREGIDO: backend/services/calculator_token_service.py
 # ========================================
 """
 Servicio para gestionar tokens de acceso a la calculadora
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import secrets
 from sqlalchemy.orm import Session
 from ..crud.usuario import usuario_crud
+from ..models.usuario import Usuario  # ✅ MOVIDO AL INICIO
 import logging
 
 logger = logging.getLogger(__name__)
@@ -85,27 +86,45 @@ class CalculatorTokenService:
             dict con 'valid' y opcionalmente 'usuario' o 'error'
         """
         try:
+            # ✅ VERIFICAR QUE EL TOKEN NO SEA VACÍO
+            if not token or token.strip() == '':
+                return {
+                    'valid': False,
+                    'error': 'Token vacío o inválido'
+                }
+
             # Buscar usuario con este token
             usuario = db.query(Usuario).filter(
                 Usuario.calculator_token == token
             ).first()
 
             if not usuario:
+                logger.warning(f"Token no encontrado en BD: {token[:10]}...")
                 return {
                     'valid': False,
-                    'error': 'Token inválido'
+                    'error': 'Token inválido o no existe'
                 }
 
-            # Verificar si el token ha expirado
+            # ✅ VERIFICAR SI EL TOKEN HA EXPIRADO
             if usuario.calculator_token_created:
                 expiry_date = usuario.calculator_token_created + timedelta(days=self.TOKEN_EXPIRY_DAYS)
 
                 if datetime.now() > expiry_date:
+                    logger.warning(f"Token expirado para usuario: {usuario.email}")
                     return {
                         'valid': False,
-                        'error': 'Token expirado'
+                        'error': f'Token expirado. Por favor, regístrate nuevamente.'
                     }
+            else:
+                # Si no tiene fecha de creación, asumir que es inválido
+                logger.warning(f"Token sin fecha de creación para usuario: {usuario.email}")
+                return {
+                    'valid': False,
+                    'error': 'Token inválido (sin fecha de creación)'
+                }
 
+
+            logger.info(f"Token validado correctamente para usuario: {usuario.email}")
             return {
                 'valid': True,
                 'usuario': {
@@ -117,14 +136,13 @@ class CalculatorTokenService:
 
         except Exception as e:
             logger.error(f"Error validando token: {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 'valid': False,
-                'error': 'Error al validar token'
+                'error': f'Error al validar token: {str(e)}'
             }
 
 
 # Instancia global
 calculator_token_service = CalculatorTokenService()
-
-
-from ..models.usuario import Usuario
