@@ -107,9 +107,15 @@ class CalculatorTokenService:
 
             # ✅ VERIFICAR SI EL TOKEN HA EXPIRADO
             if usuario.calculator_token_created:
-                expiry_date = usuario.calculator_token_created + timedelta(days=self.TOKEN_EXPIRY_DAYS)
+                # Asegurarse de que ambas fechas sean naive (sin timezone)
+                token_created = usuario.calculator_token_created
+                if token_created.tzinfo is not None:
+                    token_created = token_created.replace(tzinfo=None)
 
-                if datetime.now() > expiry_date:
+                expiry_date = token_created + timedelta(days=self.TOKEN_EXPIRY_DAYS)
+                now_naive = datetime.now()
+
+                if now_naive > expiry_date:
                     logger.warning(f"Token expirado para usuario: {usuario.email}")
                     return {
                         'valid': False,
