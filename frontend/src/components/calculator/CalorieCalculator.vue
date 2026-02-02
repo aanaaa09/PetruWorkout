@@ -245,7 +245,7 @@ export default {
       this.errorMessage = ''
 
       try {
-        // ✅ OBTENER TOKEN DE sessionStorage
+        // OBTENER TOKEN DE sessionStorage
         const token = sessionStorage.getItem('petru_calculator_token')
 
         if (!token) {
@@ -254,7 +254,7 @@ export default {
           return
         }
 
-        // ✅ ENVIAR TOKEN EN EL HEADER Authorization
+        // ENVIAR TOKEN EN EL HEADER Authorization
         const response = await fetch('https://petruworkout-production.up.railway.app/api/calculator/calculate', {
           method: 'POST',
           headers: {

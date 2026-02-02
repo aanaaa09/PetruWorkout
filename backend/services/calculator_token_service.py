@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import secrets
 from sqlalchemy.orm import Session
 from ..crud.usuario import usuario_crud
-from ..models.usuario import Usuario  # ✅ MOVIDO AL INICIO
+from ..models.usuario import Usuario
 import logging
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class CalculatorTokenService:
             dict con 'valid' y opcionalmente 'usuario' o 'error'
         """
         try:
-            # ✅ VERIFICAR QUE EL TOKEN NO SEA VACÍO
+            # VERIFICAR QUE EL TOKEN NO SEA VACÍO
             if not token or token.strip() == '':
                 return {
                     'valid': False,
@@ -105,7 +105,7 @@ class CalculatorTokenService:
                     'error': 'Token inválido o no existe'
                 }
 
-            # ✅ VERIFICAR SI EL TOKEN HA EXPIRADO
+            # VERIFICAR SI EL TOKEN HA EXPIRADO
             if usuario.calculator_token_created:
                 # Asegurarse de que ambas fechas sean naive (sin timezone)
                 token_created = usuario.calculator_token_created
