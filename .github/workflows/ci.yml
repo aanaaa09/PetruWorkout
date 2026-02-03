@@ -322,27 +322,7 @@ jobs:
           - Líneas Totales: {total_statements}
           - Líneas Cubiertas: {covered_statements}
           - Líneas Sin Cubrir: {missing_statements}
-          
-          ## Archivos con Menor Cobertura
-          
-          | Archivo | Cobertura | Líneas Faltantes |
-          |---------|-----------|------------------|
-          """
-
-          # Archivos con menor cobertura
-          files_data = []
-          for filepath, data in coverage_data['files'].items():
-              if 'backend/' in filepath and 'tests/' not in filepath:
-                  percent = data['summary']['percent_covered']
-                  missing = data['summary']['missing_lines']
-                  files_data.append((filepath.split('/')[-1], percent, missing))
-
-          files_data.sort(key=lambda x: x[1])
-
-          for filename, percent, missing in files_data[:10]:
-              report += f"| {filename} | {percent:.1f}% | {missing} |\n"
-
-          report += """
+        
           
           ## Conclusión
           
