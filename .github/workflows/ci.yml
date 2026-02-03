@@ -67,7 +67,16 @@ jobs:
           OPENAI_API_KEY: test_key
         run: |
           cd backend
-          pytest tests/unit/ -v --cov=backend --cov-report=term-missing
+          pytest tests/unit/ -v --cov=backend --cov-report=term-missing --cov-report=json --cov-report=html
+
+      - name: Guardar reporte de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            backend/coverage.json
+            backend/htmlcov/
+          retention-days: 30
 
   # ==========================================
   # JOB 2: Tests de Integración
@@ -251,31 +260,133 @@ jobs:
           retention-days: 7
 
   # ==========================================
-  # JOB 4: Notificación final
+  # JOB 4: Informe Final
   # ==========================================
-  notify-status:
-    name: Estado Final
+  informe-final:
+    name: Informe Final
     runs-on: ubuntu-latest
     needs: [backend-tests, integration-tests, e2e-tests]
     if: always()
 
     steps:
-      - name: Tests pasaron
-        if: |
-          needs.backend-tests.result == 'success' && 
-          needs.integration-tests.result == 'success' && 
-          needs.e2e-tests.result == 'success'
-        run: |
-          echo " TODOS LOS TESTS PASARON"
-          echo "Listo para merge/deploy"
+      - name: Checkout código
+        uses: actions/checkout@v4
 
-      - name: Tests fallaron
-        if: |
-          needs.backend-tests.result == 'failure' || 
-          needs.integration-tests.result == 'failure' || 
-          needs.e2e-tests.result == 'failure'
+      - name: Descargar reporte de cobertura
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generar informe
         run: |
-          echo " TESTS FALLARON"
-          echo "Merge/commit BLOQUEADO"
-          echo "🔧 Revisa los logs arriba para ver qué falló"
-          exit 1
+          cat > generate_report.py << 'EOF'
+          import json
+          from datetime import datetime
+
+          # Cargar datos de cobertura
+          with open('coverage/coverage.json', 'r') as f:
+              coverage_data = json.load(f)
+
+          # Calcular estadísticas
+          total_coverage = coverage_data['totals']['percent_covered']
+          total_statements = coverage_data['totals']['num_statements']
+          covered_statements = coverage_data['totals']['covered_lines']
+          missing_statements = coverage_data['totals']['missing_lines']
+
+          # Estado de los jobs
+          backend_status = "${{ needs.backend-tests.result }}"
+          integration_status = "${{ needs.integration-tests.result }}"
+          e2e_status = "${{ needs.e2e-tests.result }}"
+
+          # Generar informe
+          report = f"""
+       
+          
+          ## Resumen de Tests
+          
+          | Tipo | Estado |
+          |------|--------|
+          | Tests Unitarios | {backend_status} |
+          | Tests de Integración | {integration_status} |
+          | Tests End-to-End | {e2e_status} |
+          
+          ## Cobertura de Código
+          
+          - Cobertura Total: {total_coverage:.2f}%
+          - Líneas Totales: {total_statements}
+          - Líneas Cubiertas: {covered_statements}
+          - Líneas Sin Cubrir: {missing_statements}
+          
+          ## Archivos con Menor Cobertura
+          
+          | Archivo | Cobertura | Líneas Faltantes |
+          |---------|-----------|------------------|
+          """
+
+          # Archivos con menor cobertura
+          files_data = []
+          for filepath, data in coverage_data['files'].items():
+              if 'backend/' in filepath and 'tests/' not in filepath:
+                  percent = data['summary']['percent_covered']
+                  missing = data['summary']['missing_lines']
+                  files_data.append((filepath.split('/')[-1], percent, missing))
+
+          files_data.sort(key=lambda x: x[1])
+
+          for filename, percent, missing in files_data[:10]:
+              report += f"| {filename} | {percent:.1f}% | {missing} |\n"
+
+          report += """
+          
+          ## Conclusión
+          
+          """
+
+          all_passed = all(s == "success" for s in [backend_status, integration_status, e2e_status])
+          
+          if all_passed:
+              report += f"ESTADO: APROBADO\n\nTodos los tests pasaron. Cobertura: {total_coverage:.1f}%"
+          else:
+              failed = []
+              if backend_status != "success":
+                  failed.append("Unitarios")
+              if integration_status != "success":
+                  failed.append("Integración")
+              if e2e_status != "success":
+                  failed.append("E2E")
+              
+              report += f"ESTADO: FALLADO\n\nTests fallidos: {', '.join(failed)}\nMerge bloqueado."
+
+          with open('informe.md', 'w') as f:
+              f.write(report)
+
+          print(report)
+          EOF
+
+          python generate_report.py
+
+      - name: Publicar informe
+        run: |
+          cat informe.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Verificar estado final
+        run: |
+          BACKEND="${{ needs.backend-tests.result }}"
+          INTEGRATION="${{ needs.integration-tests.result }}"
+          E2E="${{ needs.e2e-tests.result }}"
+          
+          if [ "$BACKEND" = "success" ] && [ "$INTEGRATION" = "success" ] && [ "$E2E" = "success" ]; then
+            echo "TODOS LOS TESTS PASARON"
+            echo "Listo para merge/deploy"
+            exit 0
+          else
+            echo "TESTS FALLARON"
+            echo "Merge bloqueado"
+            exit 1
+          fi
