@@ -41,16 +41,7 @@
 
     <!-- Lista de usuarios -->
     <div v-else class="users-section">
-      <div class="users-stats">
-        <div class="stat-card">
-          <span class="stat-number">{{ totalUsers }}</span>
-          <span class="stat-label">Total Usuarios</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number">{{ filteredUsers.length }}</span>
-          <span class="stat-label">Mostrando</span>
-        </div>
-      </div>
+      <!-- ❌ ESTADÍSTICAS ELIMINADAS -->
 
       <div class="users-table">
         <table>
@@ -62,7 +53,7 @@
               <th>Tipo</th>
               <th>Newsletter</th>
               <th>Registro</th>
-              <th>Última Conexión</th>
+              <!-- ❌ Última Conexión ELIMINADA -->
             </tr>
           </thead>
           <tbody>
@@ -81,7 +72,7 @@
                 </span>
               </td>
               <td>{{ formatDate(user.fecha_registro) }}</td>
-              <td>{{ user.ultima_conexion ? formatDate(user.ultima_conexion) : 'Nunca' }}</td>
+              <!-- ❌ Última Conexión ELIMINADA -->
             </tr>
           </tbody>
         </table>
@@ -133,7 +124,6 @@ export default {
     filteredUsers() {
       let filtered = this.users
 
-      // Filtrar por búsqueda
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase()
         filtered = filtered.filter(user =>
@@ -266,6 +256,13 @@ export default {
 .filter-group input:focus {
   outline: none;
   border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ✅ Arreglar opciones del select */
+.filter-group select option {
+  background: #1a1a1a;
+  color: white;
 }
 
 .loading-state,
@@ -309,35 +306,6 @@ export default {
 .btn-retry:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);
-}
-
-.users-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: linear-gradient(135deg, rgba(6, 214, 160, 0.1), rgba(6, 214, 160, 0.05));
-  border: 1px solid rgba(6, 214, 160, 0.2);
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-align: center;
-}
-
-.stat-number {
-  display: block;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
 }
 
 .users-table {
@@ -445,7 +413,7 @@ tbody tr:hover {
   }
 
   table {
-    min-width: 800px;
+    min-width: 700px;
   }
 
   .pagination {
