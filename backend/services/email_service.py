@@ -57,47 +57,38 @@ class EmailService:
                 html_message = message.replace('\n', '<br>')
                 html_content = f"""
                 <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                </head>
-                <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
-                    <div style="max-width:600px; margin:20px auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+    <div style="max-width:600px; margin:20px auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
 
-                        <!-- Header -->
-                        <div style="background: linear-gradient(135deg, #06d6a0 0%, #05b589 100%); padding:30px; text-align:center;">
-                            <h1 style="margin:0; color:#ffffff; font-size:28px; font-weight:700;">
-                                PETRUWORKOUT
-                            </h1>
-                            <p style="margin:10px 0 0 0; color:rgba(255,255,255,0.9); font-size:14px;">
-                                Entrenador Personal de Calistenia
-                            </p>
-                        </div>
+        <!-- Contenido -->
+        <div style="padding:40px 30px;">
+            <p style="margin:0 0 20px 0; color:#333333; font-size:16px; line-height:1.6;">
+                Hola <strong>{to_name}</strong>,
+            </p>
 
-                        <!-- Contenido -->
-                        <div style="padding:40px 30px;">
-                            <p style="margin:0 0 20px 0; color:#333333; font-size:16px; line-height:1.6;">
-                                Hola <strong>{to_name}</strong>,
-                            </p>
+            <div style="color:#333333; font-size:15px; line-height:1.7;">
+                {html_message}
+            </div>
+        </div>
 
-                            <div style="color:#333333; font-size:15px; line-height:1.7;">
-                                {html_message}
-                            </div>
-                        </div>
+        <!-- Footer -->
+        <div style="background:#f8f9fa; padding:20px 30px; text-align:center; border-top:1px solid #e0e0e0;">
+            <p style="margin:0 0 10px 0; color:#666666; font-size:13px;">
+                Este mensaje fue enviado desde <strong style="color:#06d6a0;">PetruWorkout</strong>
+            </p>
+            <p style="margin:0; color:#999999; font-size:12px;">
+                📧 petruworkout@gmail.com · 🌐 petrucalistenia.com
+            </p>
+        </div>
+    </div>
+</body>
+</html>
 
-                        <!-- Footer -->
-                        <div style="background:#f8f9fa; padding:20px 30px; text-align:center; border-top:1px solid #e0e0e0;">
-                            <p style="margin:0 0 10px 0; color:#666666; font-size:13px;">
-                                Este mensaje fue enviado desde <strong style="color:#06d6a0;">PetruWorkout</strong>
-                            </p>
-                            <p style="margin:0; color:#999999; font-size:12px;">
-                                📧 petruworkout@gmail.com · 🌐 petrucalistenia.com
-                            </p>
-                        </div>
-                    </div>
-                </body>
-                </html>
                 """
             else:
                 html_content = message
