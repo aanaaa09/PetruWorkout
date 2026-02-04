@@ -20,11 +20,7 @@ class Settings(BaseSettings):
     CALENDLY_USER_URI: str = ""
     CALENDLY_EVENT_URL: str = ""
 
-    # AÑADE ESTOS CAMPOS QUE FALTAN:
-    SPOTIFY_CLIENT_ID: str = ""
-    SPOTIFY_CLIENT_SECRET: str = ""
-    SPOTIFY_REFRESH_TOKEN: str = ""
-    OPENAI_API_KEY: str = ""
+    SESSION_DURATION_DAYS: int = 7
 
     @property
     def DATABASE_URL(self) -> str:
