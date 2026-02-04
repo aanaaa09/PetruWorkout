@@ -4,7 +4,7 @@ Router para el panel de administración
 Incluye: Login, Dashboard, Gestión de usuarios, Envío de emails con adjuntos
 """
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Header
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, distinct
@@ -34,19 +34,28 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
 # ============================================
-# DEPENDENCIA: VERIFICAR ADMIN
+# DEPENDENCIA: VERIFICAR ADMIN (CON HEADER)
 # ============================================
 
 def verify_admin_token(
-        token: str,
+        token: str = Header(None),
         db: Session = Depends(get_db)
 ) -> Usuario:
     """
     Verifica que el token pertenezca a un usuario admin
 
+    El token se recibe en el header 'token'
+
     Raises:
         HTTPException: Si el token es inválido o no es admin
     """
+    # Verificar que el token fue proporcionado
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail="Token no proporcionado en el header"
+        )
+
     # Verificar sesión
     sesion = sesion_crud.validate_token(db, token)
     if not sesion:
@@ -140,11 +149,14 @@ def admin_login(
 
 @router.post("/logout")
 def admin_logout(
-        token: str,
+        token: str = Header(None),
         db: Session = Depends(get_db)
 ):
     """Cierra la sesión del admin"""
     try:
+        if not token:
+            raise HTTPException(status_code=400, detail="Token no proporcionado")
+
         if sesion_crud.delete_by_token(db, token):
             logger.info("Admin logout exitoso")
             return {'success': True, 'message': 'Sesión cerrada correctamente'}
@@ -164,11 +176,17 @@ def admin_logout(
 
 @router.post("/verify")
 def verify_admin_session(
-        token: str,
+        token: str = Header(None),
         db: Session = Depends(get_db)
 ):
     """Verifica si el token de admin es válido"""
     try:
+        if not token:
+            return {
+                'valid': False,
+                'error': 'Token no proporcionado'
+            }
+
         admin = verify_admin_token(token, db)
 
         return {
@@ -436,7 +454,7 @@ async def send_email_to_users(
                 logger.error(f"Error enviando a {usuario.email}: {e}")
                 errores += 1
 
-        logger.info(f"✅ Emails enviados: {enviados}, Errores: {errores}")
+        logger.info(f"Emails enviados: {enviados}, Errores: {errores}")
 
         return {
             'success': True,

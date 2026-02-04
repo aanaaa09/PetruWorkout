@@ -56,7 +56,12 @@ const routes = [
   {
   path: '/admin',
   name: 'admin',
-  component: () => import('@/components/admin/AdminView.vue')
+  component: () => import('@/components/admin/AdminView.vue'),
+  meta: {
+    title: 'Panel de Administración - PetruWorkout',
+    description: 'Panel de control administrativo',
+    robots: 'noindex, nofollow'  //Evita que Google indexe esto
+  }
 }
 ]
 
