@@ -38,7 +38,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 # ============================================
 
 def verify_admin_token(
-        token: str = Header(None),
+        token: str = Header(None, alias="token"),  # ← ALIAS EXPLÍCITO
         db: Session = Depends(get_db)
 ) -> Usuario:
     """
@@ -149,7 +149,7 @@ def admin_login(
 
 @router.post("/logout")
 def admin_logout(
-        token: str = Header(None),
+        token: str = Header(None, alias="token"),  # ← ALIAS EXPLÍCITO
         db: Session = Depends(get_db)
 ):
     """Cierra la sesión del admin"""
@@ -176,7 +176,7 @@ def admin_logout(
 
 @router.post("/verify")
 def verify_admin_session(
-        token: str = Header(None),
+        token: str = Header(None, alias="token"),  # ← ALIAS EXPLÍCITO
         db: Session = Depends(get_db)
 ):
     """Verifica si el token de admin es válido"""
