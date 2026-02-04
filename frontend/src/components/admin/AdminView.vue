@@ -35,7 +35,7 @@
             v-if="activeSection === 'emails'"
           />
 
-          <!-- Gestión de Usuarios (opcional futuro) -->
+          <!-- Gestión de Usuarios -->
           <AdminUsers
             v-if="activeSection === 'users'"
           />
@@ -85,10 +85,14 @@ export default {
       }
 
       try {
+        // ✅ CORREGIDO: Token en el HEADER, no en el body
         const response = await fetch('https://petruworkout-production.up.railway.app/api/admin/verify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token  // ✅ Token en el header
+          }
+          // ❌ NO enviar body
         })
 
         const data = await response.json()
@@ -119,8 +123,10 @@ export default {
       try {
         await fetch('https://petruworkout-production.up.railway.app/api/admin/logout', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token
+          }
         })
       } catch (error) {
         console.error('Error al cerrar sesión:', error)
