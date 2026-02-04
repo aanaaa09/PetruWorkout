@@ -47,13 +47,11 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Email</th>
               <th>Tipo</th>
               <th>Newsletter</th>
               <th>Registro</th>
-              <!-- ❌ Última Conexión ELIMINADA -->
             </tr>
           </thead>
           <tbody>
@@ -71,7 +69,6 @@
                 </span>
               </td>
               <td>{{ formatDate(user.fecha_registro) }}</td>
-              <!-- ❌ Última Conexión ELIMINADA -->
             </tr>
           </tbody>
         </table>
