@@ -52,7 +52,12 @@ const routes = [
       ogImage: 'https://petrucalistenia.com/logo.png',
       canonical: 'https://petrucalistenia.com/calculator'
     }
-  }
+  },
+  {
+  path: '/admin',
+  name: 'admin',
+  component: () => import('@/components/admin/AdminView.vue')
+}
 ]
 
 export default routes
