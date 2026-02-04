@@ -67,10 +67,6 @@ class EmailService:
 
         <!-- Contenido -->
         <div style="padding:40px 30px;">
-            <p style="margin:0 0 20px 0; color:#333333; font-size:16px; line-height:1.6;">
-                Hola <strong>{to_name}</strong>,
-            </p>
-
             <div style="color:#333333; font-size:15px; line-height:1.7;">
                 {html_message}
             </div>
