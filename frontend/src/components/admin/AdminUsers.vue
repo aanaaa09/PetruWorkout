@@ -171,7 +171,7 @@ export default {
 
         const response = await fetch(url, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'token': token
           }
         })
 
