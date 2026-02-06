@@ -195,3 +195,144 @@ def delete_user_endpoint(
     except Exception as e:
         logger.error(f"Error eliminando usuario: {e}")
         raise HTTPException(status_code=500, detail="Error al eliminar usuario")
+
+# ============================================
+# LISTAR CONSULTAS
+# ============================================
+
+@router.get("/consultas")
+def get_consultas(
+        admin: Usuario = Depends(verify_admin_token),
+        db: Session = Depends(get_db),
+        limit: int = 100,
+        offset: int = 0
+):
+    """Lista consultas recibidas"""
+    try:
+        result = admin_crud.get_consultas_list(db, limit, offset)
+        return {
+            'success': True,
+            **result
+        }
+    except Exception as e:
+        logger.error(f"Error listando consultas: {e}")
+        raise HTTPException(status_code=500, detail="Error al listar consultas")
+
+
+# ============================================
+# LISTAR BOOKINGS
+# ============================================
+
+@router.get("/bookings")
+def get_bookings(
+        admin: Usuario = Depends(verify_admin_token),
+        db: Session = Depends(get_db),
+        limit: int = 100,
+        offset: int = 0
+):
+    """Lista reservas de Calendly"""
+    try:
+        result = admin_crud.get_bookings_list(db, limit, offset)
+        return {
+            'success': True,
+            **result
+        }
+    except Exception as e:
+        logger.error(f"Error listando bookings: {e}")
+        raise HTTPException(status_code=500, detail="Error al listar bookings")
+
+
+# ============================================
+# ENVIAR EMAIL (CON ADJUNTOS)
+# ============================================
+
+@router.post("/send-email")
+async def send_email_to_users(
+        admin: Usuario = Depends(verify_admin_token),
+        db: Session = Depends(get_db),
+        subject: str = Form(...),
+        message: str = Form(...),
+        send_to: str = Form(...),  # "all" o "selected"
+        selected_ids: Optional[str] = Form(None),  # IDs separados por coma
+        attachments: Optional[List[UploadFile]] = File(None)
+):
+    """
+    Envía email a usuarios con opción de adjuntos
+
+    send_to: "all" (todos los newsletter) o "selected" (IDs específicos)
+    selected_ids: "1,2,3,4" (string de IDs separados por coma)
+    attachments: Lista de archivos (PDF, imágenes, etc)
+    """
+    try:
+        # Obtener destinatarios
+        if send_to == "all":
+            destinatarios = db.query(Usuario).filter(
+                Usuario.tipo_usuario == TipoUsuario.NEWSLETTER,
+                Usuario.suscrito_newsletter == True
+            ).all()
+        elif send_to == "selected" and selected_ids:
+            ids = [int(id.strip()) for id in selected_ids.split(',')]
+            destinatarios = db.query(Usuario).filter(Usuario.id.in_(ids)).all()
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Debe especificar destinatarios válidos"
+            )
+
+        if not destinatarios:
+            raise HTTPException(
+                status_code=400,
+                detail="No hay destinatarios seleccionados"
+            )
+
+        logger.info(f"📧 Enviando email a {len(destinatarios)} usuarios...")
+
+        # Preparar adjuntos si existen
+        attachment_data = []
+        if attachments:
+            for file in attachments:
+                content = await file.read()
+                attachment_data.append({
+                    'content': content,
+                    'name': file.filename
+                })
+
+        # Enviar emails
+        enviados = 0
+        errores = 0
+
+        for usuario in destinatarios:
+            try:
+                success = await email_service.send_newsletter_email(
+                    to_email=usuario.email,
+                    to_name=usuario.nombre,
+                    subject=subject,
+                    message=message,
+                    attachments=attachment_data
+                )
+
+                if success:
+                    enviados += 1
+                else:
+                    errores += 1
+
+            except Exception as e:
+                logger.error(f"Error enviando a {usuario.email}: {e}")
+                errores += 1
+
+        logger.info(f"✅ Emails enviados: {enviados}, Errores: {errores}")
+
+        return {
+            'success': True,
+            'enviados': enviados,
+            'errores': errores,
+            'total': len(destinatarios)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en envío masivo: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error al enviar emails: {str(e)}")
