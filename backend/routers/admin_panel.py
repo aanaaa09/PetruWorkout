@@ -183,19 +183,22 @@ def delete_user_endpoint(
         admin: Usuario = Depends(verify_admin_token),
         db: Session = Depends(get_db)
 ):
-    """Elimina un usuario"""
+    """
+    Elimina un usuario
+    - Solo permite eliminar usuarios tipo NEWSLETTER
+    - Rechaza eliminación de usuarios ADMIN
+    """
     try:
         result = admin_crud.delete_user(db, user_id, admin.id)
-        logger.info(f"✅ Usuario {user_id} eliminado por admin {admin.email}")
+        logger.info(f"Usuario {user_id} eliminado por admin {admin.email}")
         return result
 
     except ValueError as e:
         logger.warning(f"Error validación: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=403, detail=str(e))  # 403 Forbidden
     except Exception as e:
         logger.error(f"Error eliminando usuario: {e}")
         raise HTTPException(status_code=500, detail="Error al eliminar usuario")
-
 # ============================================
 # LISTAR CONSULTAS
 # ============================================

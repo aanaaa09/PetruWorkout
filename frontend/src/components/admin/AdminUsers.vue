@@ -70,15 +70,23 @@
               </td>
               <td>{{ formatDate(user.fecha_registro) }}</td>
               <td>
-        <button
-          @click="handleDeleteClick(user)"
-          class="btn-delete"
-          :disabled="loading"
-          title="Eliminar usuario"
-        >
-          🗑️
-        </button>
-      </td>
+                <button
+                  v-if="user.tipo_usuario === 'newsletter'"
+                  @click="handleDeleteClick(user)"
+                  class="btn-delete"
+                  :disabled="loading"
+                  title="Eliminar usuario"
+                >
+                  🗑️
+                </button>
+                <span
+                  v-else
+                  class="non-deletable-badge"
+                  title="Los administradores no se pueden eliminar"
+                >
+                  🔒
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -105,51 +113,53 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de confirmación -->
+    <transition name="modal-fade">
+      <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+        <div class="modal-content">
+          <button @click="closeDeleteModal" class="modal-close" :disabled="deleting">✕</button>
+
+          <h2 class="modal-title">⚠️ Confirmar Eliminación</h2>
+
+          <p class="modal-description">
+            ¿Estás seguro de que quieres eliminar al usuario:
+          </p>
+
+          <div class="user-info-box">
+            <p><strong>Nombre:</strong> {{ userToDelete?.nombre }}</p>
+            <p><strong>Email:</strong> {{ userToDelete?.email }}</p>
+          </div>
+
+          <p class="modal-warning">
+            ⚠️ Esta acción es <strong>permanente</strong> y no se puede deshacer.
+          </p>
+
+          <div v-if="deleteError" class="error-message">
+            {{ deleteError }}
+          </div>
+
+          <div class="modal-buttons">
+            <button
+              @click="closeDeleteModal"
+              class="btn-cancel"
+              :disabled="deleting"
+            >
+              Cancelar
+            </button>
+
+            <button
+              @click="handleConfirmDelete"
+              class="btn-confirm-delete"
+              :disabled="deleting"
+            >
+              {{ deleting ? '🗑️ Eliminando...' : '🗑️ Eliminar Usuario' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
-<transition name="modal-fade">
-  <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
-    <div class="modal-content">
-      <button @click="closeDeleteModal" class="modal-close" :disabled="deleting">✕</button>
-
-      <h2 class="modal-title">⚠️ Confirmar Eliminación</h2>
-
-      <p class="modal-description">
-        ¿Estás seguro de que quieres eliminar al usuario:
-      </p>
-
-      <div class="user-info-box">
-        <p><strong>Nombre:</strong> {{ userToDelete?.nombre }}</p>
-        <p><strong>Email:</strong> {{ userToDelete?.email }}</p>
-      </div>
-
-      <p class="modal-warning">
-        ⚠️ Esta acción es <strong>permanente</strong> y no se puede deshacer.
-      </p>
-
-      <div v-if="deleteError" class="error-message">
-        {{ deleteError }}
-      </div>
-
-      <div class="modal-buttons">
-        <button
-          @click="closeDeleteModal"
-          class="btn-cancel"
-          :disabled="deleting"
-        >
-          Cancelar
-        </button>
-
-        <button
-          @click="handleConfirmDelete"
-          class="btn-confirm-delete"
-          :disabled="deleting"
-        >
-          {{ deleting ? '🗑️ Eliminando...' : '🗑️ Eliminar Usuario' }}
-        </button>
-      </div>
-    </div>
-  </div>
-</transition>
 </template>
 
 <script>
@@ -253,56 +263,67 @@ export default {
       })
     },
 
-  handleDeleteClick(user) {
-    this.userToDelete = user
-    this.showDeleteModal = true
-    this.deleteError = ''
-  },
-
-
-  closeDeleteModal() {
-    this.showDeleteModal = false
-    this.userToDelete = null
-    this.deleteError = ''
-  },
-
-  async handleConfirmDelete() {
-    if (!this.userToDelete) return
-
-    this.deleting = true
-    this.deleteError = ''
-
-    try {
-      const token = localStorage.getItem('admin_token')
-
-      const response = await fetch(
-        `https://petruworkout-production.up.railway.app/api/admin/users/${this.userToDelete.id}`,
-        {
-          method: 'DELETE',
-          headers: { 'token': token }
-        }
-      )
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-
-        this.users = this.users.filter(u => u.id !== this.userToDelete.id)
-
-        // Cerrar modal
-        this.closeDeleteModal()
-
-        console.log('Usuario eliminado:', data.message)
-      } else {
-        this.deleteError = data.detail || 'Error al eliminar usuario'
+    handleDeleteClick(user) {
+      // Validación adicional en frontend
+      if (user.tipo_usuario !== 'newsletter') {
+        alert('⚠️ Solo se pueden eliminar usuarios de tipo NEWSLETTER')
+        return
       }
-    } catch (error) {
-      console.error('Error eliminando usuario:', error)
-      this.deleteError = 'Error de conexión al eliminar usuario'
-    } finally {
-      this.deleting = false
+
+      this.userToDelete = user
+      this.showDeleteModal = true
+      this.deleteError = ''
+    },
+
+    closeDeleteModal() {
+      this.showDeleteModal = false
+      this.userToDelete = null
+      this.deleteError = ''
+    },
+
+    async handleConfirmDelete() {
+      if (!this.userToDelete) return
+
+      // Validación de seguridad
+      if (this.userToDelete.tipo_usuario !== 'newsletter') {
+        this.deleteError = 'Solo se pueden eliminar usuarios de tipo NEWSLETTER'
+        return
+      }
+
+      this.deleting = true
+      this.deleteError = ''
+
+      try {
+        const token = localStorage.getItem('admin_token')
+
+        const response = await fetch(
+          `https://petruworkout-production.up.railway.app/api/admin/users/${this.userToDelete.id}`,
+          {
+            method: 'DELETE',
+            headers: { 'token': token }
+          }
+        )
+
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          // Eliminar del array local
+          this.users = this.users.filter(u => u.id !== this.userToDelete.id)
+
+          // Cerrar modal
+          this.closeDeleteModal()
+
+          console.log('Usuario eliminado:', data.message)
+        } else {
+          this.deleteError = data.detail || 'Error al eliminar usuario'
+        }
+      } catch (error) {
+        console.error('Error eliminando usuario:', error)
+        this.deleteError = 'Error de conexión al eliminar usuario'
+      } finally {
+        this.deleting = false
+      }
     }
-  }
   }
 }
 </script>
@@ -364,7 +385,6 @@ export default {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* ✅ Arreglar opciones del select */
 .filter-group select option {
   background: #1a1a1a;
   color: white;
@@ -478,6 +498,40 @@ tbody tr:hover {
   color: var(--color-text-muted);
 }
 
+/* ✅ BOTÓN DELETE - FUERA DEL MEDIA QUERY */
+.btn-delete {
+  background: rgba(239, 35, 60, 0.2);
+  border: 1px solid rgba(239, 35, 60, 0.4);
+  border-radius: 6px;
+  color: #ff6b6b;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: rgba(239, 35, 60, 0.3);
+  transform: scale(1.1);
+}
+
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ✅ BADGE PARA USUARIOS NO ELIMINABLES */
+.non-deletable-badge {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.1rem;
+  color: #ffc107;
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 6px;
+  cursor: not-allowed;
+}
+
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -510,41 +564,6 @@ tbody tr:hover {
 .page-info {
   color: var(--color-text-secondary);
   font-size: 0.9rem;
-}
-
-@media (max-width: 968px) {
-  .users-table {
-    overflow-x: auto;
-  }
-
-  table {
-    min-width: 700px;
-  }
-
-  .pagination {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  /* Botón eliminar en tabla */
-.btn-delete {
-  background: rgba(239, 35, 60, 0.2);
-  border: 1px solid rgba(239, 35, 60, 0.4);
-  border-radius: 6px;
-  color: #ff6b6b;
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1.1rem;
-}
-
-.btn-delete:hover:not(:disabled) {
-  background: rgba(239, 35, 60, 0.3);
-  transform: scale(1.1);
-}
-
-.btn-delete:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* Modal */
@@ -709,6 +728,21 @@ tbody tr:hover {
   margin-bottom: 1rem;
 }
 
+@media (max-width: 968px) {
+  .users-table {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 700px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 640px) {
   .modal-content {
     padding: 2rem 1.5rem;
@@ -717,6 +751,5 @@ tbody tr:hover {
   .modal-buttons {
     flex-direction: column;
   }
-}
 }
 </style>

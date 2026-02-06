@@ -128,7 +128,9 @@ def get_users_list(
 def delete_user(db: Session, user_id: int, admin_id: int) -> dict:
     """
     Elimina un usuario de la base de datos.
-    No permite que un admin se elimine a sí mismo.
+    - NO permite que un admin se elimine a sí mismo
+    - NO permite eliminar usuarios tipo ADMIN
+    - SOLO permite eliminar usuarios tipo NEWSLETTER
     """
     # Verificar que no sea auto-eliminación
     if user_id == admin_id:
@@ -139,6 +141,9 @@ def delete_user(db: Session, user_id: int, admin_id: int) -> dict:
 
     if not user:
         raise ValueError("Usuario no encontrado")
+
+    if user.tipo_usuario != TipoUsuario.NEWSLETTER:
+        raise ValueError("Solo se pueden eliminar usuarios de tipo NEWSLETTER")
 
     # Guardar info antes de eliminar
     user_email = user.email
@@ -154,7 +159,6 @@ def delete_user(db: Session, user_id: int, admin_id: int) -> dict:
         "user_id": user_id,
         "email": user_email
     }
-
 
 def get_consultas_list(
         db: Session,
