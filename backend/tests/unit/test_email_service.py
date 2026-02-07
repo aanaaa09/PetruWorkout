@@ -7,7 +7,8 @@ from unittest.mock import patch, MagicMock
 import base64
 
 
-def test_send_newsletter_email_simple():
+@pytest.mark.asyncio
+async def test_send_newsletter_email_simple():
     """Test envío de email simple sin adjuntos"""
     from backend.services.email_service import email_service
 
@@ -17,7 +18,7 @@ def test_send_newsletter_email_simple():
         mock_response.status_code = 201
         mock_post.return_value = mock_response
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="test@example.com",
             to_name="Test User",
             subject="Newsletter Test",
@@ -36,7 +37,8 @@ def test_send_newsletter_email_simple():
         assert payload['to'][0]['name'] == "Test User"
 
 
-def test_send_newsletter_email_with_html():
+@pytest.mark.asyncio
+async def test_send_newsletter_email_with_html():
     """Test envío de email con contenido HTML"""
     from backend.services.email_service import email_service
 
@@ -54,7 +56,7 @@ def test_send_newsletter_email_with_html():
         </html>
         """
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="html@test.com",
             to_name="HTML User",
             subject="HTML Newsletter",
@@ -64,7 +66,8 @@ def test_send_newsletter_email_with_html():
         assert result is True
 
 
-def test_send_newsletter_email_with_attachments():
+@pytest.mark.asyncio
+async def test_send_newsletter_email_with_attachments():
     """Test envío de email con adjuntos"""
     from backend.services.email_service import email_service
 
@@ -88,7 +91,7 @@ def test_send_newsletter_email_with_attachments():
             }
         ]
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="attach@test.com",
             to_name="Attach User",
             subject="Email con Adjuntos",
@@ -108,7 +111,8 @@ def test_send_newsletter_email_with_attachments():
         assert payload['attachment'][1]['name'] == 'imagen.png'
 
 
-def test_send_newsletter_email_failure():
+@pytest.mark.asyncio
+async def test_send_newsletter_email_failure():
     """Test manejo de error en envío de email"""
     from backend.services.email_service import email_service
 
@@ -119,7 +123,7 @@ def test_send_newsletter_email_failure():
         mock_response.text = "Bad Request"
         mock_post.return_value = mock_response
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="error@test.com",
             to_name="Error User",
             subject="Error Test",
@@ -129,7 +133,8 @@ def test_send_newsletter_email_failure():
         assert result is False
 
 
-def test_send_newsletter_email_exception():
+@pytest.mark.asyncio
+async def test_send_newsletter_email_exception():
     """Test manejo de excepción en envío de email"""
     from backend.services.email_service import email_service
 
@@ -137,7 +142,7 @@ def test_send_newsletter_email_exception():
         # Simular excepción de red
         mock_post.side_effect = Exception("Network error")
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="exception@test.com",
             to_name="Exception User",
             subject="Exception Test",
@@ -147,7 +152,8 @@ def test_send_newsletter_email_exception():
         assert result is False
 
 
-def test_send_plain_email():
+@pytest.mark.asyncio
+async def test_send_plain_email():
     """Test envío de email plain sin template"""
     from backend.services.email_service import email_service
 
@@ -158,7 +164,7 @@ def test_send_plain_email():
 
         html_content = "<h1>Test</h1><p>Plain email</p>"
 
-        result = email_service.send_plain_email(
+        result = await email_service.send_plain_email(
             to_email="plain@test.com",
             to_name="Plain User",
             subject="Plain Email",
@@ -168,7 +174,8 @@ def test_send_plain_email():
         assert result is True
 
 
-def test_send_newsletter_email_text_to_html_conversion():
+@pytest.mark.asyncio
+async def test_send_newsletter_email_text_to_html_conversion():
     """Test conversión automática de texto a HTML"""
     from backend.services.email_service import email_service
 
@@ -180,7 +187,7 @@ def test_send_newsletter_email_text_to_html_conversion():
         # Mensaje de texto simple (sin HTML)
         text_message = "Línea 1\nLínea 2\nLínea 3"
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="convert@test.com",
             to_name="Convert User",
             subject="Text to HTML",
@@ -197,7 +204,8 @@ def test_send_newsletter_email_text_to_html_conversion():
         assert '<br>' in html_content
 
 
-def test_attachment_base64_encoding():
+@pytest.mark.asyncio
+async def test_attachment_base64_encoding():
     """Test codificación correcta de adjuntos a base64"""
     from backend.services.email_service import email_service
 
@@ -217,7 +225,7 @@ def test_attachment_base64_encoding():
             }
         ]
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="b64@test.com",
             to_name="B64 User",
             subject="Base64 Test",
@@ -234,7 +242,8 @@ def test_attachment_base64_encoding():
         assert payload['attachment'][0]['content'] == expected_b64
 
 
-def test_multiple_attachments_different_types():
+@pytest.mark.asyncio
+async def test_multiple_attachments_different_types():
     """Test envío con múltiples adjuntos de diferentes tipos"""
     from backend.services.email_service import email_service
 
@@ -250,7 +259,7 @@ def test_multiple_attachments_different_types():
             {'content': b'TXT content', 'name': 'text.txt'}
         ]
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="multi@test.com",
             to_name="Multi User",
             subject="Multiple Attachments",
@@ -268,7 +277,8 @@ def test_multiple_attachments_different_types():
         assert payload['attachment'][3]['name'] == 'text.txt'
 
 
-def test_email_sender_configuration():
+@pytest.mark.asyncio
+async def test_email_sender_configuration():
     """Test configuración correcta del remitente"""
     from backend.services.email_service import email_service
 
@@ -277,7 +287,7 @@ def test_email_sender_configuration():
         mock_response.status_code = 201
         mock_post.return_value = mock_response
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="sender@test.com",
             to_name="Sender User",
             subject="Sender Test",
@@ -294,7 +304,8 @@ def test_email_sender_configuration():
         assert payload['sender']['name'] == "PetruWorkout"
 
 
-def test_email_timeout_configuration():
+@pytest.mark.asyncio
+async def test_email_timeout_configuration():
     """Test configuración de timeout en requests"""
     from backend.services.email_service import email_service
 
@@ -303,7 +314,7 @@ def test_email_timeout_configuration():
         mock_response.status_code = 201
         mock_post.return_value = mock_response
 
-        result = email_service.send_newsletter_email(
+        result = await email_service.send_newsletter_email(
             to_email="timeout@test.com",
             to_name="Timeout User",
             subject="Timeout Test",
