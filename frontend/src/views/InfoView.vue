@@ -9,6 +9,7 @@
       <AboutSection id="sobre-mi" />
       <ServicesSection id="servicios" />
       <GuaranteeSection />
+      <TestimonialsSection id="testimonios" />
       <ContactForm id="contacto" />
     </main>
 
@@ -29,6 +30,7 @@ import FullNavbar from '@/components/navigation/FullNavbar.vue'
 import AboutSection from '@/components/landing/AboutSection.vue'
 import ServicesSection from '@/components/landing/ServicesSection.vue'
 import GuaranteeSection from '@/components/landing/GuaranteeSection.vue'
+import TestimonialsSection from '@/components/landing/TestimonialsSection.vue'
 import ContactForm from '@/components/landing/ContactForm.vue'
 import FullFooter from '@/components/navigation/FullFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
@@ -42,6 +44,7 @@ export default {
     AboutSection,
     ServicesSection,
     GuaranteeSection,
+    TestimonialsSection,
     ContactForm,
     FullFooter,
     PrivacyPolicy,
