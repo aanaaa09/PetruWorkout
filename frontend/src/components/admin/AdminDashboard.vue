@@ -23,7 +23,7 @@
           <option value="all">Todas las fuentes</option>
           <option value="instagram">📸 Instagram</option>
           <option value="organic_search">🔍 Organic Search</option>
-          <option value="whatsapp">💬 WhatsApp</option>
+          <option value="youtube">▶️ YouTube</option>
           <option value="facebook">👥 Facebook</option>
         </select>
       </div>
@@ -210,41 +210,48 @@
           </span>
         </div>
 
-        <!-- RTY -->
-        <div class="card sigma-card">
+        <!-- RTY + IC unificados -->
+        <div class="card sigma-card conversion-card">
           <div class="sigma-icon">🔄</div>
           <div class="sigma-body">
             <span class="sigma-label">RTY · Rendimiento acumulado</span>
             <span class="sigma-value">{{ pct(sixSigma.rty) }}</span>
             <span class="sigma-desc">% de visitas que llegan a cita</span>
           </div>
+
+          <!-- Desglose RTY -->
           <div class="rty-row">
-            <span class="rty-step">{{ (sixSigma.rty_y1 * 100).toFixed(1) }}%</span>
+            <div class="rty-step-box">
+              <span class="rty-step-label">Click rate</span>
+              <span class="rty-step-val">{{ (sixSigma.rty_y1 * 100).toFixed(1) }}%</span>
+            </div>
             <span class="rty-op">×</span>
-            <span class="rty-step">{{ (sixSigma.rty_y2 * 100).toFixed(1) }}%</span>
+            <div class="rty-step-box">
+              <span class="rty-step-label">Book rate</span>
+              <span class="rty-step-val">{{ (sixSigma.rty_y2 * 100).toFixed(1) }}%</span>
+            </div>
             <span class="rty-op">=</span>
             <span class="rty-result">{{ pct(sixSigma.rty) }}</span>
           </div>
-        </div>
 
-        <!-- IC 95% -->
-        <div class="card sigma-card">
-          <div class="sigma-icon">📏</div>
-          <div class="sigma-body">
-            <span class="sigma-label">IC 95% Conversión</span>
-            <span class="sigma-value">{{ pct(conversionRate) }}</span>
-            <span class="sigma-desc">
+          <!-- Separador -->
+          <div class="conv-divider"></div>
+
+          <!-- IC 95% -->
+          <div class="ci-section">
+            <span class="ci-title">📏 IC 95% Conversión</span>
+            <span class="ci-range-label">
               [ {{ pct(sixSigma.ci_low) }} — {{ pct(sixSigma.ci_high) }} ]
             </span>
-          </div>
-          <div class="ci-bar">
-            <div class="ci-track">
-              <div class="ci-range" :style="ciRangeStyle"></div>
-              <div class="ci-dot"   :style="ciDotStyle"></div>
-            </div>
-            <div class="ci-labels">
-              <span>{{ pct(sixSigma.ci_low) }}</span>
-              <span>{{ pct(sixSigma.ci_high) }}</span>
+            <div class="ci-bar">
+              <div class="ci-track">
+                <div class="ci-range" :style="ciRangeStyle"></div>
+                <div class="ci-dot"   :style="ciDotStyle"></div>
+              </div>
+              <div class="ci-labels">
+                <span>{{ pct(sixSigma.ci_low) }}</span>
+                <span>{{ pct(sixSigma.ci_high) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -292,16 +299,28 @@
         <div class="card trend-card">
           <div class="card-head">
             <h3>📈 Tendencia temporal</h3>
-            <span class="tag">Visitas · Clicks · Citas · Semana a semana</span>
+            <span class="tag">
+              {{ trendRaw.length > 0 ? trendRaw.length + ' días con datos' : 'Sin datos en el período' }}
+            </span>
           </div>
-          <div class="chart-wrap">
-            <canvas ref="trendCanvas"></canvas>
+
+          <!-- Sin datos: aviso claro -->
+          <div v-if="trendRaw.length === 0" class="trend-empty">
+            <span class="trend-empty-icon">📭</span>
+            <p>No hay registros para <strong>{{ sourceLabel }}</strong> en este período.</p>
+            <p class="trend-hint">Prueba con "Todas las fuentes" o un período más amplio.</p>
           </div>
-          <div class="legend">
-            <span class="leg-item"><span class="leg-dot" style="background:#06d6a0"></span>Visitas</span>
-            <span class="leg-item"><span class="leg-dot" style="background:#e63946"></span>Clicks Calendly</span>
-            <span class="leg-item"><span class="leg-dot" style="background:#ffd166"></span>Citas agendadas</span>
-          </div>
+
+          <template v-else>
+            <div class="chart-wrap">
+              <canvas ref="trendCanvas"></canvas>
+            </div>
+            <div class="legend">
+              <span class="leg-item"><span class="leg-dot" style="background:#06d6a0"></span>Visitas</span>
+              <span class="leg-item"><span class="leg-dot" style="background:#e63946"></span>Clicks Calendly</span>
+              <span class="leg-item"><span class="leg-dot" style="background:#ffd166"></span>Citas agendadas</span>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -310,10 +329,11 @@
 </template>
 
 <script>
+// ─── Configuración de fuentes ───────────────────────────────────────────────
 const SOURCE_CFG = {
   instagram:      { label: 'Instagram',      emoji: '📸', color: '#E1306C' },
   organic_search: { label: 'Organic Search', emoji: '🔍', color: '#4285F4' },
-  whatsapp:       { label: 'WhatsApp',       emoji: '💬', color: '#25D366' },
+  youtube:        { label: 'YouTube',        emoji: '▶️', color: '#FF0000' },
   facebook:       { label: 'Facebook',       emoji: '👥', color: '#1877F2' },
 }
 
@@ -326,12 +346,14 @@ const SIGMA_COLORS = [
 ]
 
 const DPMO_LABELS = [
-  { max: 233,    label: '★ Clase mundial' },
-  { max: 6210,   label: '★ Excelente'     },
-  { max: 66807,  label: '✓ Aceptable'     },
-  { max: 308538, label: '⚠ Mejorable'    },
-  { max: Infinity, label: '✗ Crítico'    },
+  { max: 233,      label: '★ Clase mundial' },
+  { max: 6210,     label: '★ Excelente'     },
+  { max: 66807,    label: '✓ Aceptable'     },
+  { max: 308538,   label: '⚠ Mejorable'    },
+  { max: Infinity, label: '✗ Crítico'      },
 ]
+
+const BASE_URL = 'https://petruworkout-production.up.railway.app'
 
 export default {
   name: 'AdminDashboard',
@@ -356,9 +378,8 @@ export default {
         { value: 'custom', label: 'Custom' },
       ],
 
-      // Datos crudos del backend
-      totals:    { visits: 0, clicks: 0, bookings: 0 },
-      sixSigma:  { dpmo: 0, sigma: 1, rty: 0, rty_y1: 0, rty_y2: 0, ci_low: 0, ci_high: 0 },
+      totals:     { visits: 0, clicks: 0, bookings: 0 },
+      sixSigma:   { dpmo: 0, sigma: 1, rty: 0, rty_y1: 0, rty_y2: 0, ci_low: 0, ci_high: 0 },
       sourcesRaw: [],
       trendRaw:   [],
     }
@@ -384,9 +405,9 @@ export default {
       const { visits, clicks, bookings } = this.totals
       const base = visits || 1
       return [
-        { name: '👁️ Visitas',         count: visits,   pct: 100,                          color: '#06d6a0' },
-        { name: '🖱️ Clicks Calendly', count: clicks,   pct: (clicks / base) * 100,        color: '#e63946' },
-        { name: '📅 Citas agendadas', count: bookings, pct: (bookings / base) * 100,       color: '#ffd166' },
+        { name: '👁️ Visitas',         count: visits,   pct: 100,                     color: '#06d6a0' },
+        { name: '🖱️ Clicks Calendly', count: clicks,   pct: (clicks / base) * 100,   color: '#e63946' },
+        { name: '📅 Citas agendadas', count: bookings, pct: (bookings / base) * 100,  color: '#ffd166' },
       ]
     },
 
@@ -395,12 +416,12 @@ export default {
       return this.sourcesRaw
         .filter(s => SOURCE_CFG[s.source])
         .map(s => ({
-          key:     s.source,
-          label:   SOURCE_CFG[s.source].label,
-          emoji:   SOURCE_CFG[s.source].emoji,
-          color:   SOURCE_CFG[s.source].color,
-          visits:  s.visits || 0,
-          pct:     ((s.visits || 0) / total) * 100,
+          key:    s.source,
+          label:  SOURCE_CFG[s.source].label,
+          emoji:  SOURCE_CFG[s.source].emoji,
+          color:  SOURCE_CFG[s.source].color,
+          visits: s.visits || 0,
+          pct:    ((s.visits || 0) / total) * 100,
         }))
         .sort((a, b) => b.visits - a.visits)
     },
@@ -446,8 +467,7 @@ export default {
 
     ciRangeStyle() {
       const max  = this.sixSigma.ci_high * 100 || 1
-      const left  = (this.sixSigma.ci_low  * 100 / max) * 100
-      const right = 100
+      const left = (this.sixSigma.ci_low * 100 / max) * 100
       return {
         position: 'absolute',
         left: left.toFixed(1) + '%',
@@ -459,8 +479,8 @@ export default {
     },
 
     ciDotStyle() {
-      const max  = this.sixSigma.ci_high * 100 || 1
-      const pos  = (this.conversionRate  * 100 / max) * 100
+      const max = this.sixSigma.ci_high * 100 || 1
+      const pos = (this.conversionRate * 100 / max) * 100
       return {
         position: 'absolute',
         left: Math.min(95, Math.max(5, pos)).toFixed(1) + '%',
@@ -515,63 +535,60 @@ export default {
     loadChartJS() {
       return new Promise(resolve => {
         if (window.Chart) { resolve(); return }
-        const s = document.createElement('script')
-        s.src    = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'
-        s.onload = resolve
-        s.onerror = resolve
+        const s    = document.createElement('script')
+        s.src      = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'
+        s.onload   = resolve
+        s.onerror  = resolve
         document.head.appendChild(s)
       })
     },
 
     // ── Fetch principal ────────────────────────────────────────────────────
     async fetchAll() {
+      // Destruir gráfico antes de redibujar
+      if (this.chart) { this.chart.destroy(); this.chart = null }
+
       this.loading = true
       this.error   = null
 
       try {
         const token   = localStorage.getItem('admin_token')
         const headers = { token }
-        const base    = 'https://petruworkout-production.up.railway.app'
         const qs      = this.buildQS()
 
-        // Llamada principal: analytics (devuelve todo en uno)
-        const analyticsRes = await fetch(`${base}/api/admin/analytics?${qs}`, { headers })
+        const res = await fetch(`${BASE_URL}/api/admin/analytics?${qs}`, { headers })
 
-        if (analyticsRes.ok) {
-          const a = await analyticsRes.json()
-
-          // Totales
+        if (res.ok) {
+          const a = await res.json()
           this.totals = {
             visits:   a.totals?.visits   ?? 0,
             clicks:   a.totals?.clicks   ?? 0,
             bookings: a.totals?.bookings ?? 0,
           }
-
-          // Six Sigma
           this.sixSigma = {
-            dpmo:   a.six_sigma?.dpmo   ?? 0,
-            sigma:  a.six_sigma?.sigma  ?? 1,
-            rty:    a.six_sigma?.rty    ?? 0,
-            rty_y1: a.six_sigma?.rty_y1 ?? 0,
-            rty_y2: a.six_sigma?.rty_y2 ?? 0,
+            dpmo:    a.six_sigma?.dpmo    ?? 0,
+            sigma:   a.six_sigma?.sigma   ?? 1,
+            rty:     a.six_sigma?.rty     ?? 0,
+            rty_y1:  a.six_sigma?.rty_y1  ?? 0,
+            rty_y2:  a.six_sigma?.rty_y2  ?? 0,
             ci_low:  a.six_sigma?.ci_low  ?? 0,
             ci_high: a.six_sigma?.ci_high ?? 0,
           }
-
-          // Fuentes
+          // Filtrar direct/internal por si vienen del backend
           this.sourcesRaw = (a.sources ?? []).filter(
             s => s.source !== 'direct' && s.source !== 'internal'
           )
-
-          // Tendencia
+          // La tendencia ya viene limpia (el servicio excluye direct/internal)
           this.trendRaw = a.trend ?? []
 
         } else {
-          // Fallback: llamar a los endpoints legacy
-          await this.fetchLegacy(base, headers, qs)
+          await this.fetchLegacy(headers, qs)
         }
 
-        this.$nextTick(() => this.renderChart())
+        // Sólo renderizar si hay datos de tendencia
+        if (this.trendRaw.length > 0) {
+          this.$nextTick(() => this.renderChart())
+        }
 
       } catch (err) {
         console.error('Dashboard error:', err)
@@ -581,12 +598,12 @@ export default {
       }
     },
 
-    // Fallback a endpoints legacy (mientras no exista /api/admin/analytics)
-    async fetchLegacy(base, headers, qs) {
+    // Fallback a endpoints legacy
+    async fetchLegacy(headers, qs) {
       const [dashRes, funnelRes, statsRes] = await Promise.allSettled([
-        fetch(`${base}/api/admin/dashboard?${qs}`,  { headers }),
-        fetch(`${base}/api/tracking/funnel?${qs}`,  { headers }),
-        fetch(`${base}/api/tracking/stats?${qs}`,   { headers }),
+        fetch(`${BASE_URL}/api/admin/dashboard?${qs}`,  { headers }),
+        fetch(`${BASE_URL}/api/tracking/funnel?${qs}`,  { headers }),
+        fetch(`${BASE_URL}/api/tracking/stats?${qs}`,   { headers }),
       ])
 
       if (dashRes.status === 'fulfilled' && dashRes.value.ok) {
@@ -604,26 +621,26 @@ export default {
       }
 
       if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
-        const s = await statsRes.value.json()
-        const arr = Array.isArray(s) ? s : (s.sources ?? s.data ?? [])
-        this.sourcesRaw = arr.filter(x =>
-          x.source !== 'direct' && x.source !== 'internal'
+        const s    = await statsRes.value.json()
+        const arr  = Array.isArray(s) ? s : (s.sources ?? s.data ?? [])
+        this.sourcesRaw = arr.filter(
+          x => x.source !== 'direct' && x.source !== 'internal'
         )
       }
 
-      // Calcular Six Sigma localmente con los datos disponibles
-      const v = this.totals.visits   || 1
-      const c = this.totals.clicks   || 0
-      const b = this.totals.bookings || 0
-      const dpmo = Math.round((1 - b / v) * 1_000_000)
+      // Calcular Six Sigma localmente
+      const v  = this.totals.visits   || 1
+      const c  = this.totals.clicks   || 0
+      const b  = this.totals.bookings || 0
+      const dpmo  = Math.round((1 - b / v) * 1_000_000)
       const sigma = this.dpmoToSigma(dpmo)
-      const y1   = c / v
-      const y2   = b / Math.max(c, 1)
-      const p    = b / v
-      const z    = 1.96
-      const m    = Math.sqrt((p * (1 - p)) / v) * z
+      const y1    = c / v
+      const y2    = b / Math.max(c, 1)
+      const p     = b / v
+      const z     = 1.96
+      const m     = Math.sqrt((p * (1 - p)) / v) * z
       this.sixSigma = {
-        dpmo,  sigma,
+        dpmo, sigma,
         rty: y1 * y2, rty_y1: y1, rty_y2: y2,
         ci_low:  Math.max(0, p - m),
         ci_high: Math.min(1, p + m),
@@ -653,43 +670,37 @@ export default {
     renderChart() {
       if (!window.Chart || !this.$refs.trendCanvas) return
       if (this.chart) { this.chart.destroy(); this.chart = null }
+      if (this.trendRaw.length === 0) return
+
+      const raw = this.trendRaw
 
       let labels, visits, clicks, bookings
 
-      if (this.trendRaw.length > 0) {
-        // Agrupar por semana si hay muchos días
-        const raw = this.trendRaw
-        if (raw.length <= 14) {
-          labels   = raw.map(d => d.date)
-          visits   = raw.map(d => d.visits)
-          clicks   = raw.map(d => d.clicks)
-          bookings = raw.map(d => d.bookings)
-        } else {
-          // Agrupar en semanas
-          const weeks = {}
-          raw.forEach(d => {
-            const dt  = new Date(d.date)
-            const mon = new Date(dt.setDate(dt.getDate() - dt.getDay() + 1))
-            const key = mon.toISOString().slice(0, 10)
-            if (!weeks[key]) weeks[key] = { v: 0, c: 0, b: 0 }
-            weeks[key].v += d.visits
-            weeks[key].c += d.clicks
-            weeks[key].b += d.bookings
-          })
-          labels   = Object.keys(weeks).map(k => 'Sem ' + k.slice(5))
-          visits   = Object.values(weeks).map(w => w.v)
-          clicks   = Object.values(weeks).map(w => w.c)
-          bookings = Object.values(weeks).map(w => w.b)
-        }
+      // Si hay pocos días (≤14) mostrar por día; si no, agrupar en semanas
+      if (raw.length <= 14) {
+        labels   = raw.map(d => d.date.slice(5))  // MM-DD
+        visits   = raw.map(d => d.visits)
+        clicks   = raw.map(d => d.clicks)
+        bookings = raw.map(d => d.bookings)
       } else {
-        // Placeholder distribuido
-        const n = Math.min(Math.ceil((parseInt(this.filters.period) || 30) / 7), 12)
-        labels   = Array.from({ length: n }, (_, i) => `Sem ${i + 1}`)
-        const rand = (base, noise) =>
-          labels.map(() => Math.max(0, Math.round(base + (Math.random() - 0.5) * noise * 2)))
-        visits   = rand(this.totals.visits   / n, this.totals.visits   * 0.3 / n)
-        clicks   = rand(this.totals.clicks   / n, this.totals.clicks   * 0.3 / n)
-        bookings = rand(this.totals.bookings / n, this.totals.bookings * 0.3 / n)
+        const weeks = {}
+        raw.forEach(d => {
+          const dt  = new Date(d.date)
+          const dow = dt.getDay()  // 0=dom, 1=lun …
+          const diff = (dow === 0) ? -6 : 1 - dow  // lunes de esa semana
+          const mon  = new Date(dt)
+          mon.setDate(dt.getDate() + diff)
+          const key = mon.toISOString().slice(0, 10)
+          if (!weeks[key]) weeks[key] = { v: 0, c: 0, b: 0 }
+          weeks[key].v += d.visits
+          weeks[key].c += d.clicks
+          weeks[key].b += d.bookings
+        })
+        const sortedKeys = Object.keys(weeks).sort()
+        labels   = sortedKeys.map(k => 'Sem ' + k.slice(5))
+        visits   = sortedKeys.map(k => weeks[k].v)
+        clicks   = sortedKeys.map(k => weeks[k].c)
+        bookings = sortedKeys.map(k => weeks[k].b)
       }
 
       const ctx = this.$refs.trendCanvas.getContext('2d')
@@ -698,15 +709,30 @@ export default {
         data: {
           labels,
           datasets: [
-            { label: 'Visitas',          data: visits,   borderColor: '#06d6a0',
-              backgroundColor: 'rgba(6,214,160,0.07)',  tension: 0.4, fill: true,
-              pointBackgroundColor: '#06d6a0', pointRadius: 4 },
-            { label: 'Clicks Calendly',  data: clicks,   borderColor: '#e63946',
-              backgroundColor: 'rgba(230,57,70,0.07)',  tension: 0.4, fill: true,
-              pointBackgroundColor: '#e63946', pointRadius: 4 },
-            { label: 'Citas agendadas',  data: bookings, borderColor: '#ffd166',
-              backgroundColor: 'rgba(255,209,102,0.07)', tension: 0.4, fill: true,
-              pointBackgroundColor: '#ffd166', pointRadius: 4 },
+            {
+              label: 'Visitas',
+              data: visits,
+              borderColor: '#06d6a0',
+              backgroundColor: 'rgba(6,214,160,0.07)',
+              tension: 0.4, fill: true,
+              pointBackgroundColor: '#06d6a0', pointRadius: 4,
+            },
+            {
+              label: 'Clicks Calendly',
+              data: clicks,
+              borderColor: '#e63946',
+              backgroundColor: 'rgba(230,57,70,0.07)',
+              tension: 0.4, fill: true,
+              pointBackgroundColor: '#e63946', pointRadius: 4,
+            },
+            {
+              label: 'Citas agendadas',
+              data: bookings,
+              borderColor: '#ffd166',
+              backgroundColor: 'rgba(255,209,102,0.07)',
+              tension: 0.4, fill: true,
+              pointBackgroundColor: '#ffd166', pointRadius: 4,
+            },
           ],
         },
         options: {
@@ -724,11 +750,15 @@ export default {
             },
           },
           scales: {
-            x: { grid: { color: 'rgba(255,255,255,0.04)' },
-                 ticks: { color: 'rgba(255,255,255,0.45)', font: { size: 11 } } },
-            y: { grid: { color: 'rgba(255,255,255,0.04)' },
-                 ticks: { color: 'rgba(255,255,255,0.45)', font: { size: 11 } },
-                 beginAtZero: true },
+            x: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: 'rgba(255,255,255,0.45)', font: { size: 11 } },
+            },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: 'rgba(255,255,255,0.45)', font: { size: 11 } },
+              beginAtZero: true,
+            },
           },
         },
       })
@@ -742,25 +772,19 @@ export default {
 .admin-dashboard { max-width: 1400px; margin: 0 auto; }
 
 .dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  display: flex; justify-content: space-between; align-items: flex-end;
   margin-bottom: 1.5rem;
 }
 .dashboard-header h2 { font-size: 1.75rem; color: white; margin: 0 0 .25rem; }
 .dashboard-header p  { color: var(--color-text-muted); font-size: .9rem; margin: 0; }
 
 .data-badge {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
+  display: flex; align-items: center; gap: .5rem;
   background: rgba(6,214,160,.1);
   border: 1px solid rgba(6,214,160,.3);
   color: var(--color-accent);
-  padding: .35rem .875rem;
-  border-radius: 20px;
-  font-size: .78rem;
-  font-weight: 600;
+  padding: .35rem .875rem; border-radius: 20px;
+  font-size: .78rem; font-weight: 600;
 }
 .dot {
   width: 7px; height: 7px;
@@ -772,15 +796,10 @@ export default {
 
 /* ── FILTROS ──────────────────────────────────── */
 .filters-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: flex-end;
+  display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end;
   background: rgba(255,255,255,.025);
   border: 1px solid rgba(255,255,255,.09);
-  border-radius: 14px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
+  border-radius: 14px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;
 }
 .filter-group { display: flex; flex-direction: column; gap: .35rem; }
 .filter-group label {
@@ -791,12 +810,9 @@ export default {
 .filter-select, .filter-input {
   background: rgba(255,255,255,.07);
   border: 1px solid rgba(255,255,255,.14);
-  border-radius: 8px;
-  color: white;
-  padding: .5rem .875rem;
-  font-size: .875rem;
-  cursor: pointer;
-  transition: border-color .2s;
+  border-radius: 8px; color: white;
+  padding: .5rem .875rem; font-size: .875rem;
+  cursor: pointer; transition: border-color .2s;
 }
 .filter-select:focus,.filter-input:focus { outline: none; border-color: var(--color-accent); }
 .filter-select option { background: #1a1a1a; }
@@ -805,80 +821,58 @@ export default {
 .period-pill {
   background: rgba(255,255,255,.07);
   border: 1px solid rgba(255,255,255,.13);
-  border-radius: 8px;
-  color: rgba(255,255,255,.55);
-  padding: .45rem .875rem;
-  font-size: .82rem; font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
+  border-radius: 8px; color: rgba(255,255,255,.55);
+  padding: .45rem .875rem; font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: all .2s;
 }
 .period-pill:hover { background: rgba(255,255,255,.12); color: white; }
 .period-pill.active {
   background: rgba(6,214,160,.18);
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: var(--color-accent); color: var(--color-accent);
 }
 
 /* ── LOADING / ERROR ──────────────────────────── */
 .loading-state {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 1rem;
-  padding: 5rem 2rem;
-  color: rgba(255,255,255,.5);
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  padding: 5rem 2rem; color: rgba(255,255,255,.5);
 }
 .spinner {
   width: 40px; height: 40px;
   border: 3px solid rgba(255,255,255,.1);
   border-left-color: var(--color-accent);
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
+  border-radius: 50%; animation: spin .8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .error-state {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
   padding: 4rem 2rem; text-align: center;
-  color: rgba(255,255,255,.55);
-  font-size: 1.5rem;
+  color: rgba(255,255,255,.55); font-size: 1.5rem;
 }
 .error-state p { font-size: 1rem; }
 .btn-retry {
-  background: rgba(6,214,160,.13);
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
-  padding: .6rem 1.5rem; border-radius: 8px;
+  background: rgba(6,214,160,.13); border: 1px solid var(--color-accent);
+  color: var(--color-accent); padding: .6rem 1.5rem; border-radius: 8px;
   cursor: pointer; font-weight: 600;
 }
 .btn-retry:hover { background: rgba(6,214,160,.22); }
 
 /* ── GRID ─────────────────────────────────────── */
 .row { display: flex; gap: 1.25rem; width: 100%; margin-bottom: 1.25rem; }
-
-/* KPI row */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 0;
-}
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; margin-bottom: 0; }
 
 .kpi-card {
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.09);
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  border-radius: 16px; padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
   transition: border-color .2s, transform .2s;
 }
 .kpi-card:hover { border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
 .kpi-card.accent {
-  background: linear-gradient(135deg, rgba(6,214,160,.12) 0%, rgba(6,214,160,.04) 100%);
+  background: linear-gradient(135deg,rgba(6,214,160,.12),rgba(6,214,160,.04));
   border-color: rgba(6,214,160,.35);
 }
-
 .kpi-icon { font-size: 2rem; flex-shrink: 0; }
 .kpi-body { display: flex; flex-direction: column; gap: .18rem; }
 .kpi-label { font-size: .75rem; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .06em; }
@@ -889,11 +883,8 @@ export default {
 .card {
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.09);
-  border-radius: 16px;
-  padding: 1.5rem;
-  flex: 1;
+  border-radius: 16px; padding: 1.5rem; flex: 1;
 }
-
 .card-head {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 1.25rem;
@@ -902,25 +893,21 @@ export default {
 .tag {
   font-size: .72rem; color: rgba(255,255,255,.4);
   background: rgba(255,255,255,.06);
-  padding: .18rem .6rem; border-radius: 20px;
-  white-space: nowrap;
+  padding: .18rem .6rem; border-radius: 20px; white-space: nowrap;
 }
 
 /* ── TWO-COL ──────────────────────────────────── */
-.two-col { gap: 1.25rem; }
 .two-col > .card:first-child { flex: 1.1; }
 .two-col > .card:last-child  { flex: 0.9; }
 
 /* ── FUNNEL ───────────────────────────────────── */
 .funnel { display: flex; flex-direction: column; gap: 1.1rem; }
 .funnel-step { display: flex; flex-direction: column; gap: .3rem; }
-.funnel-top, .funnel-bottom {
-  display: flex; justify-content: space-between; align-items: center;
-}
+.funnel-top,.funnel-bottom { display: flex; justify-content: space-between; align-items: center; }
 .funnel-name { font-size: .875rem; color: rgba(255,255,255,.78); font-weight: 500; }
 .funnel-n    { font-size: .875rem; color: white; font-weight: 700; }
 .funnel-pct  { font-size: .775rem; color: rgba(255,255,255,.45); }
-.funnel-drop { font-size: .75rem;  color: rgba(239,68,68,.65); }
+.funnel-drop { font-size: .75rem; color: rgba(239,68,68,.65); }
 
 /* ── BAR SHARED ───────────────────────────────── */
 .bar-track { height: 9px; background: rgba(255,255,255,.06); border-radius: 5px; overflow: hidden; flex: 1; }
@@ -939,9 +926,8 @@ export default {
 /* ── SIGMA ROW ────────────────────────────────── */
 .sigma-row {
   display: grid;
-  grid-template-columns: 210px repeat(3, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 0;
+  grid-template-columns: 210px 1fr 1.4fr;  /* gauge | DPMO | RTY+IC */
+  gap: 1.25rem; margin-bottom: 0;
 }
 
 .gauge-card { display: flex; flex-direction: column; }
@@ -950,9 +936,8 @@ export default {
 .gauge-arc  { transition: stroke-dasharray 1s ease; }
 .gauge-scale {
   display: flex; justify-content: space-between;
-  padding: 0 .5rem;
-  font-size: .68rem; color: rgba(255,255,255,.28);
-  margin-top: .25rem;
+  padding: 0 .5rem; font-size: .68rem;
+  color: rgba(255,255,255,.28); margin-top: .25rem;
 }
 
 .sigma-card {
@@ -969,12 +954,24 @@ export default {
   font-size: .75rem; font-weight: 600;
 }
 
-.rty-row  { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
-.rty-step { font-size: .8rem; color: rgba(255,255,255,.5); }
-.rty-op   { font-size: .75rem; color: rgba(255,255,255,.25); }
-.rty-result { font-size: .85rem; font-weight: 700; color: var(--color-accent); }
+/* ── RTY + IC UNIFICADOS ──────────────────────── */
+.conversion-card { gap: .6rem; }
 
-.ci-bar  { margin-top: .5rem; }
+.rty-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.rty-step-box { display: flex; flex-direction: column; align-items: center; gap: .08rem; }
+.rty-step-label { font-size: .64rem; color: rgba(255,255,255,.35); }
+.rty-step-val   { font-size: .875rem; color: rgba(255,255,255,.65); font-weight: 600; }
+.rty-op     { font-size: .75rem; color: rgba(255,255,255,.25); }
+.rty-result { font-size: 1rem; font-weight: 700; color: var(--color-accent); }
+
+.conv-divider {
+  height: 1px; background: rgba(255,255,255,.07); margin: .25rem 0;
+}
+
+.ci-section { display: flex; flex-direction: column; gap: .35rem; }
+.ci-title   { font-size: .72rem; color: rgba(255,255,255,.42); text-transform: uppercase; letter-spacing: .06em; }
+.ci-range-label { font-size: .78rem; color: rgba(255,255,255,.55); font-weight: 600; }
+.ci-bar  { margin-top: .2rem; }
 .ci-track {
   position: relative; height: 9px;
   background: rgba(255,255,255,.06); border-radius: 5px;
@@ -987,22 +984,16 @@ export default {
 
 /* ── PROBABILIDADES ───────────────────────────── */
 .prob-card { flex: 1; }
-.prob-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.1rem;
-}
+.prob-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.1rem; }
 .prob-item {
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.07);
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 12px; padding: 1rem;
   display: flex; flex-direction: column; gap: .55rem;
 }
 .prob-head { display: flex; align-items: center; gap: .45rem; }
 .prob-name { font-size: .875rem; font-weight: 600; color: white; flex: 1; }
 .prob-ci   { font-size: .68rem; color: rgba(255,255,255,.32); }
-
 .prob-bar-row { display: flex; align-items: center; gap: .75rem; }
 .prob-val { font-size: .95rem; font-weight: 700; min-width: 50px; text-align: right; }
 .prob-meta { font-size: .7rem; color: rgba(255,255,255,.3); }
@@ -1015,13 +1006,21 @@ export default {
 .leg-item { display: flex; align-items: center; gap: .4rem; font-size: .78rem; color: rgba(255,255,255,.5); }
 .leg-dot  { width: 10px; height: 10px; border-radius: 50%; }
 
+.trend-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .5rem; padding: 3rem 1rem; text-align: center;
+}
+.trend-empty-icon { font-size: 2.5rem; }
+.trend-empty p    { color: rgba(255,255,255,.5); font-size: .9rem; margin: 0; }
+.trend-hint       { color: rgba(255,255,255,.3) !important; font-size: .8rem !important; }
+
 /* ── RESPONSIVE ──────────────────────────────── */
 @media (max-width: 1200px) {
-  .sigma-row { grid-template-columns: repeat(2, 1fr); }
+  .sigma-row { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 968px) {
-  .kpi-row   { grid-template-columns: repeat(2, 1fr); }
-  .two-col   { flex-direction: column; }
+  .kpi-row  { grid-template-columns: repeat(2,1fr); }
+  .two-col  { flex-direction: column; }
   .sigma-row { grid-template-columns: 1fr; }
   .prob-grid { grid-template-columns: 1fr; }
 }
