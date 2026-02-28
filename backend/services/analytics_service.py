@@ -21,7 +21,11 @@ from ..models.calendly_booking import CalendlyBooking
 logger = logging.getLogger(__name__)
 
 SPAIN_TZ = timezone(timedelta(hours=1))
-EXCLUDED_SOURCES = ("direct", "internal")
+
+# Solo estas 4 fuentes cuentan para TODOS los cálculos:
+# totales, porcentajes, Six Sigma, tendencia, probabilidades.
+# Todo lo demás (direct, internal, unknown, etc.) se ignora.
+KNOWN_SOURCES = ("instagram", "organic_search", "youtube", "facebook")
 
 
 # ════════════════════════════════════════════════════════════
@@ -83,12 +87,16 @@ def dpmo_to_sigma(dpmo: float) -> float:
 
 def _apply_source_filter(query, model, source: Optional[str]):
     """
-    Siempre excluye direct/internal.
-    Si source es una fuente concreta, filtra además por ella.
+    Filtra SOLO las fuentes conocidas (instagram, organic_search, youtube, facebook).
+    Si source es una fuente concreta además filtra por ella.
+    Cualquier otra fuente (direct, internal, unknown…) queda excluida siempre.
     """
-    query = query.filter(model.traffic_source.notin_(EXCLUDED_SOURCES))
-    if source and source not in EXCLUDED_SOURCES:
+    if source and source in KNOWN_SOURCES:
+        # Fuente concreta seleccionada
         query = query.filter(model.traffic_source == source)
+    else:
+        # "Todas" → solo las 4 conocidas
+        query = query.filter(model.traffic_source.in_(KNOWN_SOURCES))
     return query
 
 
@@ -180,7 +188,7 @@ def get_full_analytics(
     sources_stats.sort(key=lambda x: x["visits"], reverse=True)
 
     # ── Tendencia diaria ─────────────────────────────────────────────────
-    # SIEMPRE excluye direct/internal → el gráfico tiene datos con source=None (todos)
+    # Solo fuentes conocidas (instagram, organic_search, youtube, facebook)
     vd = daily_series(db, PageVisit,       PageVisit.fecha,          start, end, source)
     cd = daily_series(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
     bd = daily_series(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
@@ -215,6 +223,120 @@ def get_full_analytics(
         "sources": sources_stats,
         "trend":   trend,
     }
+
+
+def generate_trend_chart_html(
+    db: Session,
+    days:      Optional[int] = None,
+    date_from: Optional[str] = None,
+    date_to:   Optional[str] = None,
+    source:    Optional[str] = None,
+) -> str:
+    """
+    Genera el gráfico de tendencia temporal con Plotly y devuelve
+    el HTML embebido (sin <html>/<body>, solo el div + script).
+    """
+    import plotly.graph_objects as go
+
+    start, end = get_date_range(days, date_from, date_to)
+
+    vd = daily_series(db, PageVisit,       PageVisit.fecha,          start, end, source)
+    cd = daily_series(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
+    bd = daily_series(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
+
+    all_days = sorted(set(vd) | set(cd) | set(bd))
+
+    if not all_days:
+        return ""
+
+    # Rellenar días sin datos con 0
+    from datetime import date as date_type, timedelta
+    current = start
+    full_days = []
+    while current <= end:
+        full_days.append(str(current))
+        current += timedelta(days=1)
+
+    visits_data   = [vd.get(d, 0) for d in full_days]
+    clicks_data   = [cd.get(d, 0) for d in full_days]
+    bookings_data = [bd.get(d, 0) for d in full_days]
+
+    # Si todos los valores son 0, no renderizar
+    if sum(visits_data) + sum(clicks_data) + sum(bookings_data) == 0:
+        return ""
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=full_days, y=visits_data,
+        name="Visitas",
+        mode="lines+markers",
+        line=dict(color="#06d6a0", width=2),
+        marker=dict(size=5, color="#06d6a0"),
+        fill="tozeroy",
+        fillcolor="rgba(6,214,160,0.07)",
+        hovertemplate="<b>%{x}</b><br>Visitas: %{y}<extra></extra>",
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=full_days, y=clicks_data,
+        name="Clicks Calendly",
+        mode="lines+markers",
+        line=dict(color="#e63946", width=2),
+        marker=dict(size=5, color="#e63946"),
+        fill="tozeroy",
+        fillcolor="rgba(230,57,70,0.07)",
+        hovertemplate="<b>%{x}</b><br>Clicks: %{y}<extra></extra>",
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=full_days, y=bookings_data,
+        name="Citas agendadas",
+        mode="lines+markers",
+        line=dict(color="#ffd166", width=2),
+        marker=dict(size=5, color="#ffd166"),
+        fill="tozeroy",
+        fillcolor="rgba(255,209,102,0.07)",
+        hovertemplate="<b>%{x}</b><br>Citas: %{y}<extra></extra>",
+    ))
+
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=40, r=20, t=10, b=40),
+        height=260,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom", y=1.02,
+            xanchor="right",  x=1,
+            font=dict(color="rgba(255,255,255,0.55)", size=12),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        xaxis=dict(
+            gridcolor="rgba(255,255,255,0.04)",
+            tickfont=dict(color="rgba(255,255,255,0.45)", size=11),
+            linecolor="rgba(255,255,255,0.1)",
+        ),
+        yaxis=dict(
+            gridcolor="rgba(255,255,255,0.04)",
+            tickfont=dict(color="rgba(255,255,255,0.45)", size=11),
+            rangemode="tozero",
+        ),
+        hovermode="x unified",
+        hoverlabel=dict(
+            bgcolor="rgba(10,10,10,0.9)",
+            font=dict(color="white", size=12),
+            bordercolor="rgba(255,255,255,0.1)",
+        ),
+    )
+
+    # Devolver solo el div+script, sin html/body
+    html = fig.to_html(
+        full_html=False,
+        include_plotlyjs="cdn",
+        config={"displayModeBar": False, "responsive": True},
+    )
+    return html
 
 
 def get_dashboard_kpis(

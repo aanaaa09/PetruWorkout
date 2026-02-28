@@ -1,21 +1,18 @@
 # backend/routers/analytics.py
 """
-Router para el dashboard de analytics con métricas Six Sigma.
+Router de analytics — usa AnalyticsService para toda la lógica de cálculo.
 Endpoints:
   GET /api/admin/analytics  → todo en uno (tendencia + Six Sigma + por fuente)
-  GET /api/admin/dashboard  → KPIs básicos (actualizado con filtros)
-  GET /api/tracking/funnel  → embudo visita → click → booking (actualizado con filtros)
-  GET /api/tracking/stats   → distribución por fuente (actualizado con filtros)
+  GET /api/admin/dashboard  → KPIs básicos con filtros
+  GET /api/tracking/funnel  → embudo visita → click → booking
+  GET /api/tracking/stats   → distribución por fuente
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Header, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy import func
 from typing import Optional
-from datetime import datetime, timedelta, date
-import math
 import logging
-from datetime import timezone, timedelta
 
 from ..config.database import get_db
 from ..models.usuario import Usuario, TipoUsuario
@@ -24,19 +21,19 @@ from ..models.calendly_click import CalendlyClick
 from ..models.calendly_booking import CalendlyBooking
 from ..crud.sesion import sesion_crud
 from ..crud.usuario import usuario_crud
+from fastapi.responses import HTMLResponse
 from ..services.analytics_service import (
     get_full_analytics,
     get_dashboard_kpis,
+    generate_trend_chart_html,
     count_filtered,
     group_by_source,
     get_date_range,
 )
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["analytics"])
-
-SPAIN_TZ = timezone(timedelta(hours=1))
-EXCLUDED_SOURCES = ("direct", "internal")
 
 
 # ════════════════════════════════════════════════════════════
@@ -81,6 +78,33 @@ def get_analytics(
         logger.error(f"Error en analytics: {e}")
         import traceback; traceback.print_exc()
         raise HTTPException(status_code=500, detail="Error al obtener analytics")
+
+
+# ════════════════════════════════════════════════════════════
+#  ENDPOINT 1b: /api/admin/trend-chart  (Plotly HTML)
+# ════════════════════════════════════════════════════════════
+
+@router.get("/api/admin/trend-chart", response_class=HTMLResponse)
+def get_trend_chart(
+        admin: Usuario = Depends(verify_admin_token),
+        db: Session = Depends(get_db),
+        days:      Optional[int] = Query(None),
+        date_from: Optional[str] = Query(None),
+        date_to:   Optional[str] = Query(None),
+        source:    Optional[str] = Query(None),
+):
+    """Devuelve el gráfico de tendencia temporal como HTML de Plotly."""
+    try:
+        html = generate_trend_chart_html(
+            db, days=days, date_from=date_from, date_to=date_to, source=source
+        )
+        return HTMLResponse(content=html or "<p style='color:rgba(255,255,255,.4);text-align:center;padding:3rem'>Sin datos para este período</p>")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generando gráfico tendencia: {e}")
+        import traceback; traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Error al generar gráfico")
 
 
 # ════════════════════════════════════════════════════════════
