@@ -15,7 +15,7 @@ from typing import Optional
 from datetime import datetime, timedelta, date
 import math
 import logging
-import pytz
+from datetime import timezone, timedelta
 
 from ..config.database import get_db
 from ..models.usuario import Usuario, TipoUsuario
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["analytics"])
 
-SPAIN_TZ = pytz.timezone("Europe/Madrid")
+SPAIN_TZ = timezone(timedelta(hours=1))
 EXCLUDED_SOURCES = ("direct", "internal")
 
 

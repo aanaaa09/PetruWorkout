@@ -145,8 +145,8 @@ def get_dashboard(
     """KPIs básicos del dashboard con soporte de filtros."""
     try:
         from datetime import date as date_type
-        import pytz
-        SPAIN_TZ = pytz.timezone("Europe/Madrid")
+        from datetime import timezone, timedelta
+        SPAIN_TZ = timezone(timedelta(hours=1))
         now_spain = datetime.now(SPAIN_TZ)
         yesterday = now_spain.date() - timedelta(days=1)
 
