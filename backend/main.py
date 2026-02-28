@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
 
-from .routers import auth, consultas, tracking, leads, calculator, admin_panel
+from .routers import auth, consultas, tracking, leads, calculator, admin_panel, analytics
 from .config.database import Base, engine, close_db_connections
 from .init_db import crear_base_datos
 
@@ -117,7 +117,7 @@ app.include_router(leads.router)
 app.include_router(calculator.router, tags=["calculator"])
 
 app.include_router(admin_panel.router, tags=["admin"])
-
+app.include_router(analytics.router, tags=["analytics"])
 
 # --------------------------
 # Health y info API (ULTRA LIGEROS)

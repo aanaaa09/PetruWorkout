@@ -11,7 +11,7 @@ from sqlalchemy import func, distinct
 from typing import List, Optional
 from datetime import datetime, timedelta
 import logging
-
+from fastapi import Query
 from ..config.database import get_db
 from ..crud import admin_crud
 from ..models.usuario import Usuario, TipoUsuario
@@ -133,20 +133,71 @@ def admin_login(
 # DASHBOARD - ESTADÍSTICAS
 # ============================================
 
-@router.get("/dashboard", response_model=AdminDashboardResponse)
+@router.get("/dashboard")
 def get_dashboard(
         admin: Usuario = Depends(verify_admin_token),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        days:      Optional[int] = Query(30),
+        date_from: Optional[str] = Query(None),
+        date_to:   Optional[str] = Query(None),
+        source:    Optional[str] = Query(None),
 ):
-    """Retorna estadísticas del dashboard"""
+    """KPIs básicos del dashboard con soporte de filtros."""
     try:
-        stats = admin_crud.get_dashboard_stats(db)
-        return AdminDashboardResponse(**stats)
+        from datetime import date as date_type
+        import pytz
+        SPAIN_TZ = pytz.timezone("Europe/Madrid")
+        now_spain = datetime.now(SPAIN_TZ)
+        yesterday = now_spain.date() - timedelta(days=1)
 
+        if date_from and date_to:
+            start = date_type.fromisoformat(date_from)
+            end   = min(date_type.fromisoformat(date_to), yesterday)
+        else:
+            days  = days or 30
+            start = yesterday - timedelta(days=days - 1)
+            end   = yesterday
+
+        EXCLUDED = ("direct", "internal")
+
+        def apply_filters(query, model):
+            query = query.filter(model.traffic_source.notin_(EXCLUDED))
+            if source and source not in EXCLUDED:
+                query = query.filter(model.traffic_source == source)
+            return query
+
+        total_visits = apply_filters(
+            db.query(func.count(PageVisit.id))
+              .filter(func.date(PageVisit.fecha).between(start, end)),
+            PageVisit
+        ).scalar() or 0
+
+        total_clicks = apply_filters(
+            db.query(func.count(CalendlyClick.id))
+              .filter(func.date(CalendlyClick.timestamp).between(start, end)),
+            CalendlyClick
+        ).scalar() or 0
+
+        total_bookings = apply_filters(
+            db.query(func.count(CalendlyBooking.id))
+              .filter(func.date(CalendlyBooking.timestamp).between(start, end)),
+            CalendlyBooking
+        ).scalar() or 0
+
+        return {
+            "success":         True,
+            "total_visits":    total_visits,
+            "total_clicks":    total_clicks,
+            "total_bookings":  total_bookings,
+            "conversion_rate": round(total_bookings / max(total_visits, 1), 6),
+            "period":          {"start": str(start), "end": str(end)},
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error obteniendo dashboard: {e}")
+        logger.error(f"Error en dashboard: {e}")
         raise HTTPException(status_code=500, detail="Error al obtener estadísticas")
-
 
 # ============================================
 # LISTAR USUARIOS
