@@ -244,6 +244,7 @@
 
           <div v-else class="chart-wrap">
             <iframe ref="trendFrame" class="trend-iframe"></iframe>
+          </div>
         </div>
       </div>
 
