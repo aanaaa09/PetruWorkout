@@ -229,19 +229,21 @@
         </div>
       </div>
 
-      <!-- FILA 4 · TENDENCIA TEMPORAL — Plotly desde backend -->
+      <!-- FILA 4 · TENDENCIA TEMPORAL — Plotly directo -->
       <div class="row">
         <div class="card trend-card">
           <div class="card-head">
             <h3>📈 Tendencia temporal</h3>
             <span class="tag">{{ periodLabel }} · {{ sourceLabel }}</span>
           </div>
-
           <div v-if="trendLoading" class="trend-loading">
-  <div class="spinner-sm"></div>
-  <span>Generando gráfico...</span>
-</div>
-<div v-else ref="trendChart" class="chart-wrap"></div>
+            <div class="spinner-sm"></div>
+            <span>Generando gráfico...</span>
+          </div>
+          <div v-else-if="!trendData.length" class="trend-empty">
+            <span>Sin datos para este período</span>
+          </div>
+          <div v-else ref="trendChart" class="chart-wrap"></div>
         </div>
       </div>
 
@@ -283,15 +285,16 @@ export default {
 
       filters: { source: 'all', period: '30', dateFrom: '', dateTo: '' },
       periods: [
-        { value: '7',  label: '7d'  },
-        { value: '30', label: '30d' },
-        { value: '90', label: '90d' },
+        { value: '7',      label: '7d'     },
+        { value: '30',     label: '30d'    },
+        { value: '90',     label: '90d'    },
         { value: 'custom', label: 'Custom' },
       ],
 
       totals:     { visits: 0, clicks: 0, bookings: 0 },
       sixSigma:   { dpmo: 0, sigma: 1, rty: 0, rty_y1: 0, rty_y2: 0, ci_low: 0, ci_high: 0 },
       sourcesRaw: [],
+      trendData:  [],
     }
   },
 
@@ -312,9 +315,9 @@ export default {
       const { visits, clicks, bookings } = this.totals
       const base = visits || 1
       return [
-        { name: '👁️ Visitas',         count: visits,   pct: 100,                    color: '#06d6a0' },
-        { name: '🖱️ Clicks Calendly', count: clicks,   pct: (clicks/base)*100,      color: '#e63946' },
-        { name: '📅 Citas agendadas', count: bookings, pct: (bookings/base)*100,     color: '#ffd166' },
+        { name: '👁️ Visitas',         count: visits,   pct: 100,                color: '#06d6a0' },
+        { name: '🖱️ Clicks Calendly', count: clicks,   pct: (clicks/base)*100,  color: '#e63946' },
+        { name: '📅 Citas agendadas', count: bookings, pct: (bookings/base)*100, color: '#ffd166' },
       ]
     },
     trafficSources() {
@@ -378,7 +381,7 @@ export default {
   },
 
   mounted() {
-    this.fetchAll()
+    this.loadPlotly().then(() => this.fetchAll())
   },
 
   methods: {
@@ -406,9 +409,23 @@ export default {
       return p.toString()
     },
 
+    loadPlotly() {
+      // Si ya está cargado no hacer nada
+      if (window.Plotly) return Promise.resolve()
+
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = 'https://cdn.plot.ly/plotly-2.32.0.min.js'
+        script.onload  = resolve
+        script.onerror = reject
+        document.head.appendChild(script)
+      })
+    },
+
     async fetchAll() {
-      this.loading = true
-      this.error   = null
+      this.loading      = true
+      this.trendLoading = true
+      this.error        = null
       try {
         const token   = localStorage.getItem('admin_token')
         const headers = { token }
@@ -432,63 +449,95 @@ export default {
           ci_low:  a.six_sigma?.ci_low  ?? 0,
           ci_high: a.six_sigma?.ci_high ?? 0,
         }
-        // El backend solo devuelve las 4 fuentes conocidas
         this.sourcesRaw = a.sources ?? []
+        this.trendData  = a.trend   ?? []
 
-        // Cargar el gráfico Plotly en paralelo (no bloquea los KPIs)
-        this.$nextTick(() => this.fetchTrendChart(headers, qs))
+        // Renderizar gráfico después de que Vue actualice el DOM
+        this.$nextTick(() => {
+          this.trendLoading = false
+          this.$nextTick(() => this.renderChart())
+        })
 
       } catch (err) {
         console.error('Dashboard error:', err)
-        this.error = 'Error al cargar los datos. Comprueba la conexión.'
+        this.error        = 'Error al cargar los datos. Comprueba la conexión.'
+        this.trendLoading = false
       } finally {
         this.loading = false
       }
     },
 
-    async fetchTrendChart(headers, qs) {
-  this.trendLoading = true
-  try {
-    const res = await fetch(`${BASE_URL}/api/admin/trend-chart?${qs}`, { headers })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const html = await res.text()
+    renderChart() {
+      const container = this.$refs.trendChart
+      if (!container) return
+      if (!window.Plotly) { console.warn('Plotly no está cargado'); return }
+      if (!this.trendData.length) return
 
-    await this.$nextTick()
-    const container = this.$refs.trendChart
-    if (!container) return
+      const dates    = this.trendData.map(d => d.date)
+      const visits   = this.trendData.map(d => d.visits)
+      const clicks   = this.trendData.map(d => d.clicks)
+      const bookings = this.trendData.map(d => d.bookings)
 
-    // Insertar el HTML directamente en el div
-    container.innerHTML = html
+      const traces = [
+        {
+          x: dates, y: visits, name: 'Visitas',
+          mode: 'lines+markers', type: 'scatter',
+          line:   { color: '#06d6a0', width: 2 },
+          marker: { color: '#06d6a0', size: 5 },
+          fill: 'tozeroy', fillcolor: 'rgba(6,214,160,0.07)',
+          hovertemplate: '<b>%{x}</b><br>Visitas: %{y}<extra></extra>',
+        },
+        {
+          x: dates, y: clicks, name: 'Clicks Calendly',
+          mode: 'lines+markers', type: 'scatter',
+          line:   { color: '#e63946', width: 2 },
+          marker: { color: '#e63946', size: 5 },
+          fill: 'tozeroy', fillcolor: 'rgba(230,57,70,0.07)',
+          hovertemplate: '<b>%{x}</b><br>Clicks: %{y}<extra></extra>',
+        },
+        {
+          x: dates, y: bookings, name: 'Citas agendadas',
+          mode: 'lines+markers', type: 'scatter',
+          line:   { color: '#ffd166', width: 2 },
+          marker: { color: '#ffd166', size: 5 },
+          fill: 'tozeroy', fillcolor: 'rgba(255,209,102,0.07)',
+          hovertemplate: '<b>%{x}</b><br>Citas: %{y}<extra></extra>',
+        },
+      ]
 
-    // Re-ejecutar los scripts manualmente (innerHTML no ejecuta scripts)
-    container.querySelectorAll('script').forEach(oldScript => {
-      const newScript = document.createElement('script')
-      if (oldScript.src) {
-        newScript.src = oldScript.src
-        newScript.async = false
-      } else {
-        newScript.textContent = oldScript.textContent
+      const layout = {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor:  'rgba(0,0,0,0)',
+        margin: { l: 40, r: 20, t: 10, b: 40 },
+        height: 260,
+        legend: {
+          orientation: 'h', yanchor: 'bottom', y: 1.02,
+          xanchor: 'right', x: 1,
+          font: { color: 'rgba(255,255,255,0.55)', size: 12 },
+          bgcolor: 'rgba(0,0,0,0)',
+        },
+        xaxis: {
+          gridcolor: 'rgba(255,255,255,0.04)',
+          tickfont:  { color: 'rgba(255,255,255,0.45)', size: 11 },
+          linecolor: 'rgba(255,255,255,0.1)',
+        },
+        yaxis: {
+          gridcolor: 'rgba(255,255,255,0.04)',
+          tickfont:  { color: 'rgba(255,255,255,0.45)', size: 11 },
+          rangemode: 'tozero',
+        },
+        hovermode: 'x unified',
+        hoverlabel: {
+          bgcolor:     'rgba(10,10,10,0.9)',
+          font:        { color: 'white', size: 12 },
+          bordercolor: 'rgba(255,255,255,0.1)',
+        },
       }
-      oldScript.replaceWith(newScript)
-    })
 
-  } catch (err) {
-    console.error('Trend chart error:', err)
-  } finally {
-    this.trendLoading = false
-  }
-},
-    dpmoToSigma(dpmo) {
-      const table = [[691462,1],[308538,2],[66807,3],[6210,4],[233,5],[3.4,6]]
-      if (dpmo >= 691462) return 1
-      if (dpmo <= 3.4)    return 6
-      for (let i = 0; i < table.length-1; i++) {
-        const [hi,slo] = table[i]; const [lo,shi] = table[i+1]
-        if (dpmo <= hi && dpmo >= lo) {
-          return parseFloat((slo + (dpmo-hi)/(lo-hi)*(shi-slo)).toFixed(3))
-        }
-      }
-      return 1
+      window.Plotly.newPlot(container, traces, layout, {
+        displayModeBar: false,
+        responsive:     true,
+      })
     },
   },
 }
@@ -661,27 +710,23 @@ export default {
 .prob-val { font-size: .95rem; font-weight: 700; min-width: 50px; text-align: right; }
 .prob-meta { font-size: .7rem; color: rgba(255,255,255,.3); }
 
-/* Tendencia con iframe Plotly */
+/* Tendencia */
 .trend-card { flex: 1; }
-
 .trend-loading {
   display: flex; align-items: center; gap: .75rem;
   padding: 2rem; color: rgba(255,255,255,.4); font-size: .875rem;
+}
+.trend-empty {
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem; color: rgba(255,255,255,.3); font-size: .875rem;
 }
 .spinner-sm {
   width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.1);
   border-left-color: var(--color-accent); border-radius: 50%;
   animation: spin .8s linear infinite; flex-shrink: 0;
 }
-
 .chart-wrap {
-  width: 100%; height: 280px;
-  background: rgba(0,0,0,0);
-}
-.trend-iframe {
-  width: 100%; height: 100%;
-  border: none; background: transparent;
-  display: block;
+  width: 100%; min-height: 280px;
 }
 
 /* Responsive */
