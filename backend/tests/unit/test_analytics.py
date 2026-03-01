@@ -309,6 +309,18 @@ class TestGetDashboardKpis:
 # ══════════════════════════════════════════
 
 class TestAnalyticsEndpoints:
+    """
+    Rutas y formatos reales:
+      /api/admin/analytics   → analytics.py  (auth requerida) → {period, totals, six_sigma, sources, trend}
+      /api/admin/dashboard   → analytics.py  (auth requerida) → {success, total_visits, …}
+      /api/tracking/funnel   → tracking.py   (SIN auth)       → {success, period_days, funnel: {visits,…}}
+      /api/tracking/stats    → tracking.py   (SIN auth)       → {success, period_days, data: {visits,…}}
+
+    NOTA: tracking.py se registra ANTES que analytics.py en main.py con prefix /api/tracking,
+    por eso sus rutas tienen prioridad sobre las definidas en analytics.py.
+    """
+
+    # ── /api/admin/analytics (protegido) ──────────────────────────────
 
     def test_analytics_endpoint_unauthorized(self, client, db):
         response = client.get("/api/admin/analytics")
@@ -355,84 +367,140 @@ class TestAnalyticsEndpoints:
         data = response.json()
         assert data['period']['start'] == "2026-01-01"
 
-    def test_funnel_endpoint_unauthorized(self, client, db):
-        response = client.get("/api/tracking/funnel")
-        assert response.status_code == 401
-
-    def test_funnel_endpoint_structure(self, client, db):
-        token = _create_admin_session(db, "funnel_ep1@test.com")
-        response = client.get("/api/tracking/funnel", headers={"token": token})
-        assert response.status_code == 200
+    def test_analytics_totals_with_data(self, client, db):
+        token = _create_admin_session(db, "analytics_ep6@test.com")
+        _seed_tracking(db, source="instagram", visits=8, clicks=4, bookings=2)
+        response = client.get("/api/admin/analytics", headers={"token": token})
         data = response.json()
-        assert data['success'] is True
-        assert 'visits' in data
-        assert 'clicks' in data
-        assert 'bookings' in data
-        assert 'steps' in data
+        assert data['totals']['visits'] == 8
+        assert data['totals']['clicks'] == 4
+        assert data['totals']['bookings'] == 2
 
-    def test_funnel_endpoint_steps_order(self, client, db):
-        token = _create_admin_session(db, "funnel_ep2@test.com")
-        _seed_tracking(db, source="instagram", visits=10, clicks=5, bookings=2)
-        response = client.get("/api/tracking/funnel", headers={"token": token})
-        data = response.json()
-        steps = data['steps']
-        assert len(steps) == 3
-        assert steps[0]['name'] == "Visitas"
-        assert steps[1]['name'] == "Clicks Calendly"
-        assert steps[2]['name'] == "Citas agendadas"
-
-    def test_funnel_steps_rates_coherent(self, client, db):
-        token = _create_admin_session(db, "funnel_ep3@test.com")
-        _seed_tracking(db, source="instagram", visits=10, clicks=5, bookings=2)
-        response = client.get("/api/tracking/funnel", headers={"token": token})
-        data = response.json()
-        steps = data['steps']
-        # Tasa de visitas siempre 1.0
-        assert steps[0]['rate'] == 1.0
-        # Tasas de los pasos siguientes <= 1
-        assert 0 <= steps[1]['rate'] <= 1
-        assert 0 <= steps[2]['rate'] <= 1
-
-    def test_funnel_endpoint_with_source_filter(self, client, db):
-        token = _create_admin_session(db, "funnel_ep4@test.com")
-        _seed_tracking(db, source="youtube", visits=8, clicks=4, bookings=1)
-        _seed_tracking(db, source="instagram", visits=15, clicks=6, bookings=3)
-        response = client.get("/api/tracking/funnel?source=youtube", headers={"token": token})
-        assert response.status_code == 200
-        data = response.json()
-        assert data['visits'] == 8
-
-    def test_stats_endpoint_unauthorized(self, client, db):
-        response = client.get("/api/tracking/stats")
-        assert response.status_code == 401
-
-    def test_stats_endpoint_structure(self, client, db):
-        token = _create_admin_session(db, "stats_ep1@test.com")
-        response = client.get("/api/tracking/stats", headers={"token": token})
-        assert response.status_code == 200
-        data = response.json()
-        assert data['success'] is True
-        assert 'sources' in data
-        assert isinstance(data['sources'], list)
-
-    def test_stats_endpoint_source_fields(self, client, db):
-        token = _create_admin_session(db, "stats_ep2@test.com")
-        _seed_tracking(db, source="instagram", visits=5, clicks=2, bookings=1)
-        response = client.get("/api/tracking/stats", headers={"token": token})
-        data = response.json()
-        if data['sources']:
-            src = data['sources'][0]
-            for field in ('source', 'visits', 'clicks', 'bookings', 'conv_rate'):
-                assert field in src
-
-    def test_stats_sorted_by_visits_desc(self, client, db):
-        token = _create_admin_session(db, "stats_ep3@test.com")
+    def test_analytics_sources_sorted_by_visits(self, client, db):
+        token = _create_admin_session(db, "analytics_ep7@test.com")
         _seed_tracking(db, source="instagram", visits=20, clicks=5, bookings=2)
         _seed_tracking(db, source="youtube", visits=5, clicks=2, bookings=0)
-        response = client.get("/api/tracking/stats", headers={"token": token})
+        response = client.get("/api/admin/analytics", headers={"token": token})
         data = response.json()
         visits = [s['visits'] for s in data['sources']]
         assert visits == sorted(visits, reverse=True)
+
+    # ── /api/tracking/funnel (SIN auth — router tracking.py tiene prioridad) ──
+
+    def test_funnel_no_auth_returns_200(self, client, db):
+        """El endpoint de funnel en tracking.py no requiere autenticación."""
+        response = client.get("/api/tracking/funnel")
+        assert response.status_code == 200
+
+    def test_funnel_response_structure(self, client, db):
+        """/api/tracking/funnel devuelve {success, period_days, traffic_source, funnel:{…}}"""
+        response = client.get("/api/tracking/funnel")
+        assert response.status_code == 200
+        data = response.json()
+        assert data['success'] is True
+        assert 'period_days' in data
+        assert 'funnel' in data
+        funnel = data['funnel']
+        for key in ('visits', 'clicks', 'bookings', 'click_rate', 'booking_rate', 'overall_conversion'):
+            assert key in funnel
+
+    def test_funnel_with_traffic_source_param(self, client, db):
+        from backend.crud.tracking import tracking_crud
+        visit = tracking_crud.create_page_visit(db, "fv1", "linkedin", landing_page="/")
+        _move_to_yesterday(db, visit)
+        click = tracking_crud.create_calendly_click(db, "fv1", "linkedin", button_id="cta")
+        _move_to_yesterday(db, click)
+
+        response = client.get("/api/tracking/funnel?traffic_source=linkedin&days=2")
+        assert response.status_code == 200
+        data = response.json()
+        assert data['funnel']['visits'] >= 1
+        assert data['funnel']['clicks'] >= 1
+
+    def test_funnel_conversion_rates_coherent(self, client, db):
+        from backend.crud.tracking import tracking_crud
+        for i in range(10):
+            v = tracking_crud.create_page_visit(db, f"fr{i}", "instagram", landing_page="/")
+            _move_to_yesterday(db, v)
+        for i in range(5):
+            c = tracking_crud.create_calendly_click(db, f"fr{i}", "instagram", button_id="cta")
+            _move_to_yesterday(db, c)
+
+        response = client.get("/api/tracking/funnel?traffic_source=instagram&days=2")
+        funnel = response.json()['funnel']
+        assert funnel['visits'] == 10
+        assert funnel['clicks'] == 5
+        assert funnel['click_rate'] == 50.0
+
+    def test_funnel_all_sources_no_filter(self, client, db):
+        from backend.crud.tracking import tracking_crud
+        for src in ("instagram", "youtube"):
+            v = tracking_crud.create_page_visit(db, f"fall_{src}", src, landing_page="/")
+            _move_to_yesterday(db, v)
+
+        response = client.get("/api/tracking/funnel?days=2")
+        assert response.status_code == 200
+        assert response.json()['traffic_source'] == 'all'
+
+    # ── /api/tracking/stats (SIN auth — router tracking.py tiene prioridad) ──
+
+    def test_stats_no_auth_returns_200(self, client, db):
+        """El endpoint de stats en tracking.py no requiere autenticación."""
+        response = client.get("/api/tracking/stats")
+        assert response.status_code == 200
+
+    def test_stats_response_structure(self, client, db):
+        """/api/tracking/stats devuelve {success, period_days, data:{visits,clicks,bookings}}"""
+        response = client.get("/api/tracking/stats")
+        data = response.json()
+        assert data['success'] is True
+        assert 'period_days' in data
+        assert 'data' in data
+        assert 'visits' in data['data']
+        assert 'clicks' in data['data']
+        assert 'bookings' in data['data']
+
+    def test_stats_visits_per_source(self, client, db):
+        from backend.crud.tracking import tracking_crud
+        for src, n in [("instagram", 3), ("youtube", 2)]:
+            for i in range(n):
+                v = tracking_crud.create_page_visit(db, f"sv_{src}_{i}", src, landing_page="/")
+                _move_to_yesterday(db, v)
+
+        response = client.get("/api/tracking/stats?days=2")
+        visits = response.json()['data']['visits']
+        ig = next((x for x in visits if x['source'] == 'instagram'), None)
+        yt = next((x for x in visits if x['source'] == 'youtube'), None)
+        assert ig is not None and ig['total'] == 3
+        assert yt is not None and yt['total'] == 2
+
+    def test_stats_clicks_per_source(self, client, db):
+        from backend.crud.tracking import tracking_crud
+        for i in range(4):
+            c = tracking_crud.create_calendly_click(db, f"sc_{i}", "facebook", button_id="cta")
+            _move_to_yesterday(db, c)
+
+        response = client.get("/api/tracking/stats?days=2")
+        clicks = response.json()['data']['clicks']
+        fb = next((x for x in clicks if x['source'] == 'facebook'), None)
+        assert fb is not None and fb['total'] == 4
+
+    # ── /api/admin/dashboard (protegido — analytics.py) ──────────────
+
+    def test_dashboard_unauthorized(self, client, db):
+        response = client.get("/api/admin/dashboard")
+        assert response.status_code == 401
+
+    def test_dashboard_returns_kpis(self, client, db):
+        token = _create_admin_session(db, "dash_ep1@test.com")
+        _seed_tracking(db, source="instagram", visits=10, clicks=4, bookings=2)
+        response = client.get("/api/admin/dashboard", headers={"token": token})
+        assert response.status_code == 200
+        data = response.json()
+        assert data['total_visits'] == 10
+        assert data['total_clicks'] == 4
+        assert data['total_bookings'] == 2
+        assert abs(data['conversion_rate'] - 0.2) < 0.001
 
 
 class TestSixSigmaMetrics:
