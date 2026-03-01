@@ -112,12 +112,13 @@ async def cleanup_middleware(request: Request, call_next):
 # --------------------------
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(consultas.router)
-app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
+
 app.include_router(leads.router)
 app.include_router(calculator.router, tags=["calculator"])
 
+app.include_router(analytics.router, tags=["analytics"])      # primero
+app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
 app.include_router(admin_panel.router, tags=["admin"])
-app.include_router(analytics.router, tags=["analytics"])
 
 # --------------------------
 # Health y info API (ULTRA LIGEROS)

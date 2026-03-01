@@ -66,48 +66,6 @@ async def register_calendly_click(
         logger.error(f"Error al registrar click: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/stats")
-async def get_traffic_statistics(
-        days: int = 30,
-        db: Session = Depends(get_db)
-):
-    """Obtiene estadísticas de tráfico"""
-    try:
-        stats = tracking_crud.get_traffic_stats(db=db, days=days)
-        return {
-            "success": True,
-            "period_days": days,
-            "data": stats
-        }
-    except Exception as e:
-        logger.error(f"Error al obtener estadísticas: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/funnel")
-async def get_conversion_funnel(
-        traffic_source: Optional[str] = None,
-        days: int = 30,
-        db: Session = Depends(get_db)
-):
-    """Obtiene el embudo de conversión"""
-    try:
-        funnel = tracking_crud.get_conversion_funnel(
-            db=db,
-            traffic_source=traffic_source,
-            days=days
-        )
-        return {
-            "success": True,
-            "period_days": days,
-            "traffic_source": traffic_source or "all",
-            "funnel": funnel
-        }
-    except Exception as e:
-        logger.error(f"Error al obtener embudo: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.get("/stats-by-date")
 async def get_stats_by_date(
         days: int = 30,
