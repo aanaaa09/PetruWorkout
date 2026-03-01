@@ -243,7 +243,7 @@
           </div>
 
           <div v-else class="chart-wrap">
-            <iframe ref="trendFrame" class="trend-iframe" sandbox="allow-scripts"></iframe>
+            <iframe ref="trendFrame" class="trend-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
           </div>
         </div>
       </div>
@@ -450,42 +450,36 @@ export default {
     },
 
     async fetchTrendChart(headers, qs) {
-      this.trendLoading = true
-      try {
-        const res = await fetch(`${BASE_URL}/api/admin/trend-chart?${qs}`, { headers })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const html = await res.text()
+  this.trendLoading = true
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/trend-chart?${qs}`, { headers })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const html = await res.text()
 
-        // Montar el HTML de Plotly en el iframe para evitar conflictos de scope
-        await this.$nextTick()
-        const frame = this.$refs.trendFrame
-        if (!frame) return
+    await this.$nextTick()
+    const frame = this.$refs.trendFrame
+    if (!frame) return
 
-        // Escribir el HTML completo en el iframe (fondo transparente, texto blanco)
-        const doc = frame.contentDocument || frame.contentWindow.document
-        doc.open()
-        doc.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              html, body { background: transparent; overflow: hidden; }
-              .plotly-graph-div { width: 100% !important; }
-            </style>
-          </head>
-          <body>${html}</body>
-          </html>
-        `)
-        doc.close()
-      } catch (err) {
-        console.error('Trend chart error:', err)
-        // Si falla el gráfico, no afecta al resto del dashboard
-      } finally {
-        this.trendLoading = false
-      }
-    },
+
+    frame.srcdoc = `<!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { background: transparent; overflow: hidden; }
+          .plotly-graph-div { width: 100% !important; }
+        </style>
+      </head>
+      <body>${html}</body>
+      </html>`
+
+  } catch (err) {
+    console.error('Trend chart error:', err)
+  } finally {
+    this.trendLoading = false
+  }
+},
 
     dpmoToSigma(dpmo) {
       const table = [[691462,1],[308538,2],[66807,3],[6210,4],[233,5],[3.4,6]]
