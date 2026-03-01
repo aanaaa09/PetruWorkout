@@ -85,14 +85,13 @@ export default {
       }
 
       try {
-        // ✅ CORREGIDO: Token en el HEADER, no en el body
-        const response = await fetch('https://petruworkout-production.up.railway.app/api/admin/verify', {
+        const response = await fetch('https://petruworkout-production.up.railway.app/api/admin/verificar', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'token': token  // ✅ Token en el header
+            'token': token
           }
-          // ❌ NO enviar body
+
         })
 
         const data = await response.json()
