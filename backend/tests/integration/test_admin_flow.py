@@ -3,7 +3,7 @@
 # ==========================================
 """Tests de integración para flujo completo de administración"""
 import pytest
-from datetime import datetime
+from datetime import datetime, date
 from unittest.mock import patch
 
 
@@ -147,12 +147,12 @@ def test_flujo_dashboard_estadisticas_completas(client, db):
             tipo_usuario=TipoUsuario.NEWSLETTER
         )
 
-    # Visitas
+    # Visitas con fuentes CONOCIDAS (instagram, youtube, facebook, organic_search)
     for i in range(50):
         tracking_crud.create_page_visit(
             db,
             session_id=f"session_{i}",
-            traffic_source="linkedin" if i % 2 == 0 else "instagram",
+            traffic_source="instagram" if i % 2 == 0 else "youtube",
             landing_page="/"
         )
 
@@ -161,7 +161,7 @@ def test_flujo_dashboard_estadisticas_completas(client, db):
         tracking_crud.create_calendly_click(
             db,
             session_id=f"session_{i}",
-            traffic_source="linkedin" if i % 2 == 0 else "instagram",
+            traffic_source="instagram" if i % 2 == 0 else "youtube",
             button_id="cta",
             button_location="hero"
         )
@@ -176,7 +176,7 @@ def test_flujo_dashboard_estadisticas_completas(client, db):
             event_start_time=datetime.now(),
             booking_timestamp=datetime.now(),
             session_id=f"session_{i}",
-            traffic_source="linkedin"
+            traffic_source="instagram"
         )
 
     # Consultas
@@ -206,9 +206,10 @@ def test_flujo_dashboard_estadisticas_completas(client, db):
 
     token = response.json()['token']
 
-    # 3. Obtener estadísticas
+    # 3. Obtener estadísticas incluyendo hoy en el rango (los datos se acaban de crear hoy)
+    today = str(date.today())
     response = client.get(
-        "/api/admin/dashboard",
+        f"/api/admin/dashboard?date_from={today}&date_to={today}",
         headers={"token": token}
     )
 
@@ -220,6 +221,7 @@ def test_flujo_dashboard_estadisticas_completas(client, db):
     assert stats['total_bookings'] >= 1
     assert stats['total_clicks'] >= 1
     assert 0 <= stats['conversion_rate'] <= 1
+
 
 def test_flujo_gestion_consultas(client, db):
     """Test flujo: recibir consultas → admin las revisa"""
@@ -334,7 +336,7 @@ def test_flujo_tracking_completo_admin(client, db):
 
     session_id = "admin_tracking_test"
 
-    # 1. Usuario visita la web
+    # 1. Usuario visita la web — fuente conocida
     response = client.post("/api/tracking/visit", json={
         "session_id": session_id,
         "traffic_source": "youtube",
@@ -360,11 +362,8 @@ def test_flujo_tracking_completo_admin(client, db):
         "event_uri": "evt_tracking_123"
     })
     assert response.status_code == 200
-    # Después del paso 3 (booking) y ANTES del paso 4 (funnel):
 
     # 4. Crear admin y login para los endpoints protegidos
-    from backend.crud.usuario import usuario_crud
-    from backend.models.usuario import TipoUsuario
     usuario_crud.create(
         db,
         nombre="Admin",
@@ -379,13 +378,17 @@ def test_flujo_tracking_completo_admin(client, db):
     token = login.json()['token']
     headers = {"token": token}
 
-    # 5. Verificar funnel
-    response = client.get("/api/tracking/funnel?traffic_source=linkedin&days=1", headers=headers)
+    # 5. Verificar funnel incluyendo hoy en el rango
+    today = str(date.today())
+    response = client.get(
+        f"/api/tracking/funnel?source=youtube&date_from={today}&date_to={today}",
+        headers=headers
+    )
     assert response.status_code == 200
 
-    # 6. Admin revisa dashboard
+    # 6. Admin revisa dashboard incluyendo hoy en el rango
     response = client.get(
-        "/api/admin/dashboard",
+        f"/api/admin/dashboard?date_from={today}&date_to={today}",
         headers={"token": token}
     )
 
@@ -393,7 +396,7 @@ def test_flujo_tracking_completo_admin(client, db):
     stats = response.json()
 
     assert stats['total_visits'] >= 1
-    assert stats['total_clicks_calendly'] >= 1
+    assert stats['total_clicks'] >= 1
     assert stats['total_bookings'] >= 1
 
 
