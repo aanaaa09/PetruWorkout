@@ -14,5 +14,5 @@ config~=0.5.1
 pytest~=7.4.3
 selenium~=4.39.0
 webdriver-manager~=4.0.2
-psycopg2~=2.9.11
+psycopg2-binary~=2.9.11
 plotly==5.22.0
