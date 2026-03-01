@@ -243,8 +243,7 @@
           </div>
 
           <div v-else class="chart-wrap">
-            <iframe ref="trendFrame" class="trend-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
-          </div>
+            <iframe ref="trendFrame" class="trend-iframe"></iframe>
         </div>
       </div>
 
