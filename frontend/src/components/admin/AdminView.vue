@@ -85,20 +85,17 @@ export default {
       }
 
       try {
-        const response = await fetch('https://petruworkout-production.up.railway.app/api/admin/verificar', {
+        const response = await fetch('https://petruworkout-production.up.railway.app/api/auth/admin/verificar', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'token': token
-          }
-
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
         })
 
         const data = await response.json()
 
-        if (data.valid) {
+        if (data.valida) {
           this.isAuthenticated = true
-          this.currentAdmin = data.admin
+          this.currentAdmin = data.usuario
         } else {
           this.isAuthenticated = false
           localStorage.removeItem('admin_token')
@@ -122,10 +119,8 @@ export default {
       try {
         await fetch('https://petruworkout-production.up.railway.app/api/auth/admin/logout', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'token': token
-          }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
         })
       } catch (error) {
         console.error('Error al cerrar sesión:', error)
