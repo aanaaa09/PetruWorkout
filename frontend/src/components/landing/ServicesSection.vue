@@ -116,7 +116,7 @@
 </template>
 
 <script>
-
+import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'ServicesSection',
   methods: {
