@@ -238,13 +238,10 @@
           </div>
 
           <div v-if="trendLoading" class="trend-loading">
-            <div class="spinner-sm"></div>
-            <span>Generando gráfico...</span>
-          </div>
-
-          <div v-else class="chart-wrap">
-            <iframe ref="trendFrame" class="trend-iframe"></iframe>
-          </div>
+  <div class="spinner-sm"></div>
+  <span>Generando gráfico...</span>
+</div>
+<div v-else ref="trendChart" class="chart-wrap"></div>
         </div>
       </div>
 
@@ -457,22 +454,23 @@ export default {
     const html = await res.text()
 
     await this.$nextTick()
-    const frame = this.$refs.trendFrame
-    if (!frame) return
+    const container = this.$refs.trendChart
+    if (!container) return
 
+    // Insertar el HTML directamente en el div
+    container.innerHTML = html
 
-    frame.srcdoc = `<!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body { background: transparent; overflow: hidden; }
-          .plotly-graph-div { width: 100% !important; }
-        </style>
-      </head>
-      <body>${html}</body>
-      </html>`
+    // Re-ejecutar los scripts manualmente (innerHTML no ejecuta scripts)
+    container.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script')
+      if (oldScript.src) {
+        newScript.src = oldScript.src
+        newScript.async = false
+      } else {
+        newScript.textContent = oldScript.textContent
+      }
+      oldScript.replaceWith(newScript)
+    })
 
   } catch (err) {
     console.error('Trend chart error:', err)
@@ -480,7 +478,6 @@ export default {
     this.trendLoading = false
   }
 },
-
     dpmoToSigma(dpmo) {
       const table = [[691462,1],[308538,2],[66807,3],[6210,4],[233,5],[3.4,6]]
       if (dpmo >= 691462) return 1
