@@ -120,7 +120,7 @@ export default {
       const token = localStorage.getItem('admin_token')
 
       try {
-        await fetch('https://petruworkout-production.up.railway.app/api/admin/logout', {
+        await fetch('https://petruworkout-production.up.railway.app/api/auth/admin/logout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
