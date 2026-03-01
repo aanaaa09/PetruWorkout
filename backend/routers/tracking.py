@@ -66,22 +66,6 @@ async def register_calendly_click(
         logger.error(f"Error al registrar click: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/stats-by-date")
-async def get_stats_by_date(
-        days: int = 30,
-        db: Session = Depends(get_db)
-):
-    """Obtiene estadísticas agrupadas por fecha"""
-    try:
-        stats = tracking_crud.get_stats_by_date(db=db, days=days)
-        return {
-            "success": True,
-            "period_days": days,
-            "data": stats
-        }
-    except Exception as e:
-        logger.error(f"Error al obtener estadísticas por fecha: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/calendly-webhook")
