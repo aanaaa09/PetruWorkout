@@ -1,7 +1,4 @@
 # .github/workflows/ci.yml
-# Se ejecuta automáticamente en GitHub
-# Bloquea commit/merge si tests fallan
-
 name: CI/CD - Tests y Deploy
 
 on:
@@ -18,7 +15,6 @@ jobs:
     name: Backend Tests
     runs-on: ubuntu-latest
 
-    # PostgreSQL temporal en GitHub (GRATIS)
     services:
       postgres:
         image: postgres:15
@@ -29,7 +25,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U test_user"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -96,7 +92,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U test_user"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -116,25 +112,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
           pip install pytest pytest-asyncio httpx
-
-      - name: Iniciar servidor backend
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: test_db
-          DB_USER: test_user
-          DB_PASSWORD: test_password
-          EMAIL_API: test_key
-          CALENDLY_API_KEY: test_key
-          CALENDLY_USER_URI: test_uri
-          CALENDLY_EVENT_URL: test_url
-          SPOTIFY_CLIENT_ID: test_id
-          SPOTIFY_CLIENT_SECRET: test_secret
-          SPOTIFY_REFRESH_TOKEN: test_token
-          OPENAI_API_KEY: test_key
-        run: |
-          python -m uvicorn backend.main:app --host 0.0.0.0 --port 5000 &
-          sleep 10
 
       - name: Ejecutar tests de integración
         env:
@@ -173,7 +150,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U test_user"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -289,47 +266,40 @@ jobs:
           import json
           from datetime import datetime
 
-          # Cargar datos de cobertura
           with open('coverage/coverage.json', 'r') as f:
               coverage_data = json.load(f)
 
-          # Calcular estadísticas
           total_coverage = coverage_data['totals']['percent_covered']
           total_statements = coverage_data['totals']['num_statements']
           covered_statements = coverage_data['totals']['covered_lines']
           missing_statements = coverage_data['totals']['missing_lines']
 
-          # Estado de los jobs
           backend_status = "${{ needs.backend-tests.result }}"
           integration_status = "${{ needs.integration-tests.result }}"
           e2e_status = "${{ needs.e2e-tests.result }}"
 
-          # Generar informe
           report = f"""
-       
-          
           ## Resumen de Tests
-          
+
           | Tipo | Estado |
           |------|--------|
           | Tests Unitarios | {backend_status} |
           | Tests de Integración | {integration_status} |
           | Tests End-to-End | {e2e_status} |
-          
+
           ## Cobertura de Código
-          
+
           - Cobertura Total: {total_coverage:.2f}%
           - Líneas Totales: {total_statements}
           - Líneas Cubiertas: {covered_statements}
           - Líneas Sin Cubrir: {missing_statements}
-        
-          
+
           ## Conclusión
-          
+
           """
 
           all_passed = all(s == "success" for s in [backend_status, integration_status, e2e_status])
-          
+
           if all_passed:
               report += f"ESTADO: APROBADO\n\nTodos los tests pasaron. Cobertura: {total_coverage:.1f}%"
           else:
@@ -340,7 +310,6 @@ jobs:
                   failed.append("Integración")
               if e2e_status != "success":
                   failed.append("E2E")
-              
               report += f"ESTADO: FALLADO\n\nTests fallidos: {', '.join(failed)}\nMerge bloqueado."
 
           with open('informe.md', 'w') as f:
@@ -360,13 +329,11 @@ jobs:
           BACKEND="${{ needs.backend-tests.result }}"
           INTEGRATION="${{ needs.integration-tests.result }}"
           E2E="${{ needs.e2e-tests.result }}"
-          
+
           if [ "$BACKEND" = "success" ] && [ "$INTEGRATION" = "success" ] && [ "$E2E" = "success" ]; then
             echo "TODOS LOS TESTS PASARON"
-            echo "Listo para merge/deploy"
             exit 0
           else
-            echo "TESTS FALLARON"
-            echo "Merge bloqueado"
+            echo "TESTS FALLARON - Merge bloqueado"
             exit 1
           fi
