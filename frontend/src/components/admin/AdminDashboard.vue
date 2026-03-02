@@ -22,6 +22,7 @@
           <option value="organic_search">🔍 Organic Search</option>
           <option value="youtube">▶️ YouTube</option>
           <option value="facebook">👥 Facebook</option>
+          <option value="linkedin">💼 LinkedIn</option>
         </select>
       </div>
       <div class="filter-group">
@@ -256,6 +257,7 @@ const SOURCE_CFG = {
   instagram:      { label: 'Instagram',      emoji: '📸', color: '#E1306C' },
   organic_search: { label: 'Organic Search', emoji: '🔍', color: '#4285F4' },
   youtube:        { label: 'YouTube',        emoji: '▶️', color: '#FF0000' },
+  linkedin:       { label: 'LinkedIn',       emoji: '💼', color: '#0A66C2' },
   facebook:       { label: 'Facebook',       emoji: '👥', color: '#1877F2' },
 }
 const SIGMA_COLORS = [

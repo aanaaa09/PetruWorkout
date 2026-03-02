@@ -1,58 +1,30 @@
 # backend/services/analytics_service.py
 """
-Servicio que concentra toda la lógica de cálculo de analytics:
-  - Rango de fechas
-  - Filtro por fuente (excluye direct/internal)
-  - Six Sigma: DPMO, sigma, RTY, IC Wilson
-  - Construcción de totales, fuentes y tendencia diaria
+Lógica de negocio de analytics (Six Sigma, RTY, IC Wilson, Plotly).
+El acceso a BD se delega completamente a backend.crud.analytics_crud.
 """
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import Optional
-from datetime import datetime, timedelta, date, timezone
+from datetime import timedelta
 import math
 import logging
 
-from ..models.page_visit import PageVisit
-from ..models.calendly_click import CalendlyClick
-from ..models.calendly_booking import CalendlyBooking
+from ..crud.analytics_crud import (
+    KNOWN_SOURCES,
+    get_date_range,
+    visits_count, clicks_count, bookings_count,
+    visits_by_source, clicks_by_source, bookings_by_source,
+    visits_daily, clicks_daily, bookings_daily,
+    # re-exportados para que los routers que los importaban directamente sigan funcionando
+    count_filtered, group_by_source, daily_series,
+)
 
 logger = logging.getLogger(__name__)
 
-SPAIN_TZ = timezone(timedelta(hours=1))
-
-# Solo estas 4 fuentes cuentan para TODOS los cálculos:
-# totales, porcentajes, Six Sigma, tendencia, probabilidades.
-# Todo lo demás (direct, internal, unknown, etc.) se ignora.
-KNOWN_SOURCES = ("instagram", "organic_search", "youtube", "facebook")
-
-
 # ════════════════════════════════════════════════════════════
-#  UTILIDADES PURAS
+#  UTILIDADES PURAMENTE MATEMÁTICAS
 # ════════════════════════════════════════════════════════════
-
-def get_date_range(
-    days: Optional[int],
-    date_from: Optional[str],
-    date_to: Optional[str],
-):
-    """Devuelve (start, end) como date. Siempre hasta ayer (hora España)."""
-    now_spain = datetime.now(SPAIN_TZ)
-    yesterday = now_spain.date() - timedelta(days=1)
-
-    if date_from and date_to:
-        try:
-            start = date.fromisoformat(date_from)
-            end   = min(date.fromisoformat(date_to), yesterday)
-            return start, end
-        except ValueError:
-            pass
-
-    d     = days or 30
-    start = yesterday - timedelta(days=d - 1)
-    return start, yesterday
-
 
 def wilson_ci(k: int, n: int, z: float = 1.96):
     """IC de Wilson al 95% para una proporción k/n."""
@@ -82,55 +54,6 @@ def dpmo_to_sigma(dpmo: float) -> float:
 
 
 # ════════════════════════════════════════════════════════════
-#  HELPERS DE CONSULTA
-# ════════════════════════════════════════════════════════════
-
-def _apply_source_filter(query, model, source: Optional[str]):
-    """
-    Filtra SOLO las fuentes conocidas (instagram, organic_search, youtube, facebook).
-    Si source es una fuente concreta además filtra por ella.
-    Cualquier otra fuente (direct, internal, unknown…) queda excluida siempre.
-    """
-    if source and source in KNOWN_SOURCES:
-        # Fuente concreta seleccionada
-        query = query.filter(model.traffic_source == source)
-    else:
-        # "Todas" → solo las 4 conocidas
-        query = query.filter(model.traffic_source.in_(KNOWN_SOURCES))
-    return query
-
-
-def count_filtered(db: Session, model, date_col, start, end, source):
-    return _apply_source_filter(
-        db.query(func.count(model.id))
-          .filter(func.date(date_col).between(start, end)),
-        model, source
-    ).scalar() or 0
-
-
-def group_by_source(db: Session, model, date_col, start, end, source):
-    return {
-        r.traffic_source: r.n
-        for r in _apply_source_filter(
-            db.query(model.traffic_source, func.count(model.id).label("n"))
-              .filter(func.date(date_col).between(start, end)),
-            model, source
-        ).group_by(model.traffic_source).all()
-    }
-
-
-def daily_series(db: Session, model, date_col, start, end, source):
-    return {
-        str(r.day): r.n
-        for r in _apply_source_filter(
-            db.query(func.date(date_col).label("day"), func.count(model.id).label("n"))
-              .filter(func.date(date_col).between(start, end)),
-            model, source
-        ).group_by(func.date(date_col)).all()
-    }
-
-
-# ════════════════════════════════════════════════════════════
 #  FUNCIÓN PRINCIPAL
 # ════════════════════════════════════════════════════════════
 
@@ -141,18 +64,14 @@ def get_full_analytics(
     date_to:   Optional[str]  = None,
     source:    Optional[str]  = None,
 ) -> dict:
-    """
-    Devuelve el payload completo para /api/admin/analytics:
-      period, totals, six_sigma, sources, trend
-    """
     start, end = get_date_range(days, date_from, date_to)
 
-    # ── Totales ──────────────────────────────────────────────────────────
-    total_visits   = count_filtered(db, PageVisit,       PageVisit.fecha,          start, end, source)
-    total_clicks   = count_filtered(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
-    total_bookings = count_filtered(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
+    # ── Totales ──────────────────────────────────────────────
+    total_visits   = visits_count(db, start, end, source)
+    total_clicks   = clicks_count(db, start, end, source)
+    total_bookings = bookings_count(db, start, end, source)
 
-    # ── Six Sigma ─────────────────────────────────────────────────────────
+    # ── Six Sigma ─────────────────────────────────────────────
     dpmo  = round((1 - total_bookings / max(total_visits, 1)) * 1_000_000)
     sigma = dpmo_to_sigma(dpmo)
     y1    = total_clicks   / max(total_visits, 1)
@@ -160,10 +79,10 @@ def get_full_analytics(
     rty   = y1 * y2
     ci_low, ci_high = wilson_ci(total_bookings, total_visits)
 
-    # ── Por fuente ────────────────────────────────────────────────────────
-    v_map = group_by_source(db, PageVisit,       PageVisit.fecha,          start, end, source)
-    c_map = group_by_source(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
-    b_map = group_by_source(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
+    # ── Por fuente ────────────────────────────────────────────
+    v_map = visits_by_source(db, start, end, source)
+    c_map = clicks_by_source(db, start, end, source)
+    b_map = bookings_by_source(db, start, end, source)
 
     all_sources = set(v_map) | set(c_map) | set(b_map)
     sources_stats = []
@@ -187,13 +106,18 @@ def get_full_analytics(
         })
     sources_stats.sort(key=lambda x: x["visits"], reverse=True)
 
-    # ── Tendencia diaria ─────────────────────────────────────────────────
-    # Solo fuentes conocidas (instagram, organic_search, youtube, facebook)
-    vd = daily_series(db, PageVisit,       PageVisit.fecha,          start, end, source)
-    cd = daily_series(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
-    bd = daily_series(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
+    # ── Tendencia diaria ──────────────────────────────────────
+    vd = visits_daily(db, start, end, source)
+    cd = clicks_daily(db, start, end, source)
+    bd = bookings_daily(db, start, end, source)
 
-    all_days = sorted(set(vd) | set(cd) | set(bd))
+    from datetime import date as date_type
+    full_days = []
+    cur = start
+    while cur <= end:
+        full_days.append(str(cur))
+        cur += timedelta(days=1)
+
     trend = [
         {
             "date":     day,
@@ -201,7 +125,7 @@ def get_full_analytics(
             "clicks":   cd.get(day, 0),
             "bookings": bd.get(day, 0),
         }
-        for day in all_days
+        for day in full_days
     ]
 
     return {
@@ -225,120 +149,6 @@ def get_full_analytics(
     }
 
 
-def generate_trend_chart_html(
-    db: Session,
-    days:      Optional[int] = None,
-    date_from: Optional[str] = None,
-    date_to:   Optional[str] = None,
-    source:    Optional[str] = None,
-) -> str:
-    """
-    Genera el gráfico de tendencia temporal con Plotly y devuelve
-    el HTML embebido (sin <html>/<body>, solo el div + script).
-    """
-    import plotly.graph_objects as go
-
-    start, end = get_date_range(days, date_from, date_to)
-
-    vd = daily_series(db, PageVisit,       PageVisit.fecha,          start, end, source)
-    cd = daily_series(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
-    bd = daily_series(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
-
-    all_days = sorted(set(vd) | set(cd) | set(bd))
-
-    if not all_days:
-        return ""
-
-    # Rellenar días sin datos con 0
-    from datetime import date as date_type, timedelta
-    current = start
-    full_days = []
-    while current <= end:
-        full_days.append(str(current))
-        current += timedelta(days=1)
-
-    visits_data   = [vd.get(d, 0) for d in full_days]
-    clicks_data   = [cd.get(d, 0) for d in full_days]
-    bookings_data = [bd.get(d, 0) for d in full_days]
-
-    # Si todos los valores son 0, no renderizar
-    if sum(visits_data) + sum(clicks_data) + sum(bookings_data) == 0:
-        return ""
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=full_days, y=visits_data,
-        name="Visitas",
-        mode="lines+markers",
-        line=dict(color="#06d6a0", width=2),
-        marker=dict(size=5, color="#06d6a0"),
-        fill="tozeroy",
-        fillcolor="rgba(6,214,160,0.07)",
-        hovertemplate="<b>%{x}</b><br>Visitas: %{y}<extra></extra>",
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=full_days, y=clicks_data,
-        name="Clicks Calendly",
-        mode="lines+markers",
-        line=dict(color="#e63946", width=2),
-        marker=dict(size=5, color="#e63946"),
-        fill="tozeroy",
-        fillcolor="rgba(230,57,70,0.07)",
-        hovertemplate="<b>%{x}</b><br>Clicks: %{y}<extra></extra>",
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=full_days, y=bookings_data,
-        name="Citas agendadas",
-        mode="lines+markers",
-        line=dict(color="#ffd166", width=2),
-        marker=dict(size=5, color="#ffd166"),
-        fill="tozeroy",
-        fillcolor="rgba(255,209,102,0.07)",
-        hovertemplate="<b>%{x}</b><br>Citas: %{y}<extra></extra>",
-    ))
-
-    fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=40, r=20, t=10, b=40),
-        height=260,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom", y=1.02,
-            xanchor="right",  x=1,
-            font=dict(color="rgba(255,255,255,0.55)", size=12),
-            bgcolor="rgba(0,0,0,0)",
-        ),
-        xaxis=dict(
-            gridcolor="rgba(255,255,255,0.04)",
-            tickfont=dict(color="rgba(255,255,255,0.45)", size=11),
-            linecolor="rgba(255,255,255,0.1)",
-        ),
-        yaxis=dict(
-            gridcolor="rgba(255,255,255,0.04)",
-            tickfont=dict(color="rgba(255,255,255,0.45)", size=11),
-            rangemode="tozero",
-        ),
-        hovermode="x unified",
-        hoverlabel=dict(
-            bgcolor="rgba(10,10,10,0.9)",
-            font=dict(color="white", size=12),
-            bordercolor="rgba(255,255,255,0.1)",
-        ),
-    )
-
-    # Devolver solo el div+script, sin html/body
-    html = fig.to_html(
-        full_html=False,
-        include_plotlyjs="cdn",
-        config={"displayModeBar": False, "responsive": True},
-    )
-    return html
-
-
 def get_dashboard_kpis(
     db: Session,
     days:      Optional[int] = 30,
@@ -346,11 +156,10 @@ def get_dashboard_kpis(
     date_to:   Optional[str] = None,
     source:    Optional[str] = None,
 ) -> dict:
-    """KPIs básicos para /api/admin/dashboard."""
     start, end = get_date_range(days, date_from, date_to)
-    v = count_filtered(db, PageVisit,       PageVisit.fecha,          start, end, source)
-    c = count_filtered(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
-    b = count_filtered(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
+    v = visits_count(db, start, end, source)
+    c = clicks_count(db, start, end, source)
+    b = bookings_count(db, start, end, source)
     return {
         "success":         True,
         "total_visits":    v,
@@ -359,3 +168,71 @@ def get_dashboard_kpis(
         "conversion_rate": round(b / max(v, 1), 6),
         "period":          {"start": str(start), "end": str(end)},
     }
+
+
+def generate_trend_chart_html(
+    db: Session,
+    days:      Optional[int] = None,
+    date_from: Optional[str] = None,
+    date_to:   Optional[str] = None,
+    source:    Optional[str] = None,
+) -> str:
+    """Genera HTML de Plotly para el gráfico de tendencia temporal."""
+    import plotly.graph_objects as go
+    from datetime import timedelta
+
+    start, end = get_date_range(days, date_from, date_to)
+
+    vd = visits_daily(db, start, end, source)
+    cd = clicks_daily(db, start, end, source)
+    bd = bookings_daily(db, start, end, source)
+
+    from datetime import date as date_type
+    full_days, cur = [], start
+    while cur <= end:
+        full_days.append(str(cur))
+        cur += timedelta(days=1)
+
+    visits_data   = [vd.get(d, 0) for d in full_days]
+    clicks_data   = [cd.get(d, 0) for d in full_days]
+    bookings_data = [bd.get(d, 0) for d in full_days]
+
+    if sum(visits_data) + sum(clicks_data) + sum(bookings_data) == 0:
+        return ""
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=full_days, y=visits_data, name="Visitas",
+        mode="lines+markers",
+        line=dict(color="#06d6a0", width=2), marker=dict(size=5, color="#06d6a0"),
+        fill="tozeroy", fillcolor="rgba(6,214,160,0.07)",
+        hovertemplate="<b>%{x}</b><br>Visitas: %{y}<extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=full_days, y=clicks_data, name="Clicks Calendly",
+        mode="lines+markers",
+        line=dict(color="#e63946", width=2), marker=dict(size=5, color="#e63946"),
+        fill="tozeroy", fillcolor="rgba(230,57,70,0.07)",
+        hovertemplate="<b>%{x}</b><br>Clicks: %{y}<extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=full_days, y=bookings_data, name="Citas agendadas",
+        mode="lines+markers",
+        line=dict(color="#ffd166", width=2), marker=dict(size=5, color="#ffd166"),
+        fill="tozeroy", fillcolor="rgba(255,209,102,0.07)",
+        hovertemplate="<b>%{x}</b><br>Citas: %{y}<extra></extra>",
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=40, r=20, t=10, b=40), height=260,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+                    font=dict(color="rgba(255,255,255,0.55)", size=12), bgcolor="rgba(0,0,0,0)"),
+        xaxis=dict(gridcolor="rgba(255,255,255,0.04)", tickfont=dict(color="rgba(255,255,255,0.45)", size=11), linecolor="rgba(255,255,255,0.1)"),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.04)", tickfont=dict(color="rgba(255,255,255,0.45)", size=11), rangemode="tozero"),
+        hovermode="x unified",
+        hoverlabel=dict(bgcolor="rgba(10,10,10,0.9)", font=dict(color="white", size=12), bordercolor="rgba(255,255,255,0.1)"),
+    )
+    return fig.to_html(
+        full_html=False, include_plotlyjs="cdn",
+        config={"displayModeBar": False, "responsive": True},
+    )
