@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func, distinct
+
+from ..models import SessionTracking
 from ..models.page_visit import PageVisit
 from ..models.calendly_click import CalendlyClick
 from ..models.calendly_booking import CalendlyBooking
@@ -12,6 +14,17 @@ logger = logging.getLogger(__name__)
 class TrackingCRUD:
     """CRUD para tracking de conversión"""
 
+    def _ensure_session(self, db: Session, session_id: str, traffic_source: str):
+        """Crea la sesión de tracking si no existe"""
+        existe = db.query(SessionTracking).filter(
+            SessionTracking.session_id == session_id
+        ).first()
+        if not existe:
+            db.add(SessionTracking(
+                session_id=session_id,
+                traffic_source=traffic_source
+            ))
+            db.commit()
     def create_page_visit(
             self,
             db: Session,
@@ -22,6 +35,7 @@ class TrackingCRUD:
             landing_page: str = None
 
     ) -> PageVisit:
+        self._ensure_session(db, session_id, traffic_source)
         """Registra una visita a la página"""
         now_utc = datetime.utcnow()
         now_spain = now_utc + timedelta(hours=1)
@@ -53,6 +67,7 @@ class TrackingCRUD:
             page_url: str = None,
 
     ) -> CalendlyClick:
+        self._ensure_session(db, session_id, traffic_source)
         """Registra un click en botón de Calendly"""
         now_utc = datetime.utcnow()
         now_spain = now_utc + timedelta(hours=1)
@@ -85,6 +100,7 @@ class TrackingCRUD:
             session_id: str = None,
             traffic_source: str = None
     ) -> CalendlyBooking:
+        self._ensure_session(db, session_id, traffic_source)
         """Registra una reserva completada en Calendly"""
 
         if booking_timestamp:

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Date, Time, Boolean, func, Index
+from sqlalchemy import Column, Integer, String, DateTime, Date, Time, Boolean, func, Index, ForeignKey
 from backend.config.database import Base
 
 
@@ -7,7 +7,7 @@ class CalendlyBooking(Base):
     __tablename__ = "calendly_bookings"
 
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(String(255), nullable=True, index=True)
+    session_id = Column(String(255), ForeignKey("sessions_tracking.session_id"), nullable=True, index=True)
     traffic_source = Column(String(50), nullable=True, index=True)
     calendly_event_id = Column(String(255), unique=True, nullable=False, index=True)
     invitee_email = Column(String(255), nullable=True, index=True)

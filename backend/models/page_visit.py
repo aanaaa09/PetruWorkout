@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Date, Time, func, Index
+from sqlalchemy import Column, Integer, String, Text, DateTime, Date, Time, func, Index, ForeignKey
 from backend.config.database import Base
 
 
@@ -7,7 +7,7 @@ class PageVisit(Base):
     __tablename__ = "page_visits"
 
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(String(255), nullable=False, index=True)
+    session_id = Column(String(255), ForeignKey("sessions_tracking.session_id"), nullable=False, index=True)
     traffic_source = Column(String(50), nullable=False, index=True)
     referrer_url = Column(Text, nullable=True)
     user_agent = Column(Text, nullable=True)
