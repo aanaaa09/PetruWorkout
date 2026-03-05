@@ -210,6 +210,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 class="btn-calendly"
+                @click="handleCalendlyClick"
               >
                 📅 Agendar Llamada Gratuita
               </a>
@@ -222,6 +223,7 @@
 </template>
 
 <script>
+import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'CalorieCalculator',
   data() {
@@ -333,6 +335,9 @@ export default {
       } else {
         return 'Para ganar masa muscular (superávit de 300 kcal/día)'
       }
+    },
+    handleCalendlyClick() {
+      trackCalendlyClick('calculator-cta-button', 'calculator-section')
     }
   }
 }
