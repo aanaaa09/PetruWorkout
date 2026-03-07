@@ -25,17 +25,6 @@
           <option value="linkedin">💼 LinkedIn</option>
         </select>
       </div>
-
-      <div class="filter-group">
-        <label>Botón de Calendly</label>
-        <select v-model="filters.button" @change="fetchAll" class="filter-select">
-          <option value="all">Todos los botones</option>
-          <option v-for="btn in BUTTON_OPTIONS" :key="btn.key" :value="btn.key">
-            {{ btn.emoji }} {{ btn.label }}
-          </option>
-        </select>
-      </div>
-
       <div class="filter-group">
         <label>Período</label>
         <div class="period-pills">
@@ -51,18 +40,6 @@
       <div v-if="filters.period === 'custom'" class="filter-group">
         <label>Hasta</label>
         <input type="date" v-model="filters.dateTo" @change="fetchAll" class="filter-input" />
-      </div>
-
-      <!-- chips de filtros activos -->
-      <div v-if="activeFiltersCount > 0" class="active-filters">
-        <span v-if="filters.source !== 'all'" class="filter-chip">
-          {{ SOURCE_CFG[filters.source]?.emoji }} {{ SOURCE_CFG[filters.source]?.label }}
-          <button @click="filters.source = 'all'; fetchAll()">✕</button>
-        </span>
-        <span v-if="filters.button !== 'all'" class="filter-chip">
-          {{ BUTTON_CFG[filters.button]?.emoji }} {{ BUTTON_CFG[filters.button]?.label }}
-          <button @click="filters.button = 'all'; fetchAll()">✕</button>
-        </span>
       </div>
     </div>
 
@@ -110,17 +87,17 @@
           <div class="kpi-body">
             <span class="kpi-label">Clicks Calendly</span>
             <span class="kpi-value">{{ fmt(totals.clicks) }}</span>
-            <span class="kpi-sub">{{ filters.button !== 'all' ? BUTTON_CFG[filters.button]?.label : 'todos los botones' }}</span>
+            <span class="kpi-sub">interacciones</span>
           </div>
         </div>
       </div>
 
-      <!-- FILA 2 · EMBUDO + FUENTES + BOTONES -->
+      <!-- FILA 2 · EMBUDO + FUENTES -->
       <div class="row two-col">
         <div class="card">
           <div class="card-head">
             <h3>⬇️ Embudo de conversión</h3>
-            <span class="tag">{{ sourceLabel }}{{ buttonLabel ? ' · ' + buttonLabel : '' }}</span>
+            <span class="tag">{{ sourceLabel }}</span>
           </div>
           <div class="funnel">
             <div v-for="(step, i) in funnelSteps" :key="i" class="funnel-step">
@@ -138,51 +115,53 @@
             </div>
           </div>
         </div>
-
-        <!-- columna derecha: fuentes + botones apilados -->
-        <div class="right-col">
-          <div class="card">
-            <div class="card-head">
-              <h3>📡 Distribución por fuente</h3>
-              <span class="tag">{{ periodLabel }}</span>
-            </div>
-            <div class="sources">
-              <div v-for="src in trafficSources" :key="src.key" class="source-row">
-                <div class="source-info"><span>{{ src.emoji }}</span><span class="source-name">{{ src.label }}</span></div>
-                <div class="bar-track"><div class="bar-fill" :style="{ width: src.pct + '%', background: src.color }"></div></div>
-                <div class="source-stats">
-                  <span class="source-pct">{{ src.pct.toFixed(1) }}%</span>
-                  <span class="source-n">{{ fmt(src.visits) }}</span>
-                </div>
-              </div>
-              <div v-if="trafficSources.length === 0" class="empty-sources">Sin datos de fuentes</div>
-            </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>📡 Distribución por fuente</h3>
+            <span class="tag">{{ periodLabel }}</span>
           </div>
-
-          <!-- NUEVO: Distribución por botón -->
-          <div class="card">
-            <div class="card-head">
-              <h3>🖱️ Distribución por botón</h3>
-              <span class="tag">Clicks · {{ periodLabel }}</span>
-            </div>
-            <div class="sources">
-              <div v-for="btn in buttonDistribution" :key="btn.key" class="source-row">
-                <div class="source-info"><span>{{ btn.emoji }}</span><span class="source-name">{{ btn.label }}</span></div>
-                <div class="bar-track"><div class="bar-fill" :style="{ width: btn.pct + '%', background: btn.color }"></div></div>
-                <div class="source-stats">
-                  <span class="source-pct">{{ btn.pct.toFixed(1) }}%</span>
-                  <span class="source-n">{{ fmt(btn.clicks) }}</span>
-                </div>
+          <div class="sources">
+            <div v-for="src in trafficSources" :key="src.key" class="source-row">
+              <div class="source-info"><span>{{ src.emoji }}</span><span class="source-name">{{ src.label }}</span></div>
+              <div class="bar-track"><div class="bar-fill" :style="{ width: src.pct + '%', background: src.color }"></div></div>
+              <div class="source-stats">
+                <span class="source-pct">{{ src.pct.toFixed(1) }}%</span>
+                <span class="source-n">{{ fmt(src.visits) }}</span>
               </div>
-              <div v-if="buttonDistribution.length === 0" class="empty-sources">Sin datos de botones</div>
             </div>
+            <div v-if="trafficSources.length === 0" class="empty-sources">Sin datos de fuentes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILA 2b · DISTRIBUCIÓN POR BOTÓN -->
+      <div class="row">
+        <div class="card">
+          <div class="card-head">
+            <h3>🖱️ Distribución de clicks por botón</h3>
+            <span class="tag">{{ periodLabel }} · {{ sourceLabel }}</span>
+          </div>
+          <div class="btn-dist-grid">
+            <div v-for="btn in buttonDistribution" :key="btn.key" class="btn-dist-row">
+              <div class="source-info">
+                <span>{{ btn.emoji }}</span>
+                <span class="source-name">{{ btn.label }}</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" :style="{ width: btn.pct + '%', background: btn.color }"></div>
+              </div>
+              <div class="source-stats">
+                <span class="source-pct">{{ btn.pct.toFixed(1) }}%</span>
+                <span class="source-n">{{ fmt(btn.clicks) }} clicks</span>
+              </div>
+            </div>
+            <div v-if="buttonDistribution.length === 0" class="empty-sources">Sin datos de botones en este período</div>
           </div>
         </div>
       </div>
 
       <!-- FILA 3 · SIX SIGMA -->
       <div class="row sigma-row">
-        <!-- Gauge -->
         <div class="card gauge-card">
           <div class="card-head">
             <h3>🏆 Nivel Sigma</h3>
@@ -200,7 +179,6 @@
             <span v-for="n in [1,2,3,4,5,6]" :key="n">{{ n }}σ</span>
           </div>
         </div>
-        <!-- DPMO -->
         <div class="card sigma-card">
           <div class="sigma-icon">💥</div>
           <div class="sigma-body">
@@ -210,7 +188,6 @@
           </div>
           <span class="sigma-badge" :style="{ color: sigmaColor, background: sigmaColor + '18', borderColor: sigmaColor + '44' }">{{ dpmoLabel }}</span>
         </div>
-        <!-- RTY + IC unificados -->
         <div class="card sigma-card conversion-card">
           <div class="sigma-icon">🔄</div>
           <div class="sigma-body">
@@ -281,7 +258,7 @@
         <div class="card trend-card">
           <div class="card-head">
             <h3>📈 Tendencia temporal</h3>
-            <span class="tag">{{ periodLabel }} · {{ sourceLabel }}{{ buttonLabel ? ' · ' + buttonLabel : '' }}</span>
+            <span class="tag">{{ periodLabel }} · {{ sourceLabel }}</span>
           </div>
           <div v-if="trendLoading" class="trend-loading">
             <div class="spinner-sm"></div>
@@ -317,8 +294,6 @@ const BUTTON_CFG = {
   'simple-footer':      { label: 'Footer simple',    emoji: '📄', color: '#4ecdc4' },
 }
 
-const BUTTON_OPTIONS = Object.entries(BUTTON_CFG).map(([key, v]) => ({ key, ...v }))
-
 const SIGMA_COLORS = [
   { min: 5, color: '#06d6a0', label: 'Clase mundial' },
   { min: 4, color: '#4ecdc4', label: 'Excelente'     },
@@ -340,15 +315,11 @@ export default {
 
   data() {
     return {
-      SOURCE_CFG,
-      BUTTON_CFG,
-      BUTTON_OPTIONS,
-
       loading:      false,
       trendLoading: false,
       error:        null,
 
-      filters: { source: 'all', button: 'all', period: '30', dateFrom: '', dateTo: '' },
+      filters: { source: 'all', period: '30', dateFrom: '', dateTo: '' },
       periods: [
         { value: '7',      label: '7d'     },
         { value: '30',     label: '30d'    },
@@ -365,19 +336,12 @@ export default {
   },
 
   computed: {
-    activeFiltersCount() {
-      return (this.filters.source !== 'all' ? 1 : 0) + (this.filters.button !== 'all' ? 1 : 0)
-    },
     conversionRate() {
       return this.totals.visits > 0 ? this.totals.bookings / this.totals.visits : 0
     },
     sourceLabel() {
       if (this.filters.source === 'all') return 'Todas las fuentes'
       return SOURCE_CFG[this.filters.source]?.label || this.filters.source
-    },
-    buttonLabel() {
-      if (this.filters.button === 'all') return ''
-      return BUTTON_CFG[this.filters.button]?.label || this.filters.button
     },
     periodLabel() {
       if (this.filters.period === 'custom') return 'Período personalizado'
@@ -404,8 +368,6 @@ export default {
         }))
         .sort((a,b) => b.visits - a.visits)
     },
-
-    // ── NUEVO: distribución por botón ───────────────────────
     buttonDistribution() {
       const total = this.buttonsRaw.reduce((s, x) => s + (x.clicks||0), 0) || 1
       return this.buttonsRaw
@@ -422,7 +384,6 @@ export default {
         })
         .sort((a, b) => b.clicks - a.clicks)
     },
-
     sourceProbabilities() {
       return this.sourcesRaw
         .filter(s => SOURCE_CFG[s.source])
@@ -492,7 +453,6 @@ export default {
     buildQS() {
       const p = new URLSearchParams()
       if (this.filters.source !== 'all') p.append('source', this.filters.source)
-      if (this.filters.button !== 'all') p.append('button', this.filters.button)
       if (this.filters.period !== 'custom') {
         p.append('days', this.filters.period)
       } else {
@@ -683,21 +643,6 @@ export default {
 .period-pill:hover { background: rgba(255,255,255,.12); color: white; }
 .period-pill.active { background: rgba(6,214,160,.18); border-color: var(--color-accent); color: var(--color-accent); }
 
-/* Active filter chips */
-.active-filters { display: flex; flex-wrap: wrap; gap: .4rem; align-self: center; }
-.filter-chip {
-  display: inline-flex; align-items: center; gap: .4rem;
-  background: rgba(6,214,160,.12); border: 1px solid rgba(6,214,160,.3);
-  color: var(--color-accent); border-radius: 20px;
-  padding: .2rem .65rem; font-size: .75rem; font-weight: 600;
-}
-.filter-chip button {
-  background: none; border: none; color: inherit;
-  cursor: pointer; font-size: .7rem; padding: 0; line-height: 1;
-  opacity: .7;
-}
-.filter-chip button:hover { opacity: 1; }
-
 /* Loading / Error */
 .loading-state {
   display: flex; flex-direction: column; align-items: center;
@@ -749,14 +694,8 @@ export default {
   padding: .18rem .6rem; border-radius: 20px; white-space: nowrap;
 }
 
-/* Layout fila 2: embudo a la izquierda, columna derecha con dos cards apiladas */
-.two-col { align-items: stretch; }
 .two-col > .card:first-child { flex: 1.1; }
-.right-col {
-  flex: 0.9;
-  display: flex; flex-direction: column; gap: 1.25rem;
-}
-.right-col > .card { flex: 1; }
+.two-col > .card:last-child  { flex: 0.9; }
 
 /* Funnel */
 .funnel { display: flex; flex-direction: column; gap: 1.1rem; }
@@ -770,15 +709,26 @@ export default {
 .bar-track { height: 9px; background: rgba(255,255,255,.06); border-radius: 5px; overflow: hidden; flex: 1; }
 .bar-fill  { height: 100%; border-radius: 5px; transition: width .8s ease; }
 
-/* Sources / Buttons */
+/* Sources */
 .sources { display: flex; flex-direction: column; gap: .875rem; }
 .source-row { display: grid; grid-template-columns: 140px 1fr auto; align-items: center; gap: .75rem; }
 .source-info { display: flex; align-items: center; gap: .5rem; }
-.source-name { font-size: .83rem; color: rgba(255,255,255,.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.source-name { font-size: .83rem; color: rgba(255,255,255,.72); white-space: nowrap; }
 .source-stats { display: flex; flex-direction: column; align-items: flex-end; }
 .source-pct { font-size: .83rem; color: white; font-weight: 700; }
 .source-n   { font-size: .72rem; color: rgba(255,255,255,.38); }
 .empty-sources { font-size: .85rem; color: rgba(255,255,255,.35); text-align: center; padding: 1rem 0; }
+
+/* Distribución por botón — 2 columnas para aprovechar el ancho */
+.btn-dist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .75rem 3rem;
+}
+.btn-dist-row {
+  display: grid; grid-template-columns: 150px 1fr auto;
+  align-items: center; gap: .75rem;
+}
 
 /* Sigma */
 .sigma-row { display: grid; grid-template-columns: 210px 1fr 1.4fr; gap: 1.25rem; margin-bottom: 0; }
@@ -842,18 +792,20 @@ export default {
 /* Responsive */
 @media (max-width: 1200px) {
   .sigma-row { grid-template-columns: repeat(2,1fr); }
+  .btn-dist-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 968px) {
   .kpi-row  { grid-template-columns: repeat(2,1fr); }
   .two-col  { flex-direction: column; }
-  .right-col { flex-direction: column; }
   .sigma-row { grid-template-columns: 1fr; }
   .prob-grid { grid-template-columns: 1fr; }
+  .btn-dist-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .kpi-row { grid-template-columns: 1fr; }
   .filters-bar { gap: 1rem; padding: 1rem; }
   .dashboard-header { flex-direction: column; align-items: flex-start; gap: .5rem; }
   .source-row { grid-template-columns: 100px 1fr auto; }
+  .btn-dist-row { grid-template-columns: 110px 1fr auto; }
 }
 </style>
