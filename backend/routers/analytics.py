@@ -2,7 +2,7 @@
 """
 Router de analytics — usa AnalyticsService para toda la lógica de cálculo.
 Endpoints:
-  GET /api/admin/analytics  → todo en uno (tendencia + Six Sigma + por fuente)
+  GET /api/admin/analytics  → todo en uno (tendencia + Six Sigma + por fuente + por botón)
   GET /api/admin/dashboard  → KPIs básicos con filtros
   GET /api/tracking/funnel  → embudo visita → click → booking
   GET /api/tracking/stats   → distribución por fuente
@@ -69,9 +69,13 @@ def get_analytics(
         date_from: Optional[str] = Query(None),
         date_to:   Optional[str] = Query(None),
         source:    Optional[str] = Query(None),
+        button:    Optional[str] = Query(None),
 ):
     try:
-        return get_full_analytics(db, days=days, date_from=date_from, date_to=date_to, source=source)
+        return get_full_analytics(
+            db, days=days, date_from=date_from, date_to=date_to,
+            source=source, button=button,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -92,13 +96,17 @@ def get_trend_chart(
         date_from: Optional[str] = Query(None),
         date_to:   Optional[str] = Query(None),
         source:    Optional[str] = Query(None),
+        button:    Optional[str] = Query(None),
 ):
     """Devuelve el gráfico de tendencia temporal como HTML de Plotly."""
     try:
         html = generate_trend_chart_html(
-            db, days=days, date_from=date_from, date_to=date_to, source=source
+            db, days=days, date_from=date_from, date_to=date_to,
+            source=source, button=button,
         )
-        return HTMLResponse(content=html or "<p style='color:rgba(255,255,255,.4);text-align:center;padding:3rem'>Sin datos para este período</p>")
+        return HTMLResponse(
+            content=html or "<p style='color:rgba(255,255,255,.4);text-align:center;padding:3rem'>Sin datos para este período</p>"
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -119,9 +127,13 @@ def get_dashboard_filtered(
         date_from: Optional[str] = Query(None),
         date_to:   Optional[str] = Query(None),
         source:    Optional[str] = Query(None),
+        button:    Optional[str] = Query(None),
 ):
     try:
-        return get_dashboard_kpis(db, days=days, date_from=date_from, date_to=date_to, source=source)
+        return get_dashboard_kpis(
+            db, days=days, date_from=date_from, date_to=date_to,
+            source=source, button=button,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -141,11 +153,12 @@ def get_funnel(
         date_from: Optional[str] = Query(None),
         date_to:   Optional[str] = Query(None),
         source:    Optional[str] = Query(None),
+        button:    Optional[str] = Query(None),
 ):
     try:
         start, end = get_date_range(days, date_from, date_to)
         v = count_filtered(db, PageVisit,       PageVisit.fecha,          start, end, source)
-        c = count_filtered(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
+        c = count_filtered(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source, button)
         b = count_filtered(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
         return {
             "success": True, "visits": v, "clicks": c, "bookings": b,
@@ -174,11 +187,12 @@ def get_stats(
         date_from: Optional[str] = Query(None),
         date_to:   Optional[str] = Query(None),
         source:    Optional[str] = Query(None),
+        button:    Optional[str] = Query(None),
 ):
     try:
         start, end = get_date_range(days, date_from, date_to)
         v_map = group_by_source(db, PageVisit,       PageVisit.fecha,          start, end, source)
-        c_map = group_by_source(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source)
+        c_map = group_by_source(db, CalendlyClick,   CalendlyClick.timestamp,  start, end, source, button)
         b_map = group_by_source(db, CalendlyBooking, CalendlyBooking.timestamp, start, end, source)
 
         all_sources = set(v_map) | set(c_map) | set(b_map)

@@ -12,10 +12,12 @@ import logging
 
 from ..crud.analytics_crud import (
     KNOWN_SOURCES,
+    KNOWN_BUTTONS,
     get_date_range,
     visits_count, clicks_count, bookings_count,
     visits_by_source, clicks_by_source, bookings_by_source,
     visits_daily, clicks_daily, bookings_daily,
+    group_by_button,
     # re-exportados para que los routers que los importaban directamente sigan funcionando
     count_filtered, group_by_source, daily_series,
 )
@@ -63,12 +65,14 @@ def get_full_analytics(
     date_from: Optional[str]  = None,
     date_to:   Optional[str]  = None,
     source:    Optional[str]  = None,
+    button:    Optional[str]  = None,
 ) -> dict:
     start, end = get_date_range(days, date_from, date_to)
 
     # ── Totales ──────────────────────────────────────────────
+    # El filtro de botón solo afecta a clicks (visitas y bookings no tienen button_location)
     total_visits   = visits_count(db, start, end, source)
-    total_clicks   = clicks_count(db, start, end, source)
+    total_clicks   = clicks_count(db, start, end, source, button)
     total_bookings = bookings_count(db, start, end, source)
 
     # ── Six Sigma ─────────────────────────────────────────────
@@ -81,7 +85,7 @@ def get_full_analytics(
 
     # ── Por fuente ────────────────────────────────────────────
     v_map = visits_by_source(db, start, end, source)
-    c_map = clicks_by_source(db, start, end, source)
+    c_map = clicks_by_source(db, start, end, source, button)
     b_map = bookings_by_source(db, start, end, source)
 
     all_sources = set(v_map) | set(c_map) | set(b_map)
@@ -106,9 +110,23 @@ def get_full_analytics(
         })
     sources_stats.sort(key=lambda x: x["visits"], reverse=True)
 
+    # ── Por botón (clicks) ─────────────────────────────────────
+    # Nota: siempre devuelve la distribución completa (sin filtrar por button)
+    # para que el gráfico muestre todos los botones aunque haya un filtro activo.
+    btn_map = group_by_button(db, start, end, source)
+    total_btn_clicks = sum(btn_map.values()) or 1
+    buttons_stats = [
+        {
+            "button":  btn,
+            "clicks":  cnt,
+            "pct":     round(cnt / total_btn_clicks, 6),
+        }
+        for btn, cnt in sorted(btn_map.items(), key=lambda x: -x[1])
+    ]
+
     # ── Tendencia diaria ──────────────────────────────────────
     vd = visits_daily(db, start, end, source)
-    cd = clicks_daily(db, start, end, source)
+    cd = clicks_daily(db, start, end, source, button)
     bd = bookings_daily(db, start, end, source)
 
     from datetime import date as date_type
@@ -145,6 +163,7 @@ def get_full_analytics(
             "ci_high": round(ci_high,6),
         },
         "sources": sources_stats,
+        "buttons": buttons_stats,
         "trend":   trend,
     }
 
@@ -155,10 +174,11 @@ def get_dashboard_kpis(
     date_from: Optional[str] = None,
     date_to:   Optional[str] = None,
     source:    Optional[str] = None,
+    button:    Optional[str] = None,
 ) -> dict:
     start, end = get_date_range(days, date_from, date_to)
     v = visits_count(db, start, end, source)
-    c = clicks_count(db, start, end, source)
+    c = clicks_count(db, start, end, source, button)
     b = bookings_count(db, start, end, source)
     return {
         "success":         True,
@@ -176,6 +196,7 @@ def generate_trend_chart_html(
     date_from: Optional[str] = None,
     date_to:   Optional[str] = None,
     source:    Optional[str] = None,
+    button:    Optional[str] = None,
 ) -> str:
     """Genera HTML de Plotly para el gráfico de tendencia temporal."""
     import plotly.graph_objects as go
@@ -184,7 +205,7 @@ def generate_trend_chart_html(
     start, end = get_date_range(days, date_from, date_to)
 
     vd = visits_daily(db, start, end, source)
-    cd = clicks_daily(db, start, end, source)
+    cd = clicks_daily(db, start, end, source, button)
     bd = bookings_daily(db, start, end, source)
 
     from datetime import date as date_type
