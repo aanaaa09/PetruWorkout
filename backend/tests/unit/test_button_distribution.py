@@ -256,24 +256,32 @@ class TestFullAnalyticsButtons:
         assert "unknown-widget-xyz" not in btn_names
         assert "full-navbar" in btn_names
 
-    def test_buttons_not_affected_by_source_filter(self, db):
+    def test_buttons_filtered_by_source(self, db):
         """
-        Con source='instagram', los totales y six_sigma se filtran,
-        pero 'buttons' muestra la distribución completa de todos los KNOWN_SOURCES
-        para que el gráfico no quede vacío al cambiar fuente.
+        Con source='instagram', 'buttons' muestra solo los clicks
+        de esa fuente (group_by_button recibe el source y filtra).
+        Sin filtro devuelve la distribución completa.
         """
         from backend.services.analytics_service import get_full_analytics
 
         _create_click(db, "naf_ig1", "instagram", "full-navbar")
         _create_click(db, "naf_yt1", "youtube",   "calculator-section")
 
-        # Sin filtro: dos botones
+        # Sin filtro: dos botones (uno por fuente)
         result_all = get_full_analytics(db)
         assert len(result_all["buttons"]) == 2
 
-        # Con filtro instagram: buttons sigue mostrando ambos (diseño intencional)
+        # Con filtro instagram: solo aparece el botón de instagram
         result_ig = get_full_analytics(db, source="instagram")
-        assert len(result_ig["buttons"]) == 2
+        btn_names_ig = [b["button"] for b in result_ig["buttons"]]
+        assert "full-navbar" in btn_names_ig
+        assert "calculator-section" not in btn_names_ig
+
+        # Con filtro youtube: solo aparece el botón de youtube
+        result_yt = get_full_analytics(db, source="youtube")
+        btn_names_yt = [b["button"] for b in result_yt["buttons"]]
+        assert "calculator-section" in btn_names_yt
+        assert "full-navbar" not in btn_names_yt
 
     def test_buttons_counts_match_group_by_button(self, db):
         """Consistencia entre group_by_button (crud) y buttons (service)."""
@@ -347,15 +355,20 @@ class TestAnalyticsEndpointButtons:
                 f"pct fuera de rango [0,1]: {btn}"
             )
 
-    def test_buttons_with_source_query_param(self, client, db):
-        """Con ?source=instagram el endpoint sigue devolviendo 'buttons'."""
+    def test_buttons_with_source_query_param_filters_correctly(self, client, db):
+        """?source=instagram devuelve solo los botones clicados desde instagram."""
         token = _admin_session(db, "ep_btn6@test.com")
         _create_click(db, "ep_src1", "instagram", "full-navbar")
+        _create_click(db, "ep_src2", "youtube",   "full-footer")
 
         response = client.get("/api/admin/analytics?source=instagram",
                               headers={"token": token})
         assert response.status_code == 200
-        assert "buttons" in response.json()
+        data = response.json()
+        assert "buttons" in data
+        btn_names = [b["button"] for b in data["buttons"]]
+        assert "full-navbar" in btn_names
+        assert "full-footer" not in btn_names
 
     def test_buttons_with_button_query_param(self, client, db):
         """?button=full-navbar filtra clicks de ese botón en totales, no en 'buttons'."""
