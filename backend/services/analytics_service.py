@@ -28,15 +28,21 @@ logger = logging.getLogger(__name__)
 #  UTILIDADES PURAMENTE MATEMÁTICAS
 # ════════════════════════════════════════════════════════════
 
-def wilson_ci(k: int, n: int, z: float = 1.96):
-    """IC de Wilson al 95% para una proporción k/n."""
+def wilson_ci(k, n, z=1.96):
     if n == 0:
-        return 0.0, 0.0
-    p      = k / n
-    denom  = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / denom
-    margin = (z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))) / denom
-    return max(0.0, centre - margin), min(1.0, centre + margin)
+        return 0.0, 0.0  # Sin datos, sin intervalo
+
+    p = k / n
+    denom = 1 + z * z / n
+    center = (p + z * z / (2 * n)) / denom
+
+    inside = p * (1 - p) / n + z * z / (4 * n * n)
+    if inside < 0:
+        inside = 0  # Evitar dominio negativo por errores de punto flotante
+
+    margin = (z * math.sqrt(inside)) / denom
+
+    return max(0.0, center - margin), min(1.0, center + margin)
 
 
 def dpmo_to_sigma(dpmo: float) -> float:
