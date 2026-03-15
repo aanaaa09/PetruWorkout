@@ -231,7 +231,7 @@ export default {
 
         const data = await response.json()
 
-        if (response.ok && data.sucess) {
+        if (response.ok && data.success) {
           this.users = data.usuarios
         } else {
           throw new Error(data.error || 'Error al cargar usuarios')
