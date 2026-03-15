@@ -231,7 +231,7 @@ export default {
 
         const data = await response.json()
 
-        if (response.ok && data.deleted) {
+        if (response.ok && data.sucess) {
           this.users = data.usuarios
         } else {
           throw new Error(data.error || 'Error al cargar usuarios')
@@ -306,7 +306,7 @@ export default {
 
         const data = await response.json()
 
-        if (response.ok && data.success) {
+        if (response.ok && data.deleted) {
           // Eliminar del array local
           this.users = this.users.filter(u => u.id !== this.userToDelete.id)
 
