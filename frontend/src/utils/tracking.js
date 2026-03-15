@@ -128,21 +128,20 @@ function getOrCreateSessionId() {
  */
 function saveTrafficSourceToSession(source) {
   const TRAFFIC_SOURCE_KEY = 'petru_traffic_source';
-  const existingSource = sessionStorage.getItem(TRAFFIC_SOURCE_KEY);
-
+  const existingSource = localStorage.getItem(TRAFFIC_SOURCE_KEY);
   if (!existingSource) {
-    sessionStorage.setItem(TRAFFIC_SOURCE_KEY, source);
+    localStorage.setItem(TRAFFIC_SOURCE_KEY, source);
   }
-
   return existingSource || source;
 }
+
 
 /**
  * Obtiene el origen del tráfico de la sesión
  */
 function getTrafficSourceFromSession() {
   const TRAFFIC_SOURCE_KEY = 'petru_traffic_source';
-  return sessionStorage.getItem(TRAFFIC_SOURCE_KEY) || detectTrafficSource();
+  return localStorage.getItem(TRAFFIC_SOURCE_KEY) || detectTrafficSource();
 }
 
 /**
