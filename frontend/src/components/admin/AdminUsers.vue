@@ -116,7 +116,7 @@
 
     <!-- Modal de confirmación -->
     <transition name="modal-fade">
-      <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+      <div v-if="showDeleteModal" class="modal-overif (response.ok && data.success)lay" @click.self="closeDeleteModal">
         <div class="modal-content">
           <button @click="closeDeleteModal" class="modal-close" :disabled="deleting">✕</button>
 
@@ -231,7 +231,7 @@ export default {
 
         const data = await response.json()
 
-        if (response.ok && data.success) {
+        if (response.ok && data.deleted) {
           this.users = data.usuarios
         } else {
           throw new Error(data.error || 'Error al cargar usuarios')
