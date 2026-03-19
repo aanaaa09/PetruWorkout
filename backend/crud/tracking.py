@@ -104,18 +104,16 @@ class TrackingCRUD:
         """Registra una reserva completada en Calendly"""
 
         if booking_timestamp:
-            reference_time = booking_timestamp
+            time_spain = booking_timestamp  # ya viene en hora España desde sync_calendly
         elif event_start_time:
-            reference_time = event_start_time
+            if event_start_time.tzinfo:
+                from datetime import timezone
+                spain_tz = timezone(timedelta(hours=1))
+                time_spain = event_start_time.astimezone(spain_tz).replace(tzinfo=None)
+            else:
+                time_spain = event_start_time + timedelta(hours=1)
         else:
-            reference_time = datetime.utcnow()
-
-        if reference_time.tzinfo:
-            from datetime import timezone
-            spain_tz = timezone(timedelta(hours=1))
-            time_spain = reference_time.astimezone(spain_tz)
-        else:
-            time_spain = reference_time + timedelta(hours=1)
+            time_spain = datetime.utcnow() + timedelta(hours=1)
 
         booking = CalendlyBooking(
             session_id=session_id,
