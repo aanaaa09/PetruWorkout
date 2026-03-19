@@ -128,11 +128,12 @@ function getOrCreateSessionId() {
  */
 function saveTrafficSourceToSession(source) {
   const TRAFFIC_SOURCE_KEY = 'petru_traffic_source';
-  const existingSource = localStorage.getItem(TRAFFIC_SOURCE_KEY);
+  const existingSource = sessionStorage.getItem(TRAFFIC_SOURCE_KEY);
   if (!existingSource) {
-    localStorage.setItem(TRAFFIC_SOURCE_KEY, source);
+    sessionStorage.setItem(TRAFFIC_SOURCE_KEY, source);
+    return source;
   }
-  return existingSource || source;
+  return existingSource;
 }
 
 
