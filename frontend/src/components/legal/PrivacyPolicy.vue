@@ -37,7 +37,7 @@
 
           <h3>Tipos de cookies que utilizamos:</h3>
           <ul>
-            <li><strong>Cookies analíticas (Google Analytics):</strong> Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio, qué páginas visitan y cuánto tiempo permanecen. Esta información se recopila de forma anónima.</li>
+            <li><strong>Cookies analíticas:</strong> Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio, qué páginas visitan y cuánto tiempo permanecen. Esta información se recopila de forma anónima.</li>
             <li><strong>Cookies de seguimiento de conversiones:</strong> Utilizadas para medir la efectividad de nuestras campañas en redes sociales y rastrear el origen del tráfico.</li>
             <li><strong>Cookies funcionales:</strong> Recordar sus preferencias y facilitar su acceso al área de usuarios registrados.</li>
           </ul>
@@ -55,7 +55,7 @@
 
           <h3>Información que recopilamos:</h3>
           <ul>
-            <li><strong>Origen del tráfico:</strong> Registramos de forma anónima la red social o canal desde el cual nos visitas (Instagram, Facebook, TikTok, etc.) utilizando un ID único que no permite identificarte personalmente.</li>
+            <li><strong>Origen del tráfico:</strong> Registramos de forma anónima la red social o canal desde el cual nos visitas (Instagram, Facebook, Youtube, etc.) utilizando un ID único que no permite identificarte personalmente.</li>
             <li><strong>Seguimiento del embudo de conversión:</strong> Monitorizamos de manera anónima las interacciones clave en nuestro sitio, incluyendo:
               <ul>
                 <li>Clics en botones de contacto</li>
@@ -81,7 +81,7 @@
 
         <section>
           <h2>Verificando tus detalles</h2>
-          <p>Si desea verificar los detalles que nos ha enviado, puede hacerlo comunicándose con nosotros a través de la dirección de correo electrónico que se indica a continuación. Nuestros procedimientos de seguridad significan que podemos solicitar una prueba de identidad antes de revelar información. Esta prueba de identidad se basará en su dirección de correo electrónico y contraseña enviada al registrarse. Por lo tanto, debe mantener esta información segura ya que será responsable de cualquier acción que tomemos en respuesta a una solicitud de alguien que utilice su correo electrónico y contraseña. Recomendamos encarecidamente que no utilice la función de memoria de contraseña del navegador, ya que permitiría a otras personas que usan su terminal acceder a su información personal.</p>
+          <p>Si desea verificar los detalles que nos ha enviado, puede hacerlo comunicándose con nosotros a través de la dirección de correo electrónico que se indica a continuación. Nuestros procedimientos de seguridad significan que podemos solicitar una prueba de identidad antes de revelar información. Esta prueba de identidad se basará en su dirección de correo electrónico enviado al registrarse. Por lo tanto, debe mantener esta información segura ya que será responsable de cualquier acción que tomemos en respuesta a una solicitud de alguien que utilice su correo electrónico. Recomendamos encarecidamente que no utilice la función de memoria de contraseña del navegador, ya que permitiría a otras personas que usan su terminal acceder a su información personal.</p>
         </section>
 
         <section>
