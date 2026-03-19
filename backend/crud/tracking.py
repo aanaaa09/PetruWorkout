@@ -15,16 +15,21 @@ class TrackingCRUD:
     """CRUD para tracking de conversión"""
 
     def _ensure_session(self, db: Session, session_id: str, traffic_source: str):
-        """Crea la sesión de tracking si no existe"""
+        if not session_id:
+            return
+
         existe = db.query(SessionTracking).filter(
             SessionTracking.session_id == session_id
         ).first()
         if not existe:
-            db.add(SessionTracking(
-                session_id=session_id,
-                traffic_source=traffic_source
-            ))
-            db.commit()
+            try:
+                db.add(SessionTracking(
+                    session_id=session_id,
+                    traffic_source=traffic_source or "unknown"
+                ))
+                db.commit()
+            except Exception:
+                db.rollback()  # duplicate key por race condition, ignorar y continuar
     def create_page_visit(
             self,
             db: Session,
