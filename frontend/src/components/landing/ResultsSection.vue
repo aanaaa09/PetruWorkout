@@ -355,6 +355,8 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.3s ease;
+  aspect-ratio: 9 / 16;  /* ← ratio vertical tipo stories */
+  position: relative;
 }
 
 .video-wrapper:hover {
@@ -364,10 +366,13 @@ export default {
 
 .video-wrapper video {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  object-fit: cover;    /* ← rellena el recuadro sin deformar */
+  position: absolute;
+  top: 0;
+  left: 0;
 }
-
 .results-cta {
   text-align: center;
   margin-top: 4rem;

@@ -14,7 +14,7 @@
 
         <p class="guarantee-text">
           Si después de <strong>90 días</strong> siguiendo mi programa al 100%,
-          no consigues los resultados prometidos (menos de 20% de grasa y +3kg de músculo),
+          no consigues los resultados prometidos,
           <strong>te devuelvo TODO tu dinero</strong>.
         </p>
 
