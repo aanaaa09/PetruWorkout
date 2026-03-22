@@ -60,7 +60,7 @@
         <p class="credits">
           Desarrollado por
           <a
-            href="linkedin.com/in/ana-seseña-ferrero-4290891bb"
+            href="https://www.linkedin.com/in/ana-seseña-ferrero-4290891bb"
             target="_blank"
             rel="noopener noreferrer"
           >
