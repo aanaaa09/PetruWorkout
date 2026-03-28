@@ -6,24 +6,9 @@
         <h2 class="section-title">Así cambia la gente cuando empieza bien (de verdad)</h2>
       </div>
 
-      <div class="video-wrapper" @click="loadVideo">
-        <!-- Thumbnail mientras no se carga -->
-        <div v-if="!videoLoaded" class="video-thumbnail">
-          <div class="thumbnail-placeholder"></div>
-          <button class="play-button" aria-label="Reproducir video">
-            <svg width="68" height="48" viewBox="0 0 68 48">
-              <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="var(--color-accent)"></path>
-              <path d="M 45,24 27,14 27,34" fill="#fff"></path>
-            </svg>
-          </button>
-        </div>
-
-        <!-- iframe de Google Drive, solo se carga al hacer click -->
+      <div class="video-wrapper">
         <iframe
-          v-if="videoLoaded"
           class="video-frame"
-          width="100%"
-          height="100%"
           src="https://drive.google.com/file/d/1C1jzgXtW9ag65VChcBJROkkbpnRYhAN8/preview"
           title="Petru Workout - Método de Entrenamiento"
           frameborder="0"
@@ -57,15 +42,7 @@ import { trackCalendlyClick } from '@/utils/tracking.js'
 
 export default {
   name: 'VideoSection',
-  data() {
-    return {
-      videoLoaded: false
-    }
-  },
   methods: {
-    loadVideo() {
-      this.videoLoaded = true
-    },
     handleCalendlyClick() {
       trackCalendlyClick('video-section-cta-button', 'video-section')
     }
