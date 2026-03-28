@@ -2,32 +2,29 @@
   <section id="video" class="video-section">
     <div class="video-container">
       <div class="section-header">
-        <span class="section-tag">CONOCE MI MÉTODO</span>
-        <h2 class="section-title">Así trabajo con mis clientes</h2>
+        <span class="section-tag">EMPIEZA DESDE CERO</span>
+        <h2 class="section-title">Así cambia la gente cuando empieza bien (de verdad)</h2>
       </div>
 
       <div class="video-wrapper" @click="loadVideo">
         <!-- Thumbnail mientras no se carga -->
         <div v-if="!videoLoaded" class="video-thumbnail">
-          <img
-            src="https://img.youtube.com/vi/eozE3EyZWNg/maxresdefault.jpg"
-            alt="Video thumbnail"
-          >
+          <div class="thumbnail-placeholder"></div>
           <button class="play-button" aria-label="Reproducir video">
             <svg width="68" height="48" viewBox="0 0 68 48">
-              <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#f00"></path>
+              <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="var(--color-accent)"></path>
               <path d="M 45,24 27,14 27,34" fill="#fff"></path>
             </svg>
           </button>
         </div>
 
-        <!-- iframe solo se carga al hacer click -->
+        <!-- iframe de Google Drive, solo se carga al hacer click -->
         <iframe
           v-if="videoLoaded"
           class="video-frame"
           width="100%"
           height="100%"
-          :src="`https://www.youtube.com/embed/eozE3EyZWNg?autoplay=1&rel=0&modestbranding=1`"
+          src="https://drive.google.com/file/d/1C1jzgXtW9ag65VChcBJROkkbpnRYhAN8/preview"
           title="Petru Workout - Método de Entrenamiento"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -136,10 +133,10 @@ export default {
   justify-content: center;
 }
 
-.video-thumbnail img {
+.thumbnail-placeholder {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
 }
 
 .play-button {
@@ -156,7 +153,7 @@ export default {
 }
 
 .play-button:hover {
-  background: rgba(255, 0, 0, 0.9);
+  background: rgba(6, 214, 160, 0.9);
   transform: translate(-50%, -50%) scale(1.1);
 }
 
@@ -225,7 +222,7 @@ export default {
   }
 
   .section-title {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
 
   .video-cta {
