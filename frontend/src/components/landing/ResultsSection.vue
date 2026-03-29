@@ -113,13 +113,13 @@ export default {
           time: '17:12'
         },
         {
-          image: '/images/results/sergio.webp',
-          imagePath: '/images/results/sergio',
+          image: '/images/results/franck.webp',
+          imagePath: '/images/results/franck',
           width: 534,
           height: 545,
-          name: 'Sergio, 34 años',
-          stats: '+2,5kg de músculo',
-          duration: '10 semanas',
+          name: 'Franck, 29 años',
+          stats: '+6kg músculo',
+          duration: '6 meses',
           quote: 'Muchas gracias tío, la verdad que la dieta me está sentando muy bien y los entrenamientos mejor. Aún poco a poco voy logrando progresos que no esperaba ver. Sobre todo el apoyo que ofreces y das para todo. Para problemas con la dieta, problemas personales o de ejercicio, eres un gran entrenador y ojalá haberte conocido antes.',
           time: '6 min'
         },
