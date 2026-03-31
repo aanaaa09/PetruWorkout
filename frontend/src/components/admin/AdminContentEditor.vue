@@ -266,38 +266,6 @@
           </div>
         </div>
 
-        <div class="divider"></div>
-
-        <!-- Vídeos de testimonios -->
-        <div class="subsection">
-          <h4>🎥 Vídeos de testimonios (.mp4)</h4>
-          <p class="hint">⚠️ Los vídeos también tardan ~1-2 min en verse tras subirse (Vercel redespliega).</p>
-          <div class="video-upload-grid">
-            <div v-for="slot in videoSlots" :key="slot" class="upload-card">
-              <span class="upload-label">{{ slot }}</span>
-              <label class="btn-file">
-                📁 Seleccionar .mp4
-                <input
-                  type="file"
-                  accept=".mp4"
-                  style="display:none"
-                  @change="handleVideoSelect($event, slot)"
-                />
-              </label>
-              <span v-if="videoFiles[slot]" class="file-name">{{ videoFiles[slot].name }}</span>
-              <button
-                v-if="videoFiles[slot]"
-                @click="uploadVideo(slot)"
-                class="btn-save"
-                :disabled="uploadingVideo === slot"
-              >
-                {{ uploadingVideo === slot ? '⏳ Subiendo...' : '⬆️ Subir' }}
-              </button>
-              <div v-if="videoErrors[slot]" class="msg-error">{{ videoErrors[slot] }}</div>
-              <div v-if="videoSuccess[slot]" class="msg-ok">✅ Subido. Visible en ~1-2 min.</div>
-            </div>
-          </div>
-        </div>
       </section>
 
     </template>
@@ -319,8 +287,6 @@ const defaultUsers = [1, 2, 3, 4].map(id => ({
 }))
 
 const defaultContent = {
-  // IMPORTANTE: los nombres de campo en hero deben coincidir EXACTAMENTE
-  // con lo que lee HeroSection.vue (title, highlight, button_text, benefits)
   hero: {
     title: '',
     highlight: '',
@@ -362,13 +328,6 @@ export default {
       imageErrors: {},
       imageSuccess: {},
       uploadingImage: null,
-      // Videos
-      videoSlots: ['video1', 'video2', 'video3'],
-      videoFiles: {},
-      videoErrors: {},
-      videoSuccess: {},
-      uploadingVideo: null,
-      // Solo las tabs que se pueden editar (sin testimonials)
       tabs: [
         { id: 'hero',    label: 'Hero',       icon: '🦸' },
         { id: 'video',   label: 'Vídeo',      icon: '▶️' },
@@ -562,39 +521,6 @@ export default {
         this.uploadingImage = null
       }
     },
-
-    handleVideoSelect(event, slot) {
-      const file = event.target.files[0]
-      if (!file) return
-      this.videoFiles   = { ...this.videoFiles,   [slot]: file }
-      this.videoErrors  = { ...this.videoErrors,  [slot]: null }
-      this.videoSuccess = { ...this.videoSuccess, [slot]: false }
-    },
-
-    async uploadVideo(slot) {
-      const file = this.videoFiles[slot]
-      if (!file) return
-      this.uploadingVideo = slot
-      this.videoErrors = { ...this.videoErrors, [slot]: null }
-      try {
-        const fd = new FormData()
-        fd.append('slot', slot)
-        fd.append('file', file)
-        const r = await fetch(`${API}/api/admin/content/video`, {
-          method: 'POST',
-          headers: { token: this.token() },
-          body: fd,
-        })
-        const data = await r.json()
-        if (!r.ok) throw new Error(data.detail || 'Error al subir vídeo')
-        this.videoSuccess = { ...this.videoSuccess, [slot]: true }
-        this.videoFiles   = { ...this.videoFiles,   [slot]: null }
-      } catch (e) {
-        this.videoErrors = { ...this.videoErrors, [slot]: e.message }
-      } finally {
-        this.uploadingVideo = null
-      }
-    },
   },
 }
 </script>
@@ -693,14 +619,6 @@ export default {
 .btn-file:hover { background: rgba(255,255,255,.12); border-color: var(--color-accent); color: white; }
 .file-name { font-size: .75rem; color: rgba(255,255,255,.45); word-break: break-all; }
 
-/* Videos grid */
-.video-upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-.upload-card {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: .6rem;
-}
-.upload-label { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.6); text-transform: uppercase; }
-
 /* Misc */
 .youtube-row { display: flex; gap: .75rem; }
 .youtube-row input { flex: 1; }
@@ -730,7 +648,6 @@ export default {
 
 @media (max-width: 640px) {
   .fields-grid { grid-template-columns: 1fr; }
-  .video-upload-grid { grid-template-columns: 1fr; }
   .editor-section { padding: 1.25rem; }
 }
 </style>

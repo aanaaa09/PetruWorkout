@@ -61,8 +61,17 @@
             <div
               v-if="!playingVideos[video.id]"
               class="video-play-overlay"
-              @click="playVideo(video.id, $event)"
+              @click="playVideo(video.id)"
             >
+              <!-- Poster responsivo: small en móvil, normal en desktop -->
+              <img
+                v-if="video.poster"
+                :src="video.poster"
+                :srcset="video.posterSmall ? `${video.posterSmall} 400w, ${video.poster} 800w` : undefined"
+                sizes="(max-width: 640px) 400px, 800px"
+                :alt="'Testimonio ' + video.id"
+                class="video-poster"
+              />
               <div class="play-icon-wrap">
                 <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
                   <circle cx="26" cy="26" r="26" fill="rgba(0,0,0,0.55)"/>
@@ -73,7 +82,8 @@
 
             <video
               :ref="'video-' + video.id"
-              :src="`${video.src}${videoV}`"
+              :src="video.src"
+              :poster="video.poster || undefined"
               controls
               playsinline
               preload="metadata"
@@ -120,12 +130,27 @@ export default {
         videos_subtitle: 'Testimonios reales de personas que han logrado sus objetivos',
         users: [],
         _img_version: null,
-        _video_version: null,
       },
+      // Vídeos fijos — no editables desde el panel de admin
       videoTestimonials: [
-        { id: 1, src: '/videos/video1.mp4' },
-        { id: 2, src: '/videos/video2.mp4' },
-        { id: 3, src: '/videos/video3.mp4' },
+        {
+          id: 1,
+          src: '/videos/video1.mp4',
+          poster: '/videos/thumbs/thumb1.webp',
+          posterSmall: '/videos/thumbs/thumb1-small.webp',
+        },
+        {
+          id: 2,
+          src: '/videos/video2.mp4',
+          poster: '/videos/thumbs/thumb2.webp',
+          posterSmall: '/videos/thumbs/thumb2-small.webp',
+        },
+        {
+          id: 3,
+          src: '/videos/video3.mp4',
+          poster: '/videos/thumbs/thumb3.webp',
+          posterSmall: '/videos/thumbs/thumb3-small.webp',
+        },
       ],
       playingVideos: {},
     }
@@ -137,15 +162,14 @@ export default {
     imgV() {
       return this.content._img_version ? `?v=${this.content._img_version}` : ''
     },
-    videoV() {
-      return this.content._video_version ? `?v=${this.content._video_version}` : ''
-    },
   },
   async mounted() {
     try {
       const c = await useContent()
       if (c?.results) {
-        this.content = { ...this.content, ...c.results }
+        // No propagamos _video_version (los vídeos ya no se gestionan desde admin)
+        const { _video_version, ...rest } = c.results
+        this.content = { ...this.content, ...rest }
       }
     } catch (e) {
       console.warn('useContent error:', e)
@@ -155,7 +179,8 @@ export default {
     handleImageError(e) {
       if (e.target.dataset.errorHandled) return
       e.target.dataset.errorHandled = 'true'
-      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E'
+      e.target.src =
+        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E'
     },
     playVideo(id) {
       this.playingVideos = { ...this.playingVideos, [id]: true }
@@ -296,6 +321,16 @@ export default {
   position: absolute; top: 0; left: 0;
 }
 
+/* Poster image */
+.video-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
 /* Custom play overlay */
 .video-play-overlay {
   position: absolute;
@@ -305,13 +340,15 @@ export default {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.15);
   transition: background 0.2s;
 }
 .video-play-overlay:hover {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
 }
 .play-icon-wrap {
+  position: relative;
+  z-index: 3;
   transition: transform 0.2s;
 }
 .video-play-overlay:hover .play-icon-wrap {

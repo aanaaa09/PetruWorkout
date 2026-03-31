@@ -56,7 +56,6 @@
 
 <script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
-import { useContent } from '@/composables/useContent.js'
 
 const DEFAULT_ID = 'qDc5uScLz2c'
 
@@ -78,12 +77,20 @@ export default {
   },
   async mounted() {
     try {
-      const c = await useContent()
+      // Fetch directo con cache-bust para que siempre lea el content.json más reciente
+      // (evita que Vercel o el browser sirvan una versión cacheada antigua)
+      const bust = Date.now()
+      const res = await fetch(`/content.json?_=${bust}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const c = await res.json()
       if (c?.video?.youtube_id) {
         this.youtubeId = c.video.youtube_id
       }
     } catch (e) {
-      console.warn('useContent falló en VideoSection, usando ID por defecto:', e)
+      console.warn('VideoSection: no se pudo leer content.json, usando ID por defecto:', e)
     }
   },
   methods: {
@@ -92,8 +99,8 @@ export default {
     },
     handleCalendlyClick() {
       trackCalendlyClick('video-section-cta-button', 'video-section')
-    }
-  }
+    },
+  },
 }
 </script>
 
