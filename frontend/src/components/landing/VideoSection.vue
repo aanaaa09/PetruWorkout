@@ -2,8 +2,8 @@
   <section id="video" class="video-section">
     <div class="video-container">
       <div class="section-header">
-        <span class="section-tag">EMPIEZA DESDE CERO</span>
-        <h2 class="section-title">Así cambia la gente cuando empieza bien (de verdad)</h2>
+        <span class="section-tag">{{ sectionTag }}</span>
+        <h2 class="section-title">{{ sectionTitle }}</h2>
       </div>
 
       <div class="video-wrapper" @click="loadVideo">
@@ -36,10 +36,8 @@
       </div>
 
       <div class="video-cta">
-        <h3 class="cta-title">¿Listo para tu cambio?</h3>
-        <p class="cta-description">
-          Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión
-        </p>
+        <h3 class="cta-title">{{ ctaTitle }}</h3>
+        <p class="cta-description">{{ ctaDescription }}</p>
         <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
@@ -55,6 +53,7 @@
 </template>
 
 <script>
+import { useContent } from '@/composables/useContent.js'
 import { trackCalendlyClick } from '@/utils/tracking.js'
 
 const DEFAULT_ID = 'qDc5uScLz2c'
@@ -65,6 +64,10 @@ export default {
     return {
       videoLoaded: false,
       youtubeId: DEFAULT_ID,
+      sectionTag: 'EMPIEZA DESDE CERO',
+      sectionTitle: 'Así cambia la gente cuando empieza bien (de verdad)',
+      ctaTitle: '¿Listo para tu cambio?',
+      ctaDescription: 'Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión',
     }
   },
   computed: {
@@ -77,20 +80,17 @@ export default {
   },
   async mounted() {
     try {
-      // Fetch directo con cache-bust para que siempre lea el content.json más reciente
-      // (evita que Vercel o el browser sirvan una versión cacheada antigua)
-      const bust = Date.now()
-      const res = await fetch(`/content.json?_=${bust}`, {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' },
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const c = await res.json()
-      if (c?.video?.youtube_id) {
-        this.youtubeId = c.video.youtube_id
+      const c = await useContent()
+      if (c?.video) {
+        const v = c.video
+        if (v.youtube_id)       this.youtubeId      = v.youtube_id
+        if (v.section_tag)      this.sectionTag     = v.section_tag
+        if (v.title)            this.sectionTitle   = v.title
+        if (v.cta_title)        this.ctaTitle       = v.cta_title
+        if (v.cta_description)  this.ctaDescription = v.cta_description
       }
     } catch (e) {
-      console.warn('VideoSection: no se pudo leer content.json, usando ID por defecto:', e)
+      console.warn('VideoSection: no se pudo leer content.json, usando defaults:', e)
     }
   },
   methods: {
