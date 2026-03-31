@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     CALENDLY_EVENT_URL: str = ""
 
     SESSION_DURATION_DAYS: int = 7
+    GITHUB_TOKEN: str = ""
+    GITHUB_REPO: str = ""
+    GITHUB_BRANCH: str = "main"
 
     @property
     def DATABASE_URL(self) -> str:
