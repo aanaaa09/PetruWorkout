@@ -1,6 +1,6 @@
 {
   "hero": {
-    "title": "El Sistema para entrenar en Casa o en el Parque y conseguir xxx",
+    "title": "El Sistema para entrenar en Casa o en el Parque y conseguir ",
     "highlight": "fuerza real",
     "button_text": "Únete al grupo de WhatsApp + calculadora de calorías 🎁",
     "benefits": [
@@ -12,7 +12,7 @@
   },
   "video": {
     "youtube_id": "qDc5uScLz2c",
-    "section_tag": "EMPIEZA DESDE CERO",
+    "section_tag": "EMPIEZA DESDE CERO uu",
     "title": "Así cambia la gente cuando empieza bien (de verdad)",
     "cta_title": "¿Listo para tu cambio?",
     "cta_description": "Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión uuu"
@@ -35,7 +35,7 @@
       },
       {
         "id": 2,
-        "name": "Usuario 2",
+        "name": "Oscar",
         "age": "",
         "stats": "",
         "duration": "",
@@ -45,7 +45,7 @@
       },
       {
         "id": 3,
-        "name": "Usuario 3",
+        "name": "Frank",
         "age": "",
         "stats": "",
         "duration": "",
@@ -63,7 +63,8 @@
         "whatsapp_time": "",
         "image_slug": "user4"
       }
-    ]
+    ],
+    "_img_version": 1774978584
   },
   "testimonials": {
     "section_tag": "RESEÑAS",
