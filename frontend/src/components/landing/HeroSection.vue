@@ -129,12 +129,24 @@
 </template>
 
 <script>
+import { useContent } from '@/composables/useContent.js'
+
 export default {
   name: 'HeroSection',
   data() {
     return {
       desktopImage: '/images/petru-hero-nuevo.webp',
       mobileImage: '/images/petru-hero-nuevo.webp',
+      mobileImage: '/images/petru-hero-nuevo.webp',
+      heroTitle: 'El Sistema para entrenar en Casa o en el Parque y conseguir',
+      heroHighlight: 'fuerza real',
+      benefits: [
+        'Cuerpo atlético y definido',
+        'Gana fuerza y movilidad para el día a día',
+        'Estrategia secreta para activar tu metabolismo y quemar grasa',
+        'Motivación diaria para mantenerte constante y no abandonar'
+      ],
+      btnText: 'Únete al grupo de WhatsApp + calculadora de calorías 🎁',
       showModal: false,
       email: '',
       acceptPrivacy: false,
@@ -142,6 +154,18 @@ export default {
       error: '',
       success: '',
       emailError: ''
+    }
+  },
+   async mounted() {
+    const c = await useContent()
+    if (c?.hero) {
+      const h = c.hero
+      if (h.desktopImage)  this.desktopImage  = h.desktopImage
+      if (h.mobileImage)   this.mobileImage   = h.mobileImage
+      if (h.title)         this.heroTitle     = h.title
+      if (h.highlight)     this.heroHighlight = h.highlight
+      if (h.benefits)      this.benefits      = h.benefits
+      if (h.btnText)       this.btnText       = h.btnText
     }
   },
   methods: {
