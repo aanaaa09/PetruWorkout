@@ -48,11 +48,10 @@
           <label>Texto del botón CTA</label>
           <input v-model="form.hero.button_text" type="text" />
         </div>
-
         <div class="field">
           <label>Beneficios (uno por línea)</label>
           <textarea
-            :value="form.hero.benefits.join('\n')"
+            :value="(form.hero.benefits || []).join('\n')"
             @input="form.hero.benefits = $event.target.value.split('\n')"
             rows="6"
           ></textarea>
@@ -109,100 +108,176 @@
         <div v-if="saved === 'video'" class="msg-ok">✅ Guardado.</div>
       </section>
 
-      <!-- ── TAB RESULTS TEXTOS ── -->
+      <!-- ── TAB RESULTS ── -->
       <section v-if="activeTab === 'results'" class="editor-section">
-        <h3>🏆 Sección Resultados — Textos</h3>
+        <h3>🏆 Sección Resultados</h3>
 
-        <div class="field">
-          <label>Etiqueta superior</label>
-          <input v-model="form.results.section_tag" type="text" />
-        </div>
-        <div class="field">
-          <label>Título</label>
-          <input v-model="form.results.title" type="text" />
-        </div>
-        <div class="field">
-          <label>Título bloque de vídeos</label>
-          <input v-model="form.results.videos_title" type="text" />
-        </div>
-        <div class="field">
-          <label>Subtítulo bloque de vídeos</label>
-          <input v-model="form.results.videos_subtitle" type="text" />
-        </div>
-
-        <div class="actions">
-          <button @click="saveSection('results')" class="btn-save" :disabled="saving">
-            {{ saving === 'results' ? '⏳ Guardando...' : '💾 Guardar Textos Resultados' }}
-          </button>
-        </div>
-        <div v-if="saved === 'results'" class="msg-ok">✅ Guardado.</div>
-
-        <!-- Sub-sección: imágenes -->
-        <div class="divider"></div>
-        <h4>🖼️ Subir imágenes (.webp)</h4>
-        <p class="hint">
-          La imagen debe tener aprox. <strong>661×674 px</strong> (tolerancia ±50 px).<br>
-          Se generarán 3 tamaños automáticamente.
-        </p>
-
-        <div class="image-upload-grid">
-          <div v-for="slot in imageSlots" :key="slot" class="upload-card">
-            <span class="upload-label">{{ slot }}</span>
-            <img
-              v-if="imagePreviews[slot]"
-              :src="imagePreviews[slot]"
-              class="preview-thumb"
-              alt="preview"
-            />
-            <label class="btn-file">
-              📁 Seleccionar
-              <input
-                type="file"
-                accept=".webp"
-                style="display:none"
-                @change="handleImageSelect($event, slot)"
-              />
-            </label>
-            <button
-              v-if="imageFiles[slot]"
-              @click="uploadImage(slot)"
-              class="btn-save"
-              :disabled="uploadingImage === slot"
-            >
-              {{ uploadingImage === slot ? '⏳ Subiendo...' : '⬆️ Subir' }}
+        <!-- Textos generales -->
+        <div class="subsection">
+          <h4>📝 Textos generales</h4>
+          <div class="field">
+            <label>Etiqueta superior</label>
+            <input v-model="form.results.section_tag" type="text" />
+          </div>
+          <div class="field">
+            <label>Título principal</label>
+            <input v-model="form.results.title" type="text" />
+          </div>
+          <div class="field">
+            <label>Título bloque de vídeos</label>
+            <input v-model="form.results.videos_title" type="text" />
+          </div>
+          <div class="field">
+            <label>Subtítulo bloque de vídeos</label>
+            <input v-model="form.results.videos_subtitle" type="text" />
+          </div>
+          <div class="actions">
+            <button @click="saveResultsTexts" class="btn-save" :disabled="saving === 'results-texts'">
+              {{ saving === 'results-texts' ? '⏳ Guardando...' : '💾 Guardar Textos' }}
             </button>
-            <div v-if="imageErrors[slot]" class="msg-error">{{ imageErrors[slot] }}</div>
-            <div v-if="imageSuccess[slot]" class="msg-ok">✅ Subida correctamente</div>
+          </div>
+          <div v-if="saved === 'results-texts'" class="msg-ok">✅ Guardado.</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Usuarios / tarjetas de resultados -->
+        <div class="subsection">
+          <h4>👤 Tarjetas de resultados</h4>
+          <p class="hint">Edita los datos de cada usuario que aparece en la sección de resultados</p>
+
+          <div class="users-accordion">
+            <div
+              v-for="(user, idx) in form.results.users"
+              :key="user.id"
+              class="user-block"
+              :class="{ open: openUser === idx }"
+            >
+              <!-- Header del acordeón -->
+              <button class="user-block-header" @click="openUser = openUser === idx ? null : idx">
+                <span class="user-num">👤 {{ user.name || 'Usuario ' + user.id }}</span>
+                <span class="user-chevron">{{ openUser === idx ? '▲' : '▼' }}</span>
+              </button>
+
+              <!-- Contenido expandido -->
+              <div v-if="openUser === idx" class="user-block-body">
+                <div class="fields-grid">
+                  <div class="field">
+                    <label>Nombre</label>
+                    <input v-model="user.name" type="text" placeholder="Ej: Esteban" />
+                  </div>
+                  <div class="field">
+                    <label>Edad</label>
+                    <input v-model="user.age" type="text" placeholder="Ej: 37 años" />
+                  </div>
+                  <div class="field">
+                    <label>Estadísticas</label>
+                    <input v-model="user.stats" type="text" placeholder="Ej: Antes 25% grasa, ahora 12%" />
+                  </div>
+                  <div class="field">
+                    <label>Duración</label>
+                    <input v-model="user.duration" type="text" placeholder="Ej: 12 semanas" />
+                  </div>
+                  <div class="field">
+                    <label>Hora del mensaje (WhatsApp)</label>
+                    <input v-model="user.whatsapp_time" type="text" placeholder="Ej: 17:12" />
+                  </div>
+                </div>
+
+                <div class="field" style="margin-top:.75rem">
+                  <label>💬 Texto del mensaje (burbuja WhatsApp)</label>
+                  <textarea v-model="user.whatsapp_text" rows="4" placeholder="Escribe aquí el testimonio del cliente..."></textarea>
+                </div>
+
+                <!-- Vista previa WhatsApp -->
+                <div v-if="user.whatsapp_text" class="whatsapp-preview">
+                  <span class="preview-label">Vista previa:</span>
+                  <div class="wa-bubble">
+                    <p class="wa-text">{{ user.whatsapp_text }}</p>
+                    <span class="wa-time">{{ user.whatsapp_time || '00:00' }}</span>
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Imagen del usuario -->
+                <div class="image-upload-block">
+                  <h5>🖼️ Imagen del usuario</h5>
+                  <p class="hint">Formato .webp · dimensiones aprox. <strong>661×674 px</strong> (tolerancia ±50 px)</p>
+                  <p class="hint">Slug de imagen: <code>{{ user.image_slug }}</code></p>
+
+                  <div class="upload-row">
+                    <img
+                      v-if="imagePreviews[user.image_slug]"
+                      :src="imagePreviews[user.image_slug]"
+                      class="preview-thumb"
+                      alt="preview"
+                    />
+                    <div class="upload-actions">
+                      <label class="btn-file">
+                        📁 Seleccionar .webp
+                        <input
+                          type="file"
+                          accept=".webp"
+                          style="display:none"
+                          @change="handleImageSelect($event, user.image_slug)"
+                        />
+                      </label>
+                      <button
+                        v-if="imageFiles[user.image_slug]"
+                        @click="uploadImage(user.image_slug)"
+                        class="btn-save"
+                        :disabled="uploadingImage === user.image_slug"
+                      >
+                        {{ uploadingImage === user.image_slug ? '⏳ Subiendo...' : '⬆️ Subir imagen' }}
+                      </button>
+                    </div>
+                  </div>
+                  <div v-if="imageErrors[user.image_slug]" class="msg-error">{{ imageErrors[user.image_slug] }}</div>
+                  <div v-if="imageSuccess[user.image_slug]" class="msg-ok">✅ Imagen subida correctamente</div>
+                </div>
+
+                <!-- Guardar este usuario -->
+                <div class="actions" style="margin-top:1rem">
+                  <button @click="saveUser(idx)" class="btn-save" :disabled="saving === 'user-' + idx">
+                    {{ saving === 'user-' + idx ? '⏳ Guardando...' : '💾 Guardar Usuario ' + user.id }}
+                  </button>
+                </div>
+                <div v-if="saved === 'user-' + idx" class="msg-ok">✅ Guardado correctamente.</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Sub-sección: vídeos de testimonios -->
         <div class="divider"></div>
-        <h4>🎥 Vídeos de testimonios (.mp4)</h4>
 
-        <div class="video-upload-grid">
-          <div v-for="slot in videoSlots" :key="slot" class="upload-card">
-            <span class="upload-label">{{ slot }}</span>
-            <label class="btn-file">
-              📁 Seleccionar .mp4
-              <input
-                type="file"
-                accept=".mp4"
-                style="display:none"
-                @change="handleVideoSelect($event, slot)"
-              />
-            </label>
-            <span v-if="videoFiles[slot]" class="file-name">{{ videoFiles[slot].name }}</span>
-            <button
-              v-if="videoFiles[slot]"
-              @click="uploadVideo(slot)"
-              class="btn-save"
-              :disabled="uploadingVideo === slot"
-            >
-              {{ uploadingVideo === slot ? '⏳ Subiendo...' : '⬆️ Subir' }}
-            </button>
-            <div v-if="videoErrors[slot]" class="msg-error">{{ videoErrors[slot] }}</div>
-            <div v-if="videoSuccess[slot]" class="msg-ok">✅ Subido correctamente</div>
+        <!-- Vídeos de testimonios -->
+        <div class="subsection">
+          <h4>🎥 Vídeos de testimonios (.mp4)</h4>
+          <div class="video-upload-grid">
+            <div v-for="slot in videoSlots" :key="slot" class="upload-card">
+              <span class="upload-label">{{ slot }}</span>
+              <label class="btn-file">
+                📁 Seleccionar .mp4
+                <input
+                  type="file"
+                  accept=".mp4"
+                  style="display:none"
+                  @change="handleVideoSelect($event, slot)"
+                />
+              </label>
+              <span v-if="videoFiles[slot]" class="file-name">{{ videoFiles[slot].name }}</span>
+              <button
+                v-if="videoFiles[slot]"
+                @click="uploadVideo(slot)"
+                class="btn-save"
+                :disabled="uploadingVideo === slot"
+              >
+                {{ uploadingVideo === slot ? '⏳ Subiendo...' : '⬆️ Subir' }}
+              </button>
+              <div v-if="videoErrors[slot]" class="msg-error">{{ videoErrors[slot] }}</div>
+              <div v-if="videoSuccess[slot]" class="msg-ok">✅ Subido correctamente</div>
+            </div>
           </div>
         </div>
       </section>
@@ -239,10 +314,27 @@
 <script>
 const API = 'https://petruworkout-production.up.railway.app'
 
+const defaultUsers = [1, 2, 3, 4].map(id => ({
+  id,
+  name: `Usuario ${id}`,
+  age: '',
+  stats: '',
+  duration: '',
+  whatsapp_text: '',
+  whatsapp_time: '',
+  image_slug: `user${id}`,
+}))
+
 const defaultContent = {
   hero: { title: '', highlight: '', benefits: [], button_text: '' },
   video: { youtube_id: '', section_tag: '', title: '', cta_title: '', cta_description: '' },
-  results: { section_tag: '', title: '', videos_title: '', videos_subtitle: '' },
+  results: {
+    section_tag: '',
+    title: '',
+    videos_title: '',
+    videos_subtitle: '',
+    users: defaultUsers,
+  },
   testimonials: { section_tag: '', title: '', subtitle: '' },
 }
 
@@ -257,8 +349,8 @@ export default {
       activeTab: 'hero',
       form: JSON.parse(JSON.stringify(defaultContent)),
       youtubeId: '',
+      openUser: null,
       // Images
-      imageSlots: ['esteban', 'franck', 'oscar', 'pedro'],
       imageFiles: {},
       imagePreviews: {},
       imageErrors: {},
@@ -292,13 +384,35 @@ export default {
           headers: { token: this.token() },
         })
         const data = await r.json()
-        if (!r.ok) throw new Error(data.detail || 'Error')
-        // Merge con defaults para evitar campos nulos
+        if (!r.ok) throw new Error(data.detail || 'Error cargando contenido')
+
         const c = data.content || {}
-        for (const section of Object.keys(defaultContent)) {
-          this.form[section] = { ...defaultContent[section], ...(c[section] || {}) }
-        }
+
+        // Hero
+        this.form.hero = { ...defaultContent.hero, ...(c.hero || {}) }
+
+        // Video
+        this.form.video = { ...defaultContent.video, ...(c.video || {}) }
         this.youtubeId = this.form.video.youtube_id || ''
+
+        // Results — merge especial para users array
+        const resultsBase = { ...defaultContent.results }
+        if (c.results) {
+          this.form.results = {
+            ...resultsBase,
+            ...c.results,
+            // Si ya hay users guardados, usar esos; si no, usar los defaults
+            users: (c.results.users && c.results.users.length > 0)
+              ? c.results.users
+              : defaultUsers,
+          }
+        } else {
+          this.form.results = resultsBase
+        }
+
+        // Testimonials
+        this.form.testimonials = { ...defaultContent.testimonials, ...(c.testimonials || {}) }
+
       } catch (e) {
         this.loadError = e.message
       } finally {
@@ -316,9 +430,64 @@ export default {
           body: JSON.stringify({ [section]: this.form[section] }),
         })
         const data = await r.json()
-        if (!r.ok) throw new Error(data.detail || 'Error')
+        if (!r.ok) throw new Error(data.detail || 'Error guardando')
         this.saved = section
         setTimeout(() => { if (this.saved === section) this.saved = null }, 4000)
+      } catch (e) {
+        alert('❌ Error al guardar: ' + e.message)
+      } finally {
+        this.saving = null
+      }
+    },
+
+    async saveResultsTexts() {
+      this.saving = 'results-texts'
+      this.saved = null
+      try {
+        // Guardar solo los campos de texto, manteniendo users
+        const payload = {
+          results: {
+            section_tag:     this.form.results.section_tag,
+            title:           this.form.results.title,
+            videos_title:    this.form.results.videos_title,
+            videos_subtitle: this.form.results.videos_subtitle,
+            users:           this.form.results.users,
+          }
+        }
+        const r = await fetch(`${API}/api/admin/content`, {
+          method: 'PUT',
+          headers: { token: this.token(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.detail || 'Error guardando')
+        this.saved = 'results-texts'
+        setTimeout(() => { if (this.saved === 'results-texts') this.saved = null }, 4000)
+      } catch (e) {
+        alert('❌ Error al guardar: ' + e.message)
+      } finally {
+        this.saving = null
+      }
+    },
+
+    async saveUser(idx) {
+      const key = `user-${idx}`
+      this.saving = key
+      this.saved = null
+      try {
+        // Guardamos todo results con el usuario modificado
+        const payload = {
+          results: { ...this.form.results }
+        }
+        const r = await fetch(`${API}/api/admin/content`, {
+          method: 'PUT',
+          headers: { token: this.token(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.detail || 'Error guardando')
+        this.saved = key
+        setTimeout(() => { if (this.saved === key) this.saved = null }, 4000)
       } catch (e) {
         alert('❌ Error al guardar: ' + e.message)
       } finally {
@@ -350,26 +519,25 @@ export default {
       }
     },
 
-    handleImageSelect(event, slot) {
+    handleImageSelect(event, slug) {
       const file = event.target.files[0]
       if (!file) return
-      this.imageFiles = { ...this.imageFiles, [slot]: file }
-      this.imageErrors = { ...this.imageErrors, [slot]: null }
-      this.imageSuccess = { ...this.imageSuccess, [slot]: false }
-      // Preview
+      this.imageFiles = { ...this.imageFiles, [slug]: file }
+      this.imageErrors = { ...this.imageErrors, [slug]: null }
+      this.imageSuccess = { ...this.imageSuccess, [slug]: false }
       const reader = new FileReader()
-      reader.onload = e => { this.imagePreviews = { ...this.imagePreviews, [slot]: e.target.result } }
+      reader.onload = e => { this.imagePreviews = { ...this.imagePreviews, [slug]: e.target.result } }
       reader.readAsDataURL(file)
     },
 
-    async uploadImage(slot) {
-      const file = this.imageFiles[slot]
+    async uploadImage(slug) {
+      const file = this.imageFiles[slug]
       if (!file) return
-      this.uploadingImage = slot
-      this.imageErrors = { ...this.imageErrors, [slot]: null }
+      this.uploadingImage = slug
+      this.imageErrors = { ...this.imageErrors, [slug]: null }
       try {
         const fd = new FormData()
-        fd.append('name', slot)
+        fd.append('name', slug)
         fd.append('file', file)
         const r = await fetch(`${API}/api/admin/content/image`, {
           method: 'POST',
@@ -378,10 +546,10 @@ export default {
         })
         const data = await r.json()
         if (!r.ok) throw new Error(data.detail || 'Error al subir imagen')
-        this.imageSuccess = { ...this.imageSuccess, [slot]: true }
-        this.imageFiles = { ...this.imageFiles, [slot]: null }
+        this.imageSuccess = { ...this.imageSuccess, [slug]: true }
+        this.imageFiles = { ...this.imageFiles, [slug]: null }
       } catch (e) {
-        this.imageErrors = { ...this.imageErrors, [slot]: e.message }
+        this.imageErrors = { ...this.imageErrors, [slug]: e.message }
       } finally {
         this.uploadingImage = null
       }
@@ -443,7 +611,9 @@ export default {
   border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem;
 }
 .editor-section h3 { font-size: 1.1rem; color: white; margin: 0; }
-.editor-section h4 { font-size: .95rem; color: white; margin: 0; }
+.editor-section h4 { font-size: .95rem; color: white; margin: 0 0 .75rem; }
+
+.subsection { display: flex; flex-direction: column; gap: .9rem; }
 
 .field { display: flex; flex-direction: column; gap: .4rem; }
 .field label { font-size: .8rem; font-weight: 600; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .05em; }
@@ -456,10 +626,69 @@ export default {
 .hint { font-size: .75rem; color: rgba(255,255,255,.35); }
 .hint code { background: rgba(255,255,255,.1); padding: .15rem .4rem; border-radius: 4px; font-size: .8rem; }
 
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+/* Acordeón de usuarios */
+.users-accordion { display: flex; flex-direction: column; gap: .6rem; }
+.user-block { border: 1px solid rgba(255,255,255,.1); border-radius: 12px; overflow: hidden; }
+.user-block.open { border-color: var(--color-accent); }
+.user-block-header {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 1.25rem; background: rgba(255,255,255,.04);
+  border: none; color: white; cursor: pointer; font-size: .9rem; font-weight: 600;
+  transition: background .2s;
+}
+.user-block-header:hover { background: rgba(255,255,255,.08); }
+.user-block.open .user-block-header { background: rgba(6,214,160,.1); color: var(--color-accent); }
+.user-num { display: flex; align-items: center; gap: .5rem; }
+.user-chevron { font-size: .75rem; color: rgba(255,255,255,.4); }
+
+.user-block-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .9rem; }
+
+/* WhatsApp preview */
+.whatsapp-preview { display: flex; flex-direction: column; gap: .4rem; margin-top: .25rem; }
+.preview-label { font-size: .72rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .05em; }
+.wa-bubble {
+  background: linear-gradient(135deg, #128C7E, #075E54);
+  border-radius: 8px; padding: .75rem 1rem;
+  max-width: 480px; position: relative;
+}
+.wa-bubble::before {
+  content: ''; position: absolute; top: 0; left: -8px;
+  border-style: solid; border-width: 0 8px 8px 0;
+  border-color: transparent #075E54 transparent transparent;
+}
+.wa-text { color: white; font-size: .875rem; line-height: 1.5; margin: 0 0 .4rem; word-break: break-word; }
+.wa-time { display: block; text-align: right; font-size: .68rem; color: rgba(255,255,255,.55); }
+
+/* Image upload */
+.image-upload-block { display: flex; flex-direction: column; gap: .6rem; }
+.image-upload-block h5 { font-size: .875rem; color: white; margin: 0; }
+.upload-row { display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.upload-actions { display: flex; flex-direction: column; gap: .5rem; }
+.preview-thumb { width: 100px; height: 80px; object-fit: cover; border-radius: 6px; }
+.btn-file {
+  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  padding: .6rem 1rem; background: rgba(255,255,255,.07); border: 1px dashed rgba(255,255,255,.2);
+  border-radius: 8px; color: rgba(255,255,255,.7); font-size: .82rem; font-weight: 600;
+  transition: all .2s;
+}
+.btn-file:hover { background: rgba(255,255,255,.12); border-color: var(--color-accent); color: white; }
+.file-name { font-size: .75rem; color: rgba(255,255,255,.45); word-break: break-all; }
+
+/* Videos grid */
+.video-upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.upload-card {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: .6rem;
+}
+.upload-label { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.6); text-transform: uppercase; }
+
+/* Misc */
 .youtube-row { display: flex; gap: .75rem; }
 .youtube-row input { flex: 1; }
-
-.actions { margin-top: .5rem; }
+.actions { margin-top: .25rem; }
+.divider { height: 1px; background: rgba(255,255,255,.08); margin: .25rem 0; }
 .btn-save {
   padding: .75rem 1.75rem; background: var(--gradient-primary); color: white;
   border: none; border-radius: 10px; font-weight: 700; font-size: .9rem;
@@ -471,30 +700,8 @@ export default {
   padding: .6rem 1.5rem; background: rgba(255,255,255,.07); color: white;
   border: 1px solid rgba(255,255,255,.18); border-radius: 8px; cursor: pointer;
 }
-
-.divider { height: 1px; background: rgba(255,255,255,.08); margin: .5rem 0; }
-
-.msg-ok    { font-size: .85rem; color: var(--color-accent); font-weight: 600; padding: .5rem 0; }
+.msg-ok    { font-size: .85rem; color: var(--color-accent); font-weight: 600; padding: .4rem 0; }
 .msg-error { font-size: .82rem; color: #ff6b6b; font-weight: 600; padding: .4rem 0; }
-
-/* Image upload */
-.image-upload-grid, .video-upload-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
-}
-.upload-card {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: .6rem;
-}
-.upload-label { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.6); text-transform: uppercase; }
-.preview-thumb { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; }
-.btn-file {
-  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
-  padding: .6rem 1rem; background: rgba(255,255,255,.07); border: 1px dashed rgba(255,255,255,.2);
-  border-radius: 8px; color: rgba(255,255,255,.7); font-size: .82rem; font-weight: 600;
-  transition: all .2s;
-}
-.btn-file:hover { background: rgba(255,255,255,.12); border-color: var(--color-accent); color: white; }
-.file-name { font-size: .75rem; color: rgba(255,255,255,.45); word-break: break-all; }
 
 .state-loading { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 4rem 2rem; color: rgba(255,255,255,.4); }
 .state-error   { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 3rem; color: #ff6b6b; }
@@ -505,7 +712,8 @@ export default {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 640px) {
-  .image-upload-grid, .video-upload-grid { grid-template-columns: 1fr; }
+  .fields-grid { grid-template-columns: 1fr; }
+  .video-upload-grid { grid-template-columns: 1fr; }
   .editor-section { padding: 1.25rem; }
 }
 </style>

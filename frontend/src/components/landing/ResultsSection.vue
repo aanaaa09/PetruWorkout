@@ -2,56 +2,54 @@
   <section id="resultados" class="results-section">
     <div class="results-container">
       <div class="section-header">
-        <span class="section-tag">RESULTADOS REALES</span>
-        <h2 class="section-title">Transformaciones de mis clientes</h2>
+        <span class="section-tag">{{ content.section_tag || 'RESULTADOS REALES' }}</span>
+        <h2 class="section-title">{{ content.title || 'Transformaciones de mis clientes' }}</h2>
       </div>
 
       <div class="results-grid">
         <div
-          v-for="(result, index) in results"
-          :key="index"
+          v-for="(user, index) in activeUsers"
+          :key="user.id"
           class="result-card"
         >
           <div class="result-images">
             <img
               :srcset="`
-                ${result.imagePath}-small.webp 330w,
-                ${result.imagePath}-medium.webp 660w,
-                ${result.imagePath}-large.webp 1000w
+                /images/results/${user.image_slug}-small.webp 330w,
+                /images/results/${user.image_slug}-medium.webp 660w,
+                /images/results/${user.image_slug}-large.webp 1000w
               `"
               sizes="(max-width: 640px) 330px, (max-width: 968px) 660px, 500px"
-              :src="result.image"
-              :alt="result.name"
-              :width="result.width"
-              :height="result.height"
+              :src="`/images/results/${user.image_slug}-large.webp`"
+              :alt="user.name"
+              width="534"
+              height="501"
               loading="lazy"
               @error="handleImageError"
             />
           </div>
 
           <div class="result-info">
-            <h4>{{ result.name }}</h4>
-            <p class="result-stats-text">{{ result.stats }}</p>
-            <p class="result-duration">{{ result.duration }}</p>
+            <h4>{{ user.name }}{{ user.age ? ', ' + user.age : '' }}</h4>
+            <p v-if="user.stats" class="result-stats-text">{{ user.stats }}</p>
+            <p v-if="user.duration" class="result-duration">{{ user.duration }}</p>
 
             <!-- Mensaje estilo WhatsApp -->
-            <div class="whatsapp-message">
+            <div v-if="user.whatsapp_text" class="whatsapp-message">
               <div class="whatsapp-bubble">
-                <p class="whatsapp-text">{{ result.quote }}</p>
-                <span class="whatsapp-time">{{ result.time }}</span>
+                <p class="whatsapp-text">{{ user.whatsapp_text }}</p>
+                <span class="whatsapp-time">{{ user.whatsapp_time || '' }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-
-
-      <!--SECCIÓN DE VIDEOS -->
+      <!-- SECCIÓN DE VIDEOS -->
       <div class="videos-section">
         <div class="videos-header">
-          <h3>Esto es lo que opinan mis clientes</h3>
-          <p>Testimonios reales de personas que han logrado sus objetivos</p>
+          <h3>{{ content.videos_title || 'Esto es lo que opinan mis clientes' }}</h3>
+          <p>{{ content.videos_subtitle || 'Testimonios reales de personas que han logrado sus objetivos' }}</p>
         </div>
 
         <div class="videos-grid">
@@ -62,7 +60,6 @@
           >
             <video
               :src="video.src"
-              :poster="video.posterSmall"
               controls
               playsinline
               preload="none"
@@ -92,98 +89,54 @@
 </template>
 
 <script>
-
-
-import {trackCalendlyClick} from "@/utils/tracking.js";
+import { useContent } from '@/composables/useContent.js'
+import { trackCalendlyClick } from '@/utils/tracking.js'
 
 export default {
   name: 'ResultsSection',
   data() {
     return {
-      results: [
-        {
-          image: '/images/results/esteban.webp',
-          imagePath: '/images/results/esteban',
-          width: 534,
-          height: 501,
-          name: 'Esteban, 37 años',
-          stats: 'Antes 25% grasa, ahora 12% grasa',
-          duration: '12 semanas',
-          quote: 'Excelente, de hecho ya hasta dejé el tabaco. Fumaba 3-5 cigarros al día y esta semana ya no fumé en lo absoluto. Estoy haciendo un gran cambio en mi persona y se empieza a notar. Estoy feliz por mis resultados y con mayor ánimo de poder seguir dando el máximo. Muchas gracias por estar al pendiente.',
-          time: '17:12'
-        },
-        {
-          image: '/images/results/franck.webp',
-          imagePath: '/images/results/franck',
-          width: 534,
-          height: 545,
-          name: 'Franck, 29 años',
-          stats: '+6kg músculo',
-          duration: '6 meses',
-          quote: 'Muchas gracias tío, la verdad que la dieta me está sentando muy bien y los entrenamientos mejor. Aún poco a poco voy logrando progresos que no esperaba ver. Sobre todo el apoyo que ofreces y das para todo. Para problemas con la dieta, problemas personales o de ejercicio, eres un gran entrenador y ojalá haberte conocido antes.',
-          time: '6 min'
-        },
-        {
-          image: '/images/results/oscar.webp',
-          imagePath: '/images/results/oscar',
-          width: 534,
-          height: 517,
-          name: 'Óscar, 28 años',
-          stats: 'Antes 25% de grasa, ahora 16% de grasa',
-          duration: '12 semanas',
-          quote: 'Hola buenos días, además de que es un momento divertido y que me gusta, me lo paso bien y cada día que pasa me siento mejor. Cada pequeño avance como poder una repetición más o no estar tan cansado se nota y disfruto. Y esto es solo el comienzo, verás dentro de unos meses. Me alegro mucho y la verdad que estoy agradecido por dar ese paso.',
-          time: '9:16'
-        },
-        {
-          image: '/images/results/pedro.webp',
-          imagePath: '/images/results/pedro',
-          width: 534,
-          height: 523,
-          name: 'Pedro, 63 años',
-          stats: 'Antes 22% de grasa, ahora 17% de grasa',
-          duration: '14 semanas',
-          quote: 'Con mis entrenamientos estamos de maravilla, vamos mejorando más y más día con día. Mi plan de nutrición me gusta y he notado que ya hay menos grasa. Estoy mejorando tratando de no salirme del camino y con tu apoyo que recibo constantemente me he sentido súper contento y con motivación para poder seguir. Como te he dicho, de ahora en adelante esto es un muy buen hábito para mí. ¡No hay marcha atrás!',
-          time: '16:04'
-        }
-      ],
+      content: {
+        section_tag: 'RESULTADOS REALES',
+        title: 'Transformaciones de mis clientes',
+        videos_title: 'Esto es lo que opinan mis clientes',
+        videos_subtitle: 'Testimonios reales de personas que han logrado sus objetivos',
+        users: [],
+      },
       videoTestimonials: [
-        {
-          id: 1,
-          src: '/videos/video1.mp4',
-          poster: '/videos/thumbs/thumb1.webp',
-          posterSmall: '/videos/thumbs/thumb1-small.webp'
-        },
-        {
-          id: 2,
-          src: '/videos/video2.mp4',
-          poster: '/videos/thumbs/thumb2.webp',
-          posterSmall: '/videos/thumbs/thumb2-small.webp'
-        },
-        {
-          id: 3,
-          src: '/videos/video3.mp4',
-          poster: '/videos/thumbs/thumb3.webp',
-          posterSmall: '/videos/thumbs/thumb3-small.webp'
-        }
-      ]
+        { id: 1, src: '/videos/video1.mp4' },
+        { id: 2, src: '/videos/video2.mp4' },
+        { id: 3, src: '/videos/video3.mp4' },
+      ],
+    }
+  },
+  computed: {
+    // Solo mostrar usuarios que tengan al menos nombre
+    activeUsers() {
+      return (this.content.users || []).filter(u => u.name && u.name.trim())
+    },
+  },
+  async mounted() {
+    const c = await useContent()
+    if (c?.results) {
+      this.content = { ...this.content, ...c.results }
     }
   },
   methods: {
     handleImageError(e) {
-      if (e.target.dataset.errorHandled) return;
-      e.target.dataset.errorHandled = 'true';
-      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E';
+      if (e.target.dataset.errorHandled) return
+      e.target.dataset.errorHandled = 'true'
+      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E'
     },
     handleCalendlyClick() {
       trackCalendlyClick('results-cta-button', 'results-section')
     },
-
-  }
+  },
 }
 </script>
 
 <style scoped>
-/* Mantén todos tus estilos actuales exactamente igual */
+/* ── Todos los estilos originales intactos ── */
 .results-section {
   padding: 6rem 2rem;
   background: var(--bg-secondary);
@@ -276,7 +229,6 @@ export default {
 }
 
 .whatsapp-bubble {
-  background: #075E54;
   background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -310,13 +262,6 @@ export default {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.6);
   margin-top: 0.25rem;
-}
-
-.whatsapp-cta .cta-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 1.5rem 0;
 }
 
 .videos-section {
@@ -355,7 +300,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.3s ease;
-  aspect-ratio: 9 / 16;  /* ← ratio vertical tipo stories */
+  aspect-ratio: 9 / 16;
   position: relative;
 }
 
@@ -368,11 +313,12 @@ export default {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;    /* ← rellena el recuadro sin deformar */
+  object-fit: cover;
   position: absolute;
   top: 0;
   left: 0;
 }
+
 .results-cta {
   text-align: center;
   margin-top: 4rem;
@@ -447,22 +393,6 @@ export default {
 
   .results-cta p {
     font-size: 1.25rem;
-  }
-
-  .whatsapp-cta {
-    padding: 2rem 1.5rem;
-    margin: 2rem 0;
-  }
-
-  .whatsapp-cta .cta-text {
-    font-size: 1.25rem;
-  }
-
-  .btn-whatsapp-cta {
-    width: 100%;
-    justify-content: center;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
   }
 }
 </style>

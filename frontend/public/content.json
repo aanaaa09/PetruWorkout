@@ -1,14 +1,14 @@
 {
   "hero": {
-    "title": "El Sistema para entrenar en Casa o en el Parque y conseguir fuerza real",
+    "title": "El Sistema para entrenar en Casa o en el Parque y conseguir",
     "highlight": "fuerza real",
+    "button_text": "Únete al grupo de WhatsApp + calculadora de calorías 🎁",
     "benefits": [
       "Cuerpo atlético y definido",
       "Gana fuerza y movilidad para el día a día",
       "Estrategia secreta para activar tu metabolismo y quemar grasa",
       "Motivación diaria para mantenerte constante y no abandonar"
-    ],
-    "button_text": "Únete al grupo de WhatsApp + calculadora de calorías 🎁"
+    ]
   },
   "video": {
     "youtube_id": "qDc5uScLz2c",
@@ -21,7 +21,49 @@
     "section_tag": "RESULTADOS REALES",
     "title": "Transformaciones de mis clientes",
     "videos_title": "Esto es lo que opinan mis clientes",
-    "videos_subtitle": "Testimonios reales de personas que han logrado sus objetivos"
+    "videos_subtitle": "Testimonios reales de personas que han logrado sus objetivos",
+    "users": [
+      {
+        "id": 1,
+        "name": "Usuario 1",
+        "age": "",
+        "stats": "",
+        "duration": "",
+        "whatsapp_text": "",
+        "whatsapp_time": "",
+        "image_slug": "user1"
+      },
+      {
+        "id": 2,
+        "name": "Usuario 2",
+        "age": "",
+        "stats": "",
+        "duration": "",
+        "whatsapp_text": "",
+        "whatsapp_time": "",
+        "image_slug": "user2"
+      },
+      {
+        "id": 3,
+        "name": "Usuario 3",
+        "age": "",
+        "stats": "",
+        "duration": "",
+        "whatsapp_text": "",
+        "whatsapp_time": "",
+        "image_slug": "user3"
+      },
+      {
+        "id": 4,
+        "name": "Usuario 4",
+        "age": "",
+        "stats": "",
+        "duration": "",
+        "whatsapp_text": "",
+        "whatsapp_time": "",
+        "image_slug": "user4"
+      }
+    ]
   },
   "testimonials": {
     "section_tag": "RESEÑAS",

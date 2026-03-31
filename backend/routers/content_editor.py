@@ -52,6 +52,23 @@ def _get_content_with_sha() -> tuple[dict, str | None]:
     return json.loads(file["content"]), file["sha"]
 
 
+def _deep_merge(current: dict, incoming: dict) -> dict:
+    """
+    Merge profundo:
+    - Para dicts: merge recursivo por clave
+    - Para listas (como results.users): reemplazar completo
+    - Para escalares: reemplazar
+    """
+    result = dict(current)
+    for key, value in incoming.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = _deep_merge(result[key], value)
+        else:
+            # Listas, strings, números → reemplazar directamente
+            result[key] = value
+    return result
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("")
@@ -71,19 +88,19 @@ def update_content(
     admin: Usuario = Depends(verify_admin),
 ):
     """
-    Actualiza textos del content.json.
-    body debe ser el objeto completo o parcial a mergear.
+    Actualiza secciones del content.json.
+    Usa merge profundo: dicts se mergean, listas se reemplazan.
     """
     try:
         current, sha = _get_content_with_sha()
-        # Merge profundo de primer nivel (secciones)
-        for section, data in body.items():
-            if section in current and isinstance(current[section], dict):
-                current[section].update(data)
-            else:
-                current[section] = data
 
-        content_bytes = json.dumps(current, ensure_ascii=False, indent=2).encode("utf-8")
+        if not current and sha is None:
+            # El archivo no existe aún en GitHub → será creado
+            merged = body
+        else:
+            merged = _deep_merge(current, body)
+
+        content_bytes = json.dumps(merged, ensure_ascii=False, indent=2).encode("utf-8")
         ok = github_service.commit_file(
             CONTENT_JSON_PATH,
             content_bytes,
@@ -105,7 +122,7 @@ def update_youtube(
     youtube_id: str = Form(...),
     admin: Usuario = Depends(verify_admin),
 ):
-    """Actualiza el ID del vídeo de YouTube embebido en la sección vídeo."""
+    """Actualiza el ID del vídeo de YouTube."""
     try:
         current, sha = _get_content_with_sha()
         if "video" not in current:
@@ -131,28 +148,25 @@ def update_youtube(
 
 @router.post("/image")
 async def upload_image(
-    name: str = Form(...),            # slug del resultado, ej: "esteban"
+    name: str = Form(...),
     file: UploadFile = File(...),
     admin: Usuario = Depends(verify_admin),
 ):
     """
     Sube imagen .webp, genera 3 tamaños y hace commit atómico.
-    name = slug (sin extensión), ej: "esteban" → esteban-small.webp, etc.
+    name = image_slug del usuario (ej: "user1")
     """
     if not file.filename.lower().endswith(".webp"):
         raise HTTPException(status_code=400, detail="Solo se aceptan imágenes .webp")
 
     image_bytes = await file.read()
 
-    # Validar dimensiones
     validation = validate_image(image_bytes)
     if not validation["valid"]:
         raise HTTPException(status_code=422, detail=validation["error"])
 
-    # Generar 3 tamaños
     sizes = generate_sizes(image_bytes)
 
-    # Preparar commit múltiple
     files_to_commit = [
         {"path": f"{IMAGES_BASE_PATH}/{name}-small.webp",  "content_bytes": sizes["small"]},
         {"path": f"{IMAGES_BASE_PATH}/{name}-medium.webp", "content_bytes": sizes["medium"]},
@@ -175,7 +189,7 @@ async def upload_image(
 
 @router.post("/video")
 async def upload_video(
-    slot: str = Form(...),            # "video1", "video2" o "video3"
+    slot: str = Form(...),
     file: UploadFile = File(...),
     admin: Usuario = Depends(verify_admin),
 ):
@@ -190,7 +204,6 @@ async def upload_video(
     video_bytes = await file.read()
     path = f"{VIDEOS_BASE_PATH}/{slot}.mp4"
 
-    # Obtener SHA si ya existe
     existing = github_service.get_file(path)
     sha = existing["sha"] if existing else None
 
