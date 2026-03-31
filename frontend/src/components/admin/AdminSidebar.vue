@@ -43,6 +43,11 @@ export default {
           label: 'Usuarios'
         },
         {
+  id: 'content-editor',
+  icon: '✏️',
+  label: 'Editar Landing'
+},
+        {
           id: 'password',
           icon: '🔐',
           label: 'Cambiar Contraseña'

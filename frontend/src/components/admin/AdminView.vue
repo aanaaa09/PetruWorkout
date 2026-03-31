@@ -29,6 +29,7 @@
           <AdminPassword
             v-if="activeSection === 'password'"
           />
+          <AdminContentEditor v-if="activeSection === 'content-editor'" />
 
           <!-- Gestión de Emails -->
           <AdminEmails
@@ -53,6 +54,8 @@ import AdminDashboard from '@/components/admin/AdminDashboard.vue'
 import AdminPassword from '@/components/admin/AdminPassword.vue'
 import AdminEmails from '@/components/admin/AdminEmails.vue'
 import AdminUsers from '@/components/admin/AdminUsers.vue'
+import AdminContentEditor from '@/components/admin/AdminContentEditor.vue'
+
 
 export default {
   name: 'AdminView',
@@ -63,7 +66,8 @@ export default {
     AdminDashboard,
     AdminPassword,
     AdminEmails,
-    AdminUsers
+    AdminUsers,
+    AdminContentEditor
   },
   data() {
     return {

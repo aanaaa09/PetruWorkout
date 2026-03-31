@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "El Sistema para entrenar en Casa o en el Parque y conseguir fuerza real",
+    "highlight": "fuerza real",
+    "benefits": [
+      "Cuerpo atlético y definido",
+      "Gana fuerza y movilidad para el día a día",
+      "Estrategia secreta para activar tu metabolismo y quemar grasa",
+      "Motivación diaria para mantenerte constante y no abandonar"
+    ],
+    "button_text": "Únete al grupo de WhatsApp + calculadora de calorías 🎁"
+  },
+  "video": {
+    "youtube_id": "qDc5uScLz2c",
+    "section_tag": "EMPIEZA DESDE CERO",
+    "title": "Así cambia la gente cuando empieza bien (de verdad)",
+    "cta_title": "¿Listo para tu cambio?",
+    "cta_description": "Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión"
+  },
+  "results": {
+    "section_tag": "RESULTADOS REALES",
+    "title": "Transformaciones de mis clientes",
+    "videos_title": "Esto es lo que opinan mis clientes",
+    "videos_subtitle": "Testimonios reales de personas que han logrado sus objetivos"
+  },
+  "testimonials": {
+    "section_tag": "RESEÑAS",
+    "title": "Lo que dicen mis clientes",
+    "subtitle": "Opiniones verificadas sobre mi"
+  }
+}

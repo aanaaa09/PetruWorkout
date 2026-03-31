@@ -30,6 +30,9 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "allow"
+        GITHUB_TOKEN: str = ""
+        GITHUB_REPO: str = ""
+        GITHUB_BRANCH: str = "main"
 
 
 settings = Settings()
