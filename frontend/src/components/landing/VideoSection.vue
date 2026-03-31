@@ -10,7 +10,7 @@
         <!-- Thumbnail mientras no se carga -->
         <div v-if="!videoLoaded" class="video-thumbnail">
           <img
-            src="https://img.youtube.com/vi/qDc5uScLz2c/maxresdefault.jpg"
+            :src="thumbnailUrl"
             alt="Video thumbnail"
           >
           <button class="play-button" aria-label="Reproducir video">
@@ -27,14 +27,13 @@
           class="video-frame"
           width="100%"
           height="100%"
-          :src="`https://www.youtube.com/embed/qDc5uScLz2c?autoplay=1&rel=0&modestbranding=1`"
+          :src="embedUrl"
           title="Petru Workout - Método de Entrenamiento"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
         ></iframe>
       </div>
-
 
       <div class="video-cta">
         <h3 class="cta-title">¿Listo para tu cambio?</h3>
@@ -57,12 +56,34 @@
 
 <script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
+import { useContent } from '@/composables/useContent.js'
+
+const DEFAULT_ID = 'qDc5uScLz2c'
 
 export default {
   name: 'VideoSection',
   data() {
     return {
-      videoLoaded: false
+      videoLoaded: false,
+      youtubeId: DEFAULT_ID,
+    }
+  },
+  computed: {
+    thumbnailUrl() {
+      return `https://img.youtube.com/vi/${this.youtubeId}/maxresdefault.jpg`
+    },
+    embedUrl() {
+      return `https://www.youtube.com/embed/${this.youtubeId}?autoplay=1&rel=0&modestbranding=1`
+    },
+  },
+  async mounted() {
+    try {
+      const c = await useContent()
+      if (c?.video?.youtube_id) {
+        this.youtubeId = c.video.youtube_id
+      }
+    } catch (e) {
+      console.warn('useContent falló en VideoSection, usando ID por defecto:', e)
     }
   },
   methods: {
@@ -106,12 +127,6 @@ export default {
   font-weight: 800;
   color: white;
   margin: 0 0 1rem 0;
-}
-
-.section-subtitle {
-  font-size: 1.1rem;
-  color: var(--color-text-muted);
-  margin: 0;
 }
 
 .video-wrapper {
@@ -172,7 +187,6 @@ export default {
   height: 100%;
 }
 
-/* ===== CTA DEBAJO DEL VIDEO ===== */
 .video-cta {
   text-align: center;
   margin-top: 3rem;

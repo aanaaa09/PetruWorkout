@@ -216,7 +216,7 @@
                 <div class="image-upload-block">
                   <h5>🖼️ Imagen del usuario</h5>
                   <p class="hint">
-                    Formato <strong>.webp</strong> · dimensiones aprox. <strong>661×674 px</strong> (tolerancia ±50 px)<br>
+                    Formato <strong>.webp</strong> · cualquier tamaño, se redimensiona automáticamente a 3 versiones responsive<br>
                     ⚠️ La imagen tardará ~1-2 minutos en verse en la web (Vercel redespliega automáticamente)
                   </p>
                   <p class="hint">Slug de imagen: <code>{{ user.image_slug }}</code></p>

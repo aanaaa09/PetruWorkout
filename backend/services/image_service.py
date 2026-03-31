@@ -1,44 +1,35 @@
 import io
 from PIL import Image
 
-# Tamaños objetivo
 SIZES = {
     "small":  (330, 336),
     "medium": (660, 673),
     "large":  (661, 674),
 }
-TOLERANCE = 50  # ±px
 
 
 def validate_image(image_bytes: bytes) -> dict:
     """
-    Valida que la imagen tenga dimensiones compatibles con 'large' ±TOLERANCE.
-    Devuelve {"valid": bool, "width": int, "height": int, "error": str|None}
+    Valida que los bytes sean una imagen válida que Pillow pueda abrir.
+    No restringe dimensiones: se acepta cualquier tamaño y se redimensiona automáticamente.
     """
-    img = Image.open(io.BytesIO(image_bytes))
-    w, h = img.size
-    tw, th = SIZES["large"]
-
-    w_ok = (tw - TOLERANCE) <= w <= (tw + TOLERANCE)
-    h_ok = (th - TOLERANCE) <= h <= (th + TOLERANCE)
-
-    if not (w_ok and h_ok):
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        w, h = img.size
+        return {"valid": True, "width": w, "height": h, "error": None}
+    except Exception as e:
         return {
             "valid": False,
-            "width": w,
-            "height": h,
-            "error": (
-                f"Dimensiones recibidas: {w}×{h}px. "
-                f"Se esperaba aproximadamente {tw}×{th}px "
-                f"(tolerancia ±{TOLERANCE}px)."
-            ),
+            "width": 0,
+            "height": 0,
+            "error": f"No se pudo leer la imagen: {str(e)}",
         }
-    return {"valid": True, "width": w, "height": h, "error": None}
 
 
 def generate_sizes(image_bytes: bytes) -> dict[str, bytes]:
     """
     Genera los 3 tamaños en WebP a partir de la imagen original.
+    Usa LANCZOS para redimensionar con máxima calidad.
     Devuelve {"small": bytes, "medium": bytes, "large": bytes}
     """
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")

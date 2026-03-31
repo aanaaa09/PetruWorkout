@@ -57,13 +57,31 @@
             :key="video.id"
             class="video-wrapper"
           >
+            <!-- Overlay de play antes de reproducir -->
+            <div
+              v-if="!playingVideos[video.id]"
+              class="video-play-overlay"
+              @click="playVideo(video.id, $event)"
+            >
+              <div class="play-icon-wrap">
+                <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+                  <circle cx="26" cy="26" r="26" fill="rgba(0,0,0,0.55)"/>
+                  <polygon points="21,16 39,26 21,36" fill="white"/>
+                </svg>
+              </div>
+            </div>
+
             <video
+              :ref="'video-' + video.id"
               :src="`${video.src}${videoV}`"
               controls
               playsinline
-              preload="none"
+              preload="metadata"
               width="377"
               height="640"
+              @play="onPlay(video.id)"
+              @pause="onPause(video.id)"
+              @ended="onPause(video.id)"
             >
               Tu navegador no soporta el video.
             </video>
@@ -101,21 +119,21 @@ export default {
         videos_title: 'Esto es lo que opinan mis clientes',
         videos_subtitle: 'Testimonios reales de personas que han logrado sus objetivos',
         users: [],
-        _img_version: null,   // timestamp guardado en content.json al subir imágenes
-        _video_version: null, // timestamp guardado en content.json al subir vídeos
+        _img_version: null,
+        _video_version: null,
       },
       videoTestimonials: [
         { id: 1, src: '/videos/video1.mp4' },
         { id: 2, src: '/videos/video2.mp4' },
         { id: 3, src: '/videos/video3.mp4' },
       ],
+      playingVideos: {},
     }
   },
   computed: {
     activeUsers() {
       return (this.content.users || []).filter(u => u.name && u.name.trim())
     },
-    // Añade ?v=TIMESTAMP a las imágenes para romper caché de Vercel/browser
     imgV() {
       return this.content._img_version ? `?v=${this.content._img_version}` : ''
     },
@@ -138,6 +156,20 @@ export default {
       if (e.target.dataset.errorHandled) return
       e.target.dataset.errorHandled = 'true'
       e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E'
+    },
+    playVideo(id) {
+      this.playingVideos = { ...this.playingVideos, [id]: true }
+      this.$nextTick(() => {
+        const ref = this.$refs[`video-${id}`]
+        const el = Array.isArray(ref) ? ref[0] : ref
+        if (el) el.play()
+      })
+    },
+    onPlay(id) {
+      this.playingVideos = { ...this.playingVideos, [id]: true }
+    },
+    onPause(id) {
+      this.playingVideos = { ...this.playingVideos, [id]: false }
     },
     handleCalendlyClick() {
       trackCalendlyClick('results-cta-button', 'results-section')
@@ -234,6 +266,7 @@ export default {
 .whatsapp-text { color: #ffffff; font-size: 0.9rem; line-height: 1.5; margin: 0 0 0.5rem 0; word-wrap: break-word; }
 .whatsapp-time { display: block; text-align: right; font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
 
+/* Videos section */
 .videos-section {
   margin-top: 5rem;
   padding-top: 4rem;
@@ -249,19 +282,43 @@ export default {
 .video-wrapper {
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(255,255,255,0.05);
+  background: rgba(20, 20, 20, 0.9);
   border: 1px solid rgba(255,255,255,0.08);
   transition: all 0.3s ease;
   aspect-ratio: 9 / 16;
   position: relative;
 }
-.video-wrapper:hover { transform: translateY(-5px); border-color: rgba(6,214,160,0.3); }
+.video-wrapper:hover { border-color: rgba(6,214,160,0.3); }
+
 .video-wrapper video {
   width: 100%; height: 100%;
   display: block; object-fit: cover;
   position: absolute; top: 0; left: 0;
 }
 
+/* Custom play overlay */
+.video-play-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.2s;
+}
+.video-play-overlay:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+.play-icon-wrap {
+  transition: transform 0.2s;
+}
+.video-play-overlay:hover .play-icon-wrap {
+  transform: scale(1.12);
+}
+
+/* CTA */
 .results-cta {
   text-align: center;
   margin-top: 4rem;
@@ -287,7 +344,7 @@ export default {
 
 @media (max-width: 968px) {
   .results-grid  { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
-  .videos-grid   { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+  .videos-grid   { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
 }
 
 @media (max-width: 640px) {
