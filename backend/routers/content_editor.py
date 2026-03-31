@@ -3,6 +3,7 @@ Endpoints para editar el contenido de la landing desde el panel de admin.
 """
 import json
 import logging
+import time
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Header
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -64,7 +65,6 @@ def _deep_merge(current: dict, incoming: dict) -> dict:
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             result[key] = _deep_merge(result[key], value)
         else:
-            # Listas, strings, números → reemplazar directamente
             result[key] = value
     return result
 
@@ -95,7 +95,6 @@ def update_content(
         current, sha = _get_content_with_sha()
 
         if not current and sha is None:
-            # El archivo no existe aún en GitHub → será creado
             merged = body
         else:
             merged = _deep_merge(current, body)
@@ -154,6 +153,7 @@ async def upload_image(
 ):
     """
     Sube imagen .webp, genera 3 tamaños y hace commit atómico.
+    También actualiza _img_version en content.json para romper caché de Vercel.
     name = image_slug del usuario (ej: "user1")
     """
     if not file.filename.lower().endswith(".webp"):
@@ -180,6 +180,23 @@ async def upload_image(
     if not ok:
         raise HTTPException(status_code=500, detail="Error al subir imagen a GitHub")
 
+    # ── Actualizar _img_version en content.json para romper caché del browser ──
+    try:
+        current, sha = _get_content_with_sha()
+        if "results" not in current:
+            current["results"] = {}
+        current["results"]["_img_version"] = int(time.time())
+        content_bytes = json.dumps(current, ensure_ascii=False, indent=2).encode("utf-8")
+        github_service.commit_file(
+            CONTENT_JSON_PATH,
+            content_bytes,
+            f"admin: bump _img_version tras subir imagen {name}",
+            sha,
+        )
+    except Exception as e:
+        # No es crítico: la imagen ya está subida, solo fallará el cache busting
+        logger.warning(f"No se pudo actualizar _img_version: {e}")
+
     return {
         "success": True,
         "name": name,
@@ -193,7 +210,10 @@ async def upload_video(
     file: UploadFile = File(...),
     admin: Usuario = Depends(verify_admin),
 ):
-    """Sube un vídeo .mp4 de testimonio y hace commit."""
+    """
+    Sube un vídeo .mp4 de testimonio y hace commit.
+    También actualiza _video_version en content.json para romper caché.
+    """
     if not file.filename.lower().endswith(".mp4"):
         raise HTTPException(status_code=400, detail="Solo se aceptan vídeos .mp4")
 
@@ -215,5 +235,21 @@ async def upload_video(
     )
     if not ok:
         raise HTTPException(status_code=500, detail="Error al subir vídeo a GitHub")
+
+    # ── Actualizar _video_version en content.json para romper caché ──
+    try:
+        current, sha_content = _get_content_with_sha()
+        if "results" not in current:
+            current["results"] = {}
+        current["results"]["_video_version"] = int(time.time())
+        content_bytes = json.dumps(current, ensure_ascii=False, indent=2).encode("utf-8")
+        github_service.commit_file(
+            CONTENT_JSON_PATH,
+            content_bytes,
+            f"admin: bump _video_version tras subir vídeo {slot}",
+            sha_content,
+        )
+    except Exception as e:
+        logger.warning(f"No se pudo actualizar _video_version: {e}")
 
     return {"success": True, "slot": slot, "path": f"/videos/{slot}.mp4"}

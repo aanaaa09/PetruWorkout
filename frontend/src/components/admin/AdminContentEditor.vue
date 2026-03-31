@@ -2,7 +2,7 @@
   <div class="content-editor">
     <div class="editor-header">
       <h2>✏️ Editor de Landing</h2>
-      <p>Los cambios se publican automáticamente vía GitHub → Railway</p>
+      <p>Los cambios se publican automáticamente vía GitHub → Vercel (~1 min)</p>
     </div>
 
     <!-- Tabs -->
@@ -36,25 +36,36 @@
         <h3>🦸 Sección Hero</h3>
 
         <div class="field">
-          <label>Título principal</label>
+          <label>Título principal (sin la parte resaltada)</label>
           <textarea v-model="form.hero.title" rows="3"></textarea>
+          <span class="hint">Ej: "El Sistema para entrenar en Casa o en el Parque y conseguir"</span>
         </div>
         <div class="field">
           <label>Palabra/frase resaltada (highlight)</label>
           <input v-model="form.hero.highlight" type="text" />
-          <span class="hint">Parte del título que aparece en color acento</span>
+          <span class="hint">Parte del título en color verde. Ej: "fuerza real"</span>
         </div>
         <div class="field">
           <label>Texto del botón CTA</label>
           <input v-model="form.hero.button_text" type="text" />
+          <span class="hint">Texto del botón principal. Ej: "Únete al grupo de WhatsApp 🎁"</span>
         </div>
         <div class="field">
           <label>Beneficios (uno por línea)</label>
           <textarea
             :value="(form.hero.benefits || []).join('\n')"
-            @input="form.hero.benefits = $event.target.value.split('\n')"
+            @input="form.hero.benefits = $event.target.value.split('\n').filter(l => l.trim())"
             rows="6"
           ></textarea>
+          <span class="hint">Cada línea es un beneficio que aparece con ✅</span>
+        </div>
+
+        <!-- Preview live -->
+        <div class="preview-box" v-if="form.hero.title || form.hero.highlight">
+          <span class="preview-label">Vista previa del título:</span>
+          <p class="preview-title">
+            {{ form.hero.title }}<span class="preview-highlight"> {{ form.hero.highlight }}</span>
+          </p>
         </div>
 
         <div class="actions">
@@ -62,7 +73,8 @@
             {{ saving === 'hero' ? '⏳ Guardando...' : '💾 Guardar Hero' }}
           </button>
         </div>
-        <div v-if="saved === 'hero'" class="msg-ok">✅ Guardado. Railway redesplegará en ~1 min.</div>
+        <div v-if="saved === 'hero'" class="msg-ok">✅ Guardado. Vercel redesplegará en ~1 min.</div>
+        <div v-if="saveError === 'hero'" class="msg-error">❌ Error al guardar. Revisa la consola.</div>
       </section>
 
       <!-- ── TAB VIDEO ── -->
@@ -144,7 +156,7 @@
         <!-- Usuarios / tarjetas de resultados -->
         <div class="subsection">
           <h4>👤 Tarjetas de resultados</h4>
-          <p class="hint">Edita los datos de cada usuario que aparece en la sección de resultados</p>
+          <p class="hint">Edita los datos de cada usuario. Las imágenes se publican en ~1-2 min tras subirlas.</p>
 
           <div class="users-accordion">
             <div
@@ -203,7 +215,10 @@
                 <!-- Imagen del usuario -->
                 <div class="image-upload-block">
                   <h5>🖼️ Imagen del usuario</h5>
-                  <p class="hint">Formato .webp · dimensiones aprox. <strong>661×674 px</strong> (tolerancia ±50 px)</p>
+                  <p class="hint">
+                    Formato <strong>.webp</strong> · dimensiones aprox. <strong>661×674 px</strong> (tolerancia ±50 px)<br>
+                    ⚠️ La imagen tardará ~1-2 minutos en verse en la web (Vercel redespliega automáticamente)
+                  </p>
                   <p class="hint">Slug de imagen: <code>{{ user.image_slug }}</code></p>
 
                   <div class="upload-row">
@@ -229,21 +244,23 @@
                         class="btn-save"
                         :disabled="uploadingImage === user.image_slug"
                       >
-                        {{ uploadingImage === user.image_slug ? '⏳ Subiendo...' : '⬆️ Subir imagen' }}
+                        {{ uploadingImage === user.image_slug ? '⏳ Subiendo a GitHub...' : '⬆️ Subir imagen' }}
                       </button>
                     </div>
                   </div>
                   <div v-if="imageErrors[user.image_slug]" class="msg-error">{{ imageErrors[user.image_slug] }}</div>
-                  <div v-if="imageSuccess[user.image_slug]" class="msg-ok">✅ Imagen subida correctamente</div>
+                  <div v-if="imageSuccess[user.image_slug]" class="msg-ok">
+                    ✅ Imagen subida a GitHub. Aparecerá en la web en ~1-2 min (Vercel redespliega).
+                  </div>
                 </div>
 
                 <!-- Guardar este usuario -->
                 <div class="actions" style="margin-top:1rem">
                   <button @click="saveUser(idx)" class="btn-save" :disabled="saving === 'user-' + idx">
-                    {{ saving === 'user-' + idx ? '⏳ Guardando...' : '💾 Guardar Usuario ' + user.id }}
+                    {{ saving === 'user-' + idx ? '⏳ Guardando...' : '💾 Guardar datos Usuario ' + user.id }}
                   </button>
                 </div>
-                <div v-if="saved === 'user-' + idx" class="msg-ok">✅ Guardado correctamente.</div>
+                <div v-if="saved === 'user-' + idx" class="msg-ok">✅ Datos guardados.</div>
               </div>
             </div>
           </div>
@@ -254,6 +271,7 @@
         <!-- Vídeos de testimonios -->
         <div class="subsection">
           <h4>🎥 Vídeos de testimonios (.mp4)</h4>
+          <p class="hint">⚠️ Los vídeos también tardan ~1-2 min en verse tras subirse (Vercel redespliega).</p>
           <div class="video-upload-grid">
             <div v-for="slot in videoSlots" :key="slot" class="upload-card">
               <span class="upload-label">{{ slot }}</span>
@@ -276,35 +294,10 @@
                 {{ uploadingVideo === slot ? '⏳ Subiendo...' : '⬆️ Subir' }}
               </button>
               <div v-if="videoErrors[slot]" class="msg-error">{{ videoErrors[slot] }}</div>
-              <div v-if="videoSuccess[slot]" class="msg-ok">✅ Subido correctamente</div>
+              <div v-if="videoSuccess[slot]" class="msg-ok">✅ Subido. Visible en ~1-2 min.</div>
             </div>
           </div>
         </div>
-      </section>
-
-      <!-- ── TAB TESTIMONIALS ── -->
-      <section v-if="activeTab === 'testimonials'" class="editor-section">
-        <h3>⭐ Sección Testimonios</h3>
-
-        <div class="field">
-          <label>Etiqueta superior</label>
-          <input v-model="form.testimonials.section_tag" type="text" />
-        </div>
-        <div class="field">
-          <label>Título</label>
-          <input v-model="form.testimonials.title" type="text" />
-        </div>
-        <div class="field">
-          <label>Subtítulo</label>
-          <input v-model="form.testimonials.subtitle" type="text" />
-        </div>
-
-        <div class="actions">
-          <button @click="saveSection('testimonials')" class="btn-save" :disabled="saving">
-            {{ saving === 'testimonials' ? '⏳ Guardando...' : '💾 Guardar Testimonios' }}
-          </button>
-        </div>
-        <div v-if="saved === 'testimonials'" class="msg-ok">✅ Guardado.</div>
       </section>
 
     </template>
@@ -316,7 +309,7 @@ const API = 'https://petruworkout-production.up.railway.app'
 
 const defaultUsers = [1, 2, 3, 4].map(id => ({
   id,
-  name: `Usuario ${id}`,
+  name: '',
   age: '',
   stats: '',
   duration: '',
@@ -326,8 +319,21 @@ const defaultUsers = [1, 2, 3, 4].map(id => ({
 }))
 
 const defaultContent = {
-  hero: { title: '', highlight: '', benefits: [], button_text: '' },
-  video: { youtube_id: '', section_tag: '', title: '', cta_title: '', cta_description: '' },
+  // IMPORTANTE: los nombres de campo en hero deben coincidir EXACTAMENTE
+  // con lo que lee HeroSection.vue (title, highlight, button_text, benefits)
+  hero: {
+    title: '',
+    highlight: '',
+    button_text: '',
+    benefits: [],
+  },
+  video: {
+    youtube_id: '',
+    section_tag: '',
+    title: '',
+    cta_title: '',
+    cta_description: '',
+  },
   results: {
     section_tag: '',
     title: '',
@@ -335,7 +341,6 @@ const defaultContent = {
     videos_subtitle: '',
     users: defaultUsers,
   },
-  testimonials: { section_tag: '', title: '', subtitle: '' },
 }
 
 export default {
@@ -346,6 +351,7 @@ export default {
       loadError: null,
       saving: null,
       saved: null,
+      saveError: null,
       activeTab: 'hero',
       form: JSON.parse(JSON.stringify(defaultContent)),
       youtubeId: '',
@@ -362,11 +368,11 @@ export default {
       videoErrors: {},
       videoSuccess: {},
       uploadingVideo: null,
+      // Solo las tabs que se pueden editar (sin testimonials)
       tabs: [
-        { id: 'hero',         label: 'Hero',        icon: '🦸' },
-        { id: 'video',        label: 'Vídeo',       icon: '▶️' },
-        { id: 'results',      label: 'Resultados',  icon: '🏆' },
-        { id: 'testimonials', label: 'Testimonios', icon: '⭐' },
+        { id: 'hero',    label: 'Hero',       icon: '🦸' },
+        { id: 'video',   label: 'Vídeo',      icon: '▶️' },
+        { id: 'results', label: 'Resultados', icon: '🏆' },
       ],
     }
   },
@@ -374,7 +380,9 @@ export default {
     this.fetchContent()
   },
   methods: {
-    token() { return localStorage.getItem('admin_token') },
+    token() {
+      return localStorage.getItem('admin_token')
+    },
 
     async fetchContent() {
       this.loading = true
@@ -388,20 +396,25 @@ export default {
 
         const c = data.content || {}
 
-        // Hero
-        this.form.hero = { ...defaultContent.hero, ...(c.hero || {}) }
+        // ── Hero ─────────────────────────────────────────────────────────
+        this.form.hero = {
+          ...defaultContent.hero,
+          ...(c.hero || {}),
+        }
 
-        // Video
-        this.form.video = { ...defaultContent.video, ...(c.video || {}) }
+        // ── Video ─────────────────────────────────────────────────────────
+        this.form.video = {
+          ...defaultContent.video,
+          ...(c.video || {}),
+        }
         this.youtubeId = this.form.video.youtube_id || ''
 
-        // Results — merge especial para users array
+        // ── Results ───────────────────────────────────────────────────────
         const resultsBase = { ...defaultContent.results }
         if (c.results) {
           this.form.results = {
             ...resultsBase,
             ...c.results,
-            // Si ya hay users guardados, usar esos; si no, usar los defaults
             users: (c.results.users && c.results.users.length > 0)
               ? c.results.users
               : defaultUsers,
@@ -409,9 +422,6 @@ export default {
         } else {
           this.form.results = resultsBase
         }
-
-        // Testimonials
-        this.form.testimonials = { ...defaultContent.testimonials, ...(c.testimonials || {}) }
 
       } catch (e) {
         this.loadError = e.message
@@ -423,6 +433,7 @@ export default {
     async saveSection(section) {
       this.saving = section
       this.saved = null
+      this.saveError = null
       try {
         const r = await fetch(`${API}/api/admin/content`, {
           method: 'PUT',
@@ -432,8 +443,9 @@ export default {
         const data = await r.json()
         if (!r.ok) throw new Error(data.detail || 'Error guardando')
         this.saved = section
-        setTimeout(() => { if (this.saved === section) this.saved = null }, 4000)
+        setTimeout(() => { if (this.saved === section) this.saved = null }, 5000)
       } catch (e) {
+        this.saveError = section
         alert('❌ Error al guardar: ' + e.message)
       } finally {
         this.saving = null
@@ -444,7 +456,6 @@ export default {
       this.saving = 'results-texts'
       this.saved = null
       try {
-        // Guardar solo los campos de texto, manteniendo users
         const payload = {
           results: {
             section_tag:     this.form.results.section_tag,
@@ -452,7 +463,7 @@ export default {
             videos_title:    this.form.results.videos_title,
             videos_subtitle: this.form.results.videos_subtitle,
             users:           this.form.results.users,
-          }
+          },
         }
         const r = await fetch(`${API}/api/admin/content`, {
           method: 'PUT',
@@ -462,7 +473,7 @@ export default {
         const data = await r.json()
         if (!r.ok) throw new Error(data.detail || 'Error guardando')
         this.saved = 'results-texts'
-        setTimeout(() => { if (this.saved === 'results-texts') this.saved = null }, 4000)
+        setTimeout(() => { if (this.saved === 'results-texts') this.saved = null }, 5000)
       } catch (e) {
         alert('❌ Error al guardar: ' + e.message)
       } finally {
@@ -475,10 +486,7 @@ export default {
       this.saving = key
       this.saved = null
       try {
-        // Guardamos todo results con el usuario modificado
-        const payload = {
-          results: { ...this.form.results }
-        }
+        const payload = { results: { ...this.form.results } }
         const r = await fetch(`${API}/api/admin/content`, {
           method: 'PUT',
           headers: { token: this.token(), 'Content-Type': 'application/json' },
@@ -487,7 +495,7 @@ export default {
         const data = await r.json()
         if (!r.ok) throw new Error(data.detail || 'Error guardando')
         this.saved = key
-        setTimeout(() => { if (this.saved === key) this.saved = null }, 4000)
+        setTimeout(() => { if (this.saved === key) this.saved = null }, 5000)
       } catch (e) {
         alert('❌ Error al guardar: ' + e.message)
       } finally {
@@ -511,7 +519,7 @@ export default {
         if (!r.ok) throw new Error(data.detail || 'Error')
         this.form.video.youtube_id = this.youtubeId.trim()
         this.saved = 'youtube'
-        setTimeout(() => { if (this.saved === 'youtube') this.saved = null }, 4000)
+        setTimeout(() => { if (this.saved === 'youtube') this.saved = null }, 5000)
       } catch (e) {
         alert('❌ Error: ' + e.message)
       } finally {
@@ -522,8 +530,8 @@ export default {
     handleImageSelect(event, slug) {
       const file = event.target.files[0]
       if (!file) return
-      this.imageFiles = { ...this.imageFiles, [slug]: file }
-      this.imageErrors = { ...this.imageErrors, [slug]: null }
+      this.imageFiles   = { ...this.imageFiles,   [slug]: file }
+      this.imageErrors  = { ...this.imageErrors,  [slug]: null }
       this.imageSuccess = { ...this.imageSuccess, [slug]: false }
       const reader = new FileReader()
       reader.onload = e => { this.imagePreviews = { ...this.imagePreviews, [slug]: e.target.result } }
@@ -547,7 +555,7 @@ export default {
         const data = await r.json()
         if (!r.ok) throw new Error(data.detail || 'Error al subir imagen')
         this.imageSuccess = { ...this.imageSuccess, [slug]: true }
-        this.imageFiles = { ...this.imageFiles, [slug]: null }
+        this.imageFiles   = { ...this.imageFiles,   [slug]: null }
       } catch (e) {
         this.imageErrors = { ...this.imageErrors, [slug]: e.message }
       } finally {
@@ -558,8 +566,8 @@ export default {
     handleVideoSelect(event, slot) {
       const file = event.target.files[0]
       if (!file) return
-      this.videoFiles = { ...this.videoFiles, [slot]: file }
-      this.videoErrors = { ...this.videoErrors, [slot]: null }
+      this.videoFiles   = { ...this.videoFiles,   [slot]: file }
+      this.videoErrors  = { ...this.videoErrors,  [slot]: null }
       this.videoSuccess = { ...this.videoSuccess, [slot]: false }
     },
 
@@ -580,7 +588,7 @@ export default {
         const data = await r.json()
         if (!r.ok) throw new Error(data.detail || 'Error al subir vídeo')
         this.videoSuccess = { ...this.videoSuccess, [slot]: true }
-        this.videoFiles = { ...this.videoFiles, [slot]: null }
+        this.videoFiles   = { ...this.videoFiles,   [slot]: null }
       } catch (e) {
         this.videoErrors = { ...this.videoErrors, [slot]: e.message }
       } finally {
@@ -628,6 +636,16 @@ export default {
 
 .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
 
+/* Preview live del hero */
+.preview-box {
+  background: rgba(6,214,160,.05); border: 1px solid rgba(6,214,160,.2);
+  border-radius: 10px; padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; gap: .4rem;
+}
+.preview-label { font-size: .72rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .05em; }
+.preview-title { margin: 0; font-size: 1rem; color: white; font-weight: 700; line-height: 1.4; }
+.preview-highlight { color: var(--color-accent); }
+
 /* Acordeón de usuarios */
 .users-accordion { display: flex; flex-direction: column; gap: .6rem; }
 .user-block { border: 1px solid rgba(255,255,255,.1); border-radius: 12px; overflow: hidden; }
@@ -647,7 +665,6 @@ export default {
 
 /* WhatsApp preview */
 .whatsapp-preview { display: flex; flex-direction: column; gap: .4rem; margin-top: .25rem; }
-.preview-label { font-size: .72rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .05em; }
 .wa-bubble {
   background: linear-gradient(135deg, #128C7E, #075E54);
   border-radius: 8px; padding: .75rem 1rem;

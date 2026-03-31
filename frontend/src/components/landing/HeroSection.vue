@@ -7,31 +7,18 @@
     <div class="hero-content">
       <div class="hero-text">
         <h1 class="hero-title">
-          El Sistema para entrenar en Casa o en el Parque y conseguir
-          <span class="highlight">fuerza real</span>
+          {{ heroTitle }}<span class="highlight"> {{ heroHighlight }}</span>
         </h1>
 
         <ul class="benefits-list">
-          <li>
+          <li v-for="(benefit, i) in benefits" :key="i">
             <span class="check">✅</span>
-            Cuerpo atlético y definido
-          </li>
-          <li>
-            <span class="check">✅</span>
-            Gana fuerza y movilidad para el día a día
-          </li>
-          <li>
-            <span class="check">✅</span>
-            Estrategia secreta para activar tu metabolismo y quemar grasa
-          </li>
-          <li>
-            <span class="check">✅</span>
-            Motivación diaria para mantenerte constante y no abandonar
+            {{ benefit }}
           </li>
         </ul>
 
         <button @click="showModal = true" class="btn-gift">
-          Únete al grupo de WhatsApp + calculadora de calorías 🎁
+          {{ btnText }}
         </button>
       </div>
 
@@ -131,62 +118,67 @@
 <script>
 import { useContent } from '@/composables/useContent.js'
 
+// Valores por defecto hardcodeados (fallback si content.json no carga)
+const DEFAULTS = {
+  desktopImage: '/images/petru-hero-nuevo.webp',
+  mobileImage:  '/images/petru-hero-nuevo.webp',
+  heroTitle:    'El Sistema para entrenar en Casa o en el Parque y conseguir',
+  heroHighlight:'fuerza real',
+  benefits: [
+    'Cuerpo atlético y definido',
+    'Gana fuerza y movilidad para el día a día',
+    'Estrategia secreta para activar tu metabolismo y quemar grasa',
+    'Motivación diaria para mantenerte constante y no abandonar',
+  ],
+  btnText: 'Únete al grupo de WhatsApp + calculadora de calorías 🎁',
+}
+
 export default {
   name: 'HeroSection',
   data() {
     return {
-      desktopImage: '/images/petru-hero-nuevo.webp',
-      mobileImage: '/images/petru-hero-nuevo.webp',
-      mobileImage: '/images/petru-hero-nuevo.webp',
-      heroTitle: 'El Sistema para entrenar en Casa o en el Parque y conseguir',
-      heroHighlight: 'fuerza real',
-      benefits: [
-        'Cuerpo atlético y definido',
-        'Gana fuerza y movilidad para el día a día',
-        'Estrategia secreta para activar tu metabolismo y quemar grasa',
-        'Motivación diaria para mantenerte constante y no abandonar'
-      ],
-      btnText: 'Únete al grupo de WhatsApp + calculadora de calorías 🎁',
-      showModal: false,
-      email: '',
+      ...DEFAULTS,
+      showModal:     false,
+      email:         '',
       acceptPrivacy: false,
-      loading: false,
-      error: '',
-      success: '',
-      emailError: ''
+      loading:       false,
+      error:         '',
+      success:       '',
+      emailError:    '',
     }
   },
-   async mounted() {
-    const c = await useContent()
-    if (c?.hero) {
-      const h = c.hero
-      if (h.desktopImage)  this.desktopImage  = h.desktopImage
-      if (h.mobileImage)   this.mobileImage   = h.mobileImage
-      if (h.title)         this.heroTitle     = h.title
-      if (h.highlight)     this.heroHighlight = h.highlight
-      if (h.benefits)      this.benefits      = h.benefits
-      if (h.btnText)       this.btnText       = h.btnText
+
+  async mounted() {
+    try {
+      const c = await useContent()
+      if (c?.hero) {
+        const h = c.hero
+        // Mapeo exacto de los campos que guarda AdminContentEditor
+        if (h.title)        this.heroTitle     = h.title
+        if (h.highlight)    this.heroHighlight = h.highlight
+        if (h.benefits && Array.isArray(h.benefits) && h.benefits.length)
+                            this.benefits      = h.benefits
+        if (h.button_text)  this.btnText       = h.button_text   // ← snake_case, igual que el editor
+        if (h.desktop_image) this.desktopImage = h.desktop_image
+        if (h.mobile_image)  this.mobileImage  = h.mobile_image
+      }
+    } catch (e) {
+      console.warn('useContent falló, usando defaults:', e)
     }
   },
+
   methods: {
     handleImageError(e) {
       e.target.style.display = 'none'
     },
 
     validateEmail() {
-      // Regex para validar formato xxx@xxx.xxx (mínimo)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-      if (!this.email) {
-        this.emailError = ''
-        return true // No mostrar error si está vacío
-      }
-
+      if (!this.email) { this.emailError = ''; return true }
       if (!emailRegex.test(this.email)) {
         this.emailError = 'Formato de email incorrecto (ejemplo: correo@gmail.com)'
         return false
       }
-
       this.emailError = ''
       return true
     },
@@ -197,53 +189,43 @@ export default {
     },
 
     resetForm() {
-      this.email = ''
+      this.email         = ''
       this.acceptPrivacy = false
-      this.error = ''
-      this.success = ''
-      this.loading = false
-      this.emailError = ''
+      this.error         = ''
+      this.success       = ''
+      this.loading       = false
+      this.emailError    = ''
     },
 
     async handleSubmit() {
-      // Limpiar errores previos
-      this.error = ''
+      this.error   = ''
       this.success = ''
       this.emailError = ''
 
-      // Validar email antes de enviar
       if (!this.validateEmail()) {
         this.error = 'Por favor, introduce un email válido'
         return
       }
-
       if (!this.acceptPrivacy) {
         this.error = 'Debes aceptar la política de privacidad'
         return
       }
 
       this.loading = true
-
       try {
         const response = await fetch('https://petruworkout-production.up.railway.app/api/lead/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.email })
+          body: JSON.stringify({ email: this.email }),
         })
-
         const data = await response.json()
         sessionStorage.setItem('petru_has_team_access', 'true')
+
         if (response.ok) {
-          if (data.nuevo) {
-            this.success = '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
-          } else {
-            this.success = '¡Ya estás registrado! Redirigiendo al grupo...'
-          }
-
-
-           setTimeout(() => {
-            this.$router.push('/team')  // ← CAMBIO AQUÍ
-            }, 2000)
+          this.success = data.nuevo
+            ? '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
+            : '¡Ya estás registrado! Redirigiendo al grupo...'
+          setTimeout(() => this.$router.push('/team'), 2000)
         } else {
           this.error = data.error || 'Error al registrar. Intenta de nuevo.'
         }
@@ -253,8 +235,8 @@ export default {
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -273,26 +255,15 @@ export default {
 
 .hero-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0;
-  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95) 0%, rgba(26, 26, 26, 0.90) 100%);
+  background: linear-gradient(135deg, rgba(13,13,13,0.95) 0%, rgba(26,26,26,0.90) 100%);
 }
 
 .hero-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(13, 13, 13, 0.95) 0%,
-    rgba(26, 26, 26, 0.85) 50%,
-    rgba(13, 13, 13, 0.9) 100%
-  );
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(13,13,13,0.95) 0%, rgba(26,26,26,0.85) 50%, rgba(13,13,13,0.9) 100%);
 }
 
 /* ===== CONTENIDO HERO ===== */
@@ -305,7 +276,6 @@ export default {
   align-items: center;
   position: relative;
   z-index: 1;
-  margin-top: 0;
 }
 
 .hero-text {
@@ -314,7 +284,6 @@ export default {
   gap: 2rem;
 }
 
-/* ===== TÍTULO ===== */
 .hero-title {
   font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 900;
@@ -323,11 +292,8 @@ export default {
   margin: 0;
 }
 
-.hero-title .highlight {
-  color: var(--color-accent);
-}
+.hero-title .highlight { color: var(--color-accent); }
 
-/* ===== LISTA DE BENEFICIOS ===== */
 .benefits-list {
   list-style: none;
   padding: 0;
@@ -351,10 +317,8 @@ export default {
   font-size: 1.3rem;
   flex-shrink: 0;
   line-height: 1.4;
-  margin-top: 0;
 }
 
-/* ===== BOTÓN REGALO ===== */
 .btn-gift {
   background: var(--gradient-primary);
   color: white;
@@ -365,33 +329,22 @@ export default {
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+  box-shadow: 0 8px 30px rgba(6,214,160,0.4);
   text-align: center;
 }
-
 .btn-gift:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
+  box-shadow: 0 12px 40px rgba(6,214,160,0.6);
 }
 
 /* ===== MODAL ===== */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.3s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -401,25 +354,23 @@ export default {
 }
 
 .modal-content {
-  background: rgba(26, 26, 26, 0.98);
-  border: 1px solid rgba(6, 214, 160, 0.3);
+  background: rgba(26,26,26,0.98);
+  border: 1px solid rgba(6,214,160,0.3);
   border-radius: 20px;
   padding: 2.5rem;
   max-width: 500px;
   width: 100%;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 .modal-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  top: 1rem; right: 1rem;
+  background: rgba(255,255,255,0.1);
   border: none;
   color: white;
-  width: 35px;
-  height: 35px;
+  width: 35px; height: 35px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 1.5rem;
@@ -428,11 +379,7 @@ export default {
   justify-content: center;
   transition: all 0.3s ease;
 }
-
-.modal-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: rotate(90deg);
-}
+.modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
 
 .modal-title {
   font-size: 1.75rem;
@@ -440,7 +387,6 @@ export default {
   margin: 0 0 0.5rem 0;
   text-align: center;
 }
-
 .modal-description {
   font-size: 1rem;
   color: var(--color-text-secondary);
@@ -448,54 +394,24 @@ export default {
   margin: 0 0 2rem 0;
 }
 
-/* ===== FORMULARIO ===== */
-.email-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
+.email-form { display: flex; flex-direction: column; gap: 1.5rem; }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .email-input {
   padding: 1rem;
-  border: 2px solid rgba(6, 214, 160, 0.3);
+  border: 2px solid rgba(6,214,160,0.3);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255,255,255,0.05);
   color: white;
   font-size: 1rem;
   transition: all 0.3s ease;
 }
+.email-input.input-error { border-color: rgba(239,35,60,0.5); background: rgba(239,35,60,0.1); }
+.email-input::placeholder { color: var(--color-text-muted); }
+.email-input:focus { outline: none; border-color: var(--color-accent); background: rgba(255,255,255,0.08); }
 
-.email-input.input-error {
-  border-color: rgba(239, 35, 60, 0.5);
-  background: rgba(239, 35, 60, 0.1);
-}
-
-.email-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.email-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.email-input.input-error:focus {
-  border-color: rgba(239, 35, 60, 0.7);
-}
-
-.error-text {
-  color: #ff6b6b;
-  font-size: 0.85rem;
-  margin-top: -0.25rem;
-  font-weight: 600;
-}
+.error-text { color: #ff6b6b; font-size: 0.85rem; font-weight: 600; }
 
 .checkbox-group {
   display: flex;
@@ -504,14 +420,7 @@ export default {
   font-size: 0.9rem;
   color: var(--color-text-secondary);
 }
-
-.checkbox-group input[type="checkbox"] {
-  margin-top: 0.25rem;
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
+.checkbox-group input[type="checkbox"] { margin-top: 0.25rem; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
 
 .link-button {
   color: var(--color-accent);
@@ -523,25 +432,21 @@ export default {
   background: none;
   border: none;
 }
-
-.link-button:hover {
-  color: var(--color-accent-light);
-}
+.link-button:hover { color: var(--color-accent-light); }
 
 .error-message {
   padding: 0.875rem;
-  background: rgba(239, 35, 60, 0.2);
-  border: 1px solid rgba(239, 35, 60, 0.4);
+  background: rgba(239,35,60,0.2);
+  border: 1px solid rgba(239,35,60,0.4);
   border-radius: 10px;
   color: #ff6b6b;
   font-weight: 600;
   text-align: center;
 }
-
 .success-message {
   padding: 0.875rem;
-  background: rgba(6, 214, 160, 0.2);
-  border: 1px solid rgba(6, 214, 160, 0.4);
+  background: rgba(6,214,160,0.2);
+  border: 1px solid rgba(6,214,160,0.4);
   border-radius: 10px;
   color: var(--color-accent);
   font-weight: 600;
@@ -558,43 +463,26 @@ export default {
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+  box-shadow: 0 8px 30px rgba(6,214,160,0.4);
 }
-
-.btn-submit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(6,214,160,0.6); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ===== IMÁGENES ===== */
-.hero-image-desktop {
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-
-.hero-image-mobile {
-  display: none;
-}
+.hero-image-desktop { position: relative; display: flex; justify-content: center; }
+.hero-image-mobile  { display: none; }
 
 .hero-image img {
   max-width: 750px;
   width: 100%;
   height: 450px;
-
   object-fit: cover;
   object-position: center;
   border-radius: 20px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
 }
 
-
-/* ===== INDICADOR DE SCROLL ===== */
+/* ===== SCROLL ===== */
 .scroll-indicator {
   position: absolute;
   bottom: 2rem;
@@ -608,123 +496,35 @@ export default {
   font-size: 0.85rem;
   animation: bounce 2s infinite;
 }
-
-.scroll-arrow {
-  font-size: 1.5rem;
-}
+.scroll-arrow { font-size: 1.5rem; }
 
 @keyframes bounce {
   0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(10px); }
+  50%       { transform: translateX(-50%) translateY(10px); }
 }
 
-/* ===== RESPONSIVE TABLET ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
-  .hero-content {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    text-align: center;
-  }
-
-  .hero-text {
-    align-items: center;
-  }
-
-  .benefits-list {
-    align-items: flex-start;
-    max-width: 600px;
-    text-align: left;
-  }
-
-  .hero-image-desktop {
-    order: -1;
-  }
-
-  .hero-image img {
-    max-width: 450px; /* Tamaño medio para tablets */
-  }
+  .hero-content { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
+  .hero-text { align-items: center; }
+  .benefits-list { align-items: flex-start; max-width: 600px; text-align: left; }
+  .hero-image-desktop { order: -1; }
+  .hero-image img { max-width: 450px; }
 }
 
-/* ===== RESPONSIVE MÓVIL ===== */
 @media (max-width: 640px) {
-  .hero-section {
-    padding: 5rem 1.5rem 3rem;
-  }
-
-  .hero-content {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-
-  .hero-text {
-    order: 2;
-    align-items: center;
-    text-align: center;
-    gap: 1.5rem;
-  }
-
-  /* Ocultar imagen de escritorio en móvil */
-  .hero-image-desktop {
-    display: none;
-  }
-
-  /* Mostrar imagen de móvil */
-  .hero-image-mobile {
-    display: flex;
-    order: 1;
-    justify-content: center;
-    margin: 0;
-  }
-
-  .hero-image img {
-    max-width: 300px;
-    width: 100%;
-    height: auto;
-  }
-
-  .hero-title {
-    font-size: 1.75rem;
-    order: 1;
-  }
-
-  .benefits-list {
-    order: 3;
-    align-items: flex-start;
-    width: 100%;
-    text-align: left;
-    gap: 0.875rem;
-  }
-
-  .benefits-list li {
-    font-size: 1rem;
-    gap: 0.75rem;
-    align-items: flex-start;
-  }
-
-  .check {
-    font-size: 1.2rem;
-    line-height: 1.4;
-    margin-top: 0.1rem;
-  }
-
-  .btn-gift {
-    order: 2;
-    font-size: 1rem;
-    padding: 1.1rem 1.5rem;
-    width: 100%;
-  }
-
-  .modal-content {
-    padding: 2rem 1.5rem;
-    margin: 1rem;
-  }
-
-  .modal-title {
-    font-size: 1.5rem;
-  }
-
-  .scroll-indicator {
-    display: none;
-  }
+  .hero-section { padding: 5rem 1.5rem 3rem; }
+  .hero-content { grid-template-columns: 1fr; gap: 2.5rem; }
+  .hero-text { order: 2; align-items: center; text-align: center; gap: 1.5rem; }
+  .hero-image-desktop { display: none; }
+  .hero-image-mobile  { display: flex; order: 1; justify-content: center; }
+  .hero-image img     { max-width: 300px; width: 100%; height: auto; }
+  .hero-title         { font-size: 1.75rem; }
+  .benefits-list      { order: 3; align-items: flex-start; width: 100%; text-align: left; gap: 0.875rem; }
+  .benefits-list li   { font-size: 1rem; }
+  .btn-gift           { order: 2; font-size: 1rem; padding: 1.1rem 1.5rem; width: 100%; }
+  .modal-content      { padding: 2rem 1.5rem; margin: 1rem; }
+  .modal-title        { font-size: 1.5rem; }
+  .scroll-indicator   { display: none; }
 }
 </style>

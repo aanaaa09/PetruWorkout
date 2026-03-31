@@ -15,12 +15,12 @@
           <div class="result-images">
             <img
               :srcset="`
-                /images/results/${user.image_slug}-small.webp 330w,
-                /images/results/${user.image_slug}-medium.webp 660w,
-                /images/results/${user.image_slug}-large.webp 1000w
+                /images/results/${user.image_slug}-small.webp${imgV} 330w,
+                /images/results/${user.image_slug}-medium.webp${imgV} 660w,
+                /images/results/${user.image_slug}-large.webp${imgV} 1000w
               `"
               sizes="(max-width: 640px) 330px, (max-width: 968px) 660px, 500px"
-              :src="`/images/results/${user.image_slug}-large.webp`"
+              :src="`/images/results/${user.image_slug}-large.webp${imgV}`"
               :alt="user.name"
               width="534"
               height="501"
@@ -34,7 +34,6 @@
             <p v-if="user.stats" class="result-stats-text">{{ user.stats }}</p>
             <p v-if="user.duration" class="result-duration">{{ user.duration }}</p>
 
-            <!-- Mensaje estilo WhatsApp -->
             <div v-if="user.whatsapp_text" class="whatsapp-message">
               <div class="whatsapp-bubble">
                 <p class="whatsapp-text">{{ user.whatsapp_text }}</p>
@@ -59,7 +58,7 @@
             class="video-wrapper"
           >
             <video
-              :src="video.src"
+              :src="`${video.src}${videoV}`"
               controls
               playsinline
               preload="none"
@@ -102,6 +101,8 @@ export default {
         videos_title: 'Esto es lo que opinan mis clientes',
         videos_subtitle: 'Testimonios reales de personas que han logrado sus objetivos',
         users: [],
+        _img_version: null,   // timestamp guardado en content.json al subir imágenes
+        _video_version: null, // timestamp guardado en content.json al subir vídeos
       },
       videoTestimonials: [
         { id: 1, src: '/videos/video1.mp4' },
@@ -111,15 +112,25 @@ export default {
     }
   },
   computed: {
-    // Solo mostrar usuarios que tengan al menos nombre
     activeUsers() {
       return (this.content.users || []).filter(u => u.name && u.name.trim())
     },
+    // Añade ?v=TIMESTAMP a las imágenes para romper caché de Vercel/browser
+    imgV() {
+      return this.content._img_version ? `?v=${this.content._img_version}` : ''
+    },
+    videoV() {
+      return this.content._video_version ? `?v=${this.content._video_version}` : ''
+    },
   },
   async mounted() {
-    const c = await useContent()
-    if (c?.results) {
-      this.content = { ...this.content, ...c.results }
+    try {
+      const c = await useContent()
+      if (c?.results) {
+        this.content = { ...this.content, ...c.results }
+      }
+    } catch (e) {
+      console.warn('useContent error:', e)
     }
   },
   methods: {
@@ -136,7 +147,6 @@ export default {
 </script>
 
 <style scoped>
-/* ── Todos los estilos originales intactos ── */
 .results-section {
   padding: 6rem 2rem;
   background: var(--bg-secondary);
@@ -199,141 +209,68 @@ export default {
   object-fit: cover;
 }
 
-.result-info {
-  padding: 1.5rem;
-}
+.result-info { padding: 1.5rem; }
+.result-info h4 { font-size: 1.5rem; color: white; margin: 0 0 0.5rem 0; font-weight: 700; }
+.result-stats-text { font-size: 1rem; color: var(--color-accent); font-weight: 600; margin: 0 0 0.25rem 0; }
+.result-duration { font-size: 0.9rem; color: var(--color-text-muted); margin: 0 0 1rem 0; font-weight: 500; }
 
-.result-info h4 {
-  font-size: 1.5rem;
-  color: white;
-  margin: 0 0 0.5rem 0;
-  font-weight: 700;
-}
-
-.result-stats-text {
-  font-size: 1rem;
-  color: var(--color-accent);
-  font-weight: 600;
-  margin: 0 0 0.25rem 0;
-}
-
-.result-duration {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  margin: 0 0 1rem 0;
-  font-weight: 500;
-}
-
-.whatsapp-message {
-  margin-top: 1rem;
-}
-
+.whatsapp-message { margin-top: 1rem; }
 .whatsapp-bubble {
   background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   position: relative;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
-
 .whatsapp-bubble::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -8px;
-  width: 0;
-  height: 0;
+  top: 0; left: -8px;
+  width: 0; height: 0;
   border-style: solid;
   border-width: 0 8px 8px 0;
   border-color: transparent #075E54 transparent transparent;
 }
-
-.whatsapp-text {
-  color: #ffffff;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin: 0 0 0.5rem 0;
-  word-wrap: break-word;
-}
-
-.whatsapp-time {
-  display: block;
-  text-align: right;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 0.25rem;
-}
+.whatsapp-text { color: #ffffff; font-size: 0.9rem; line-height: 1.5; margin: 0 0 0.5rem 0; word-wrap: break-word; }
+.whatsapp-time { display: block; text-align: right; font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
 
 .videos-section {
   margin-top: 5rem;
   padding-top: 4rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-.videos-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
+.videos-header { text-align: center; margin-bottom: 3rem; }
+.videos-header h3 { font-size: 2rem; font-weight: 700; color: white; margin: 0 0 1rem 0; }
+.videos-header p  { font-size: 1.1rem; color: var(--color-text-muted); margin: 0; }
 
-.videos-header h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 1rem 0;
-}
-
-.videos-header p {
-  font-size: 1.1rem;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
-.videos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
+.videos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
 
 .video-wrapper {
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
   transition: all 0.3s ease;
   aspect-ratio: 9 / 16;
   position: relative;
 }
-
-.video-wrapper:hover {
-  transform: translateY(-5px);
-  border-color: rgba(6, 214, 160, 0.3);
-}
-
+.video-wrapper:hover { transform: translateY(-5px); border-color: rgba(6,214,160,0.3); }
 .video-wrapper video {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
+  width: 100%; height: 100%;
+  display: block; object-fit: cover;
+  position: absolute; top: 0; left: 0;
 }
 
 .results-cta {
   text-align: center;
   margin-top: 4rem;
   padding: 3rem;
-  background: linear-gradient(135deg, rgba(6, 214, 160, 0.1) 0%, rgba(6, 214, 160, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(6,214,160,0.1) 0%, rgba(6,214,160,0.05) 100%);
   border-radius: 20px;
-  border: 1px solid rgba(6, 214, 160, 0.2);
+  border: 1px solid rgba(6,214,160,0.2);
 }
-
-.results-cta p {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 1.5rem 0;
-}
+.results-cta p { font-size: 1.5rem; font-weight: 700; color: white; margin: 0 0 1.5rem 0; }
 
 .btn-primary {
   display: inline-block;
@@ -343,56 +280,23 @@ export default {
   border-radius: 10px;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+  box-shadow: 0 8px 30px rgba(6,214,160,0.4);
   transition: all 0.3s ease;
 }
-
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(6, 214, 160, 0.5);
-}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(6,214,160,0.5); }
 
 @media (max-width: 968px) {
-  .results-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .videos-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
-  }
+  .results-grid  { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+  .videos-grid   { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
 }
 
 @media (max-width: 640px) {
-  .results-section {
-    padding: 4rem 1rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-
-  .result-info h4 {
-    font-size: 1.3rem;
-  }
-
-  .whatsapp-text {
-    font-size: 0.85rem;
-  }
-
-  .videos-header h3 {
-    font-size: 1.5rem;
-  }
-
-  .results-cta {
-    padding: 2rem 1.5rem;
-  }
-
-  .results-cta p {
-    font-size: 1.25rem;
-  }
+  .results-section  { padding: 4rem 1rem; }
+  .section-title    { font-size: 2rem; }
+  .result-info h4   { font-size: 1.3rem; }
+  .whatsapp-text    { font-size: 0.85rem; }
+  .videos-header h3 { font-size: 1.5rem; }
+  .results-cta      { padding: 2rem 1.5rem; }
+  .results-cta p    { font-size: 1.25rem; }
 }
 </style>
