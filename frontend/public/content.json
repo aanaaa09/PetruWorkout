@@ -25,12 +25,12 @@
     "users": [
       {
         "id": 1,
-        "name": "Usuario 1",
-        "age": "",
-        "stats": "",
-        "duration": "",
+        "name": "Esteban",
+        "age": "37 años",
+        "stats": "Antes 25% de grasa, ahora 12",
+        "duration": "12 semanas",
         "whatsapp_text": "",
-        "whatsapp_time": "",
+        "whatsapp_time": "17:12",
         "image_slug": "user1"
       },
       {
