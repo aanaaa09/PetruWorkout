@@ -55,7 +55,7 @@
       },
       {
         "id": 4,
-        "name": "Usuario 4",
+        "name": "Pedro",
         "age": "",
         "stats": "",
         "duration": "",
@@ -64,7 +64,7 @@
         "image_slug": "user4"
       }
     ],
-    "_img_version": 1774979855
+    "_img_version": 1774978584
   },
   "testimonials": {
     "section_tag": "RESEÑAS",
