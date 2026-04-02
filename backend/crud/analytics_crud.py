@@ -1,9 +1,4 @@
 # backend/crud/analytics_crud.py
-"""
-Helpers de acceso a BD para analytics.
-Centraliza filtrado por fuentes conocidas, botones conocidos y agregaciones de tracking.
-"""
-
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional
@@ -15,11 +10,12 @@ from ..models.calendly_booking import CalendlyBooking
 
 SPAIN_TZ = timezone(timedelta(hours=1))
 
-# Fuentes de tráfico reconocidas — únicas que entran en cálculos
+# Fuentes de tráfico reconocidas
 KNOWN_SOURCES = ("instagram", "organic_search", "youtube", "facebook", "linkedin")
 
-# Ubicaciones de botón reconocidas — deben coincidir con button_location en el tracking
+# Ubicaciones de botón reconocidas
 KNOWN_BUTTONS = (
+    "hero-section",
     "calculator-section",
     "results-section",
     "services-section",
@@ -160,8 +156,6 @@ def group_by_button(
     rows = q.group_by(CalendlyClick.button_location).all()
     return {r.button_location: r.n for r in rows}
 
-
-# ── Shortcuts tipados ────────────────────────────────────────────────────────
 
 def visits_count(db: Session, start: date, end: date, source: Optional[str]) -> int:
     return count_filtered(db, PageVisit, PageVisit.fecha, start, end, source)
