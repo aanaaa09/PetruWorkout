@@ -117,7 +117,7 @@
           <div class="gift-icon-wrap">🎁</div>
           <h3 class="gift-title">Si has llegado hasta aquí, tienes un regalo</h3>
           <p class="gift-subtitle">
-            Únete al grupo privado de WhatsApp y accede a la calculadora de calorías personalizada — sin coste, sin compromiso.
+            Únete al grupo privado de WhatsApp y accede a la calculadora de calorías personalizada
           </p>
           <button class="btn-gift" @click="showGiftModal = true">
             Únete al grupo + calculadora de calorías 🎁
