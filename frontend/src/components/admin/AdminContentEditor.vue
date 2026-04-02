@@ -31,6 +31,7 @@
 
     <template v-else>
 
+
       <!-- ── TAB HERO ── -->
       <section v-if="activeTab === 'hero'" class="editor-section">
         <h3>🦸 Sección Hero</h3>
@@ -46,9 +47,9 @@
           <span class="hint">Parte del título en color verde. Ej: "fuerza real"</span>
         </div>
         <div class="field">
-          <label>Texto del botón CTA</label>
-          <input v-model="form.hero.button_text" type="text" />
-          <span class="hint">Texto del botón principal. Ej: "Únete al grupo de WhatsApp 🎁"</span>
+          <label>Texto del botón Calendly (hero)</label>
+          <input v-model="form.hero.calendly_button_text" type="text" />
+          <span class="hint">Botón principal que lleva a Calendly. Ej: "📅 Empieza ahora — Llamada gratuita"</span>
         </div>
         <div class="field">
           <label>Beneficios (uno por línea)</label>
@@ -290,7 +291,7 @@ const defaultContent = {
   hero: {
     title: '',
     highlight: '',
-    button_text: '',
+    calendly_button_text: '',
     benefits: [],
   },
   video: {
@@ -308,7 +309,6 @@ const defaultContent = {
     users: defaultUsers,
   },
 }
-
 export default {
   name: 'AdminContentEditor',
   data() {

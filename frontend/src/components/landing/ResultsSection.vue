@@ -63,7 +63,6 @@
               class="video-play-overlay"
               @click="playVideo(video.id)"
             >
-              <!-- Poster responsivo: small en móvil, normal en desktop -->
               <img
                 v-if="video.poster"
                 :src="video.poster"
@@ -99,18 +98,81 @@
         </div>
       </div>
 
-      <div class="results-cta">
-        <p>¿Quieres ser el próximo?</p>
-        <a
-          href="https://calendly.com/petruworkout/reunion"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn btn-primary"
-          @click="handleCalendlyClick"
-        >
-          Empieza Tu Transformación →
-        </a>
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!-- SECCIÓN REGALO — debajo de results/videos             -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <div class="gift-cta-section">
+        <div class="gift-cta-inner">
+          <div class="gift-icon-wrap">🎁</div>
+          <h3 class="gift-title">Si has llegado hasta aquí, tienes un regalo</h3>
+          <p class="gift-subtitle">
+            Únete al grupo privado de WhatsApp y accede a la calculadora de calorías personalizada — sin coste, sin compromiso.
+          </p>
+          <button class="btn-gift" @click="showGiftModal = true">
+            Únete al grupo + calculadora de calorías 🎁
+          </button>
+        </div>
       </div>
+
+      <!-- Modal regalo -->
+      <transition name="modal-fade">
+        <div v-if="showGiftModal" class="modal-overlay" @click.self="closeGiftModal">
+          <div class="modal-content">
+            <button @click="closeGiftModal" class="modal-close">✕</button>
+
+            <h2 class="modal-title">🎁 Accede al regalo exclusivo</h2>
+            <p class="modal-description">
+              Únete al grupo privado y recibe tu regalo de bienvenida
+            </p>
+
+            <form @submit.prevent="handleGiftSubmit" class="email-form">
+              <div class="form-group">
+                <input
+                  v-model="giftEmail"
+                  type="email"
+                  placeholder="tu@email.com"
+                  required
+                  class="email-input"
+                  :class="{ 'input-error': giftEmailError }"
+                  @input="giftEmailError = ''"
+                />
+                <span v-if="giftEmailError" class="error-text">{{ giftEmailError }}</span>
+              </div>
+
+              <div class="checkbox-group">
+                <input
+                  v-model="giftAcceptPrivacy"
+                  type="checkbox"
+                  id="gift-privacy"
+                  required
+                />
+                <label for="gift-privacy">
+                  Acepto la
+                  <router-link
+                    to="/info?legal=privacy"
+                    class="link-button"
+                    @click="closeGiftModal"
+                  >
+                    política de privacidad
+                  </router-link>
+                </label>
+              </div>
+
+              <div v-if="giftError" class="error-message">{{ giftError }}</div>
+              <div v-if="giftSuccess" class="success-message">{{ giftSuccess }}</div>
+
+              <button
+                type="submit"
+                class="btn-submit"
+                :disabled="giftLoading"
+              >
+                {{ giftLoading ? '⏳ Procesando...' : 'Accede al grupo y a mi regalo' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </transition>
+
     </div>
   </section>
 </template>
@@ -131,7 +193,6 @@ export default {
         users: [],
         _img_version: null,
       },
-      // Vídeos fijos — no editables desde el panel de admin
       videoTestimonials: [
         {
           id: 1,
@@ -153,6 +214,14 @@ export default {
         },
       ],
       playingVideos: {},
+      // Modal regalo
+      showGiftModal:     false,
+      giftEmail:         '',
+      giftAcceptPrivacy: false,
+      giftLoading:       false,
+      giftError:         '',
+      giftSuccess:       '',
+      giftEmailError:    '',
     }
   },
   computed: {
@@ -167,7 +236,6 @@ export default {
     try {
       const c = await useContent()
       if (c?.results) {
-        // No propagamos _video_version (los vídeos ya no se gestionan desde admin)
         const { _video_version, ...rest } = c.results
         this.content = { ...this.content, ...rest }
       }
@@ -196,8 +264,68 @@ export default {
     onPause(id) {
       this.playingVideos = { ...this.playingVideos, [id]: false }
     },
-    handleCalendlyClick() {
-      trackCalendlyClick('results-cta-button', 'results-section')
+
+    // ── Modal regalo ──────────────────────────────────────────
+    closeGiftModal() {
+      this.showGiftModal     = false
+      this.giftEmail         = ''
+      this.giftAcceptPrivacy = false
+      this.giftError         = ''
+      this.giftSuccess       = ''
+      this.giftLoading       = false
+      this.giftEmailError    = ''
+    },
+    validateGiftEmail() {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!this.giftEmail) { this.giftEmailError = ''; return true }
+      if (!emailRegex.test(this.giftEmail)) {
+        this.giftEmailError = 'Formato de email incorrecto (ejemplo: correo@gmail.com)'
+        return false
+      }
+      this.giftEmailError = ''
+      return true
+    },
+    async handleGiftSubmit() {
+      this.giftError   = ''
+      this.giftSuccess = ''
+      this.giftEmailError = ''
+
+      if (!this.validateGiftEmail()) {
+        this.giftError = 'Por favor, introduce un email válido'
+        return
+      }
+      if (!this.giftAcceptPrivacy) {
+        this.giftError = 'Debes aceptar la política de privacidad'
+        return
+      }
+
+      // Registrar click en el botón regalo (para analytics)
+      trackCalendlyClick('gift-section-submit', 'gift-section')
+
+      this.giftLoading = true
+      try {
+        const response = await fetch('https://petruworkout-production.up.railway.app/api/lead/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.giftEmail }),
+        })
+        const data = await response.json()
+        sessionStorage.setItem('petru_has_team_access', 'true')
+
+        if (response.ok) {
+          this.giftSuccess = data.nuevo
+            ? '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
+            : '¡Ya estás registrado! Redirigiendo al grupo...'
+          setTimeout(() => this.$router.push('/team'), 2000)
+        } else {
+          this.giftError = data.error || 'Error al registrar. Intenta de nuevo.'
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        this.giftError = 'Error de conexión. Intenta de nuevo.'
+      } finally {
+        this.giftLoading = false
+      }
     },
   },
 }
@@ -321,7 +449,6 @@ export default {
   position: absolute; top: 0; left: 0;
 }
 
-/* Poster image */
 .video-poster {
   position: absolute;
   inset: 0;
@@ -331,7 +458,6 @@ export default {
   z-index: 0;
 }
 
-/* Custom play overlay */
 .video-play-overlay {
   position: absolute;
   inset: 0;
@@ -355,33 +481,207 @@ export default {
   transform: scale(1.12);
 }
 
-/* CTA */
-.results-cta {
-  text-align: center;
-  margin-top: 4rem;
-  padding: 3rem;
-  background: linear-gradient(135deg, rgba(6,214,160,0.1) 0%, rgba(6,214,160,0.05) 100%);
-  border-radius: 20px;
-  border: 1px solid rgba(6,214,160,0.2);
+/* ══════════════════════════════════════════════════════════ */
+/* SECCIÓN REGALO                                            */
+/* ══════════════════════════════════════════════════════════ */
+.gift-cta-section {
+  margin-top: 5rem;
+  padding-top: 4rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
-.results-cta p { font-size: 1.5rem; font-weight: 700; color: white; margin: 0 0 1.5rem 0; }
 
-.btn-primary {
-  display: inline-block;
+.gift-cta-inner {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  background: linear-gradient(135deg, rgba(6,214,160,0.12) 0%, rgba(6,214,160,0.04) 100%);
+  border: 2px solid rgba(6,214,160,0.35);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.gift-icon-wrap {
+  font-size: 3.5rem;
+  animation: giftBounce 2.5s ease-in-out infinite;
+}
+
+@keyframes giftBounce {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%       { transform: translateY(-10px) rotate(5deg); }
+}
+
+.gift-title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 900;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+  max-width: 700px;
+}
+
+.gift-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 580px;
+  line-height: 1.6;
+}
+
+.btn-gift {
   background: var(--gradient-primary);
   color: white;
-  padding: 1rem 2.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  text-decoration: none;
+  padding: 1.2rem 2.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
   box-shadow: 0 8px 30px rgba(6,214,160,0.4);
+  margin-top: 0.5rem;
+}
+.btn-gift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(6,214,160,0.6);
+}
+
+/* ══ MODAL ══════════════════════════════════════════════════ */
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.3s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: rgba(26,26,26,0.98);
+  border: 1px solid rgba(6,214,160,0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 35px; height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
 }
-.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(6,214,160,0.5); }
+.modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
 
+.modal-title {
+  font-size: 1.75rem;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+.modal-description {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0 0 2rem 0;
+}
+
+.email-form { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.email-input {
+  padding: 1rem;
+  border: 2px solid rgba(6,214,160,0.3);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+.email-input.input-error { border-color: rgba(239,35,60,0.5); background: rgba(239,35,60,0.1); }
+.email-input::placeholder { color: var(--color-text-muted); }
+.email-input:focus { outline: none; border-color: var(--color-accent); background: rgba(255,255,255,0.08); }
+
+.error-text { color: #ff6b6b; font-size: 0.85rem; font-weight: 600; }
+
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+.checkbox-group input[type="checkbox"] { margin-top: 0.25rem; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
+
+.link-button {
+  color: var(--color-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  font-family: inherit;
+  background: none;
+  border: none;
+}
+.link-button:hover { color: var(--color-accent-light); }
+
+.error-message {
+  padding: 0.875rem;
+  background: rgba(239,35,60,0.2);
+  border: 1px solid rgba(239,35,60,0.4);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-weight: 600;
+  text-align: center;
+}
+.success-message {
+  padding: 0.875rem;
+  background: rgba(6,214,160,0.2);
+  border: 1px solid rgba(6,214,160,0.4);
+  border-radius: 10px;
+  color: var(--color-accent);
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn-submit {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(6,214,160,0.4);
+}
+.btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(6,214,160,0.6); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Responsive */
 @media (max-width: 968px) {
   .results-grid  { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
   .videos-grid   { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+  .gift-cta-inner { padding: 2.5rem 1.5rem; }
 }
 
 @media (max-width: 640px) {
@@ -390,7 +690,9 @@ export default {
   .result-info h4   { font-size: 1.3rem; }
   .whatsapp-text    { font-size: 0.85rem; }
   .videos-header h3 { font-size: 1.5rem; }
-  .results-cta      { padding: 2rem 1.5rem; }
-  .results-cta p    { font-size: 1.25rem; }
+  .gift-title       { font-size: 1.5rem; }
+  .btn-gift         { width: 100%; font-size: 1rem; }
+  .modal-content    { padding: 2rem 1.5rem; margin: 1rem; }
+  .modal-title      { font-size: 1.5rem; }
 }
 </style>

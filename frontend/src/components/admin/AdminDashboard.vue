@@ -284,14 +284,19 @@ const SOURCE_CFG = {
   facebook:       { label: 'Facebook',       emoji: '👥', color: '#1877F2' },
 }
 
+// En AdminDashboard.vue, localiza el bloque BUTTON_CFG (aprox línea 3-13 del <script>)
+// y REEMPLÁZALO por esto:
+
 const BUTTON_CFG = {
-  'calculator-section': { label: 'Calculadora',     emoji: '🔢', color: '#9b5de5' },
-  'results-section':    { label: 'Resultados',       emoji: '🏆', color: '#f15bb5' },
-  'services-section':   { label: 'Servicios',        emoji: '💼', color: '#fee440' },
-  'video-section':      { label: 'Vídeo',            emoji: '▶️', color: '#00bbf9' },
-  'full-footer':        { label: 'Footer principal', emoji: '📋', color: '#00f5d4' },
-  'full-navbar':        { label: 'Navbar',           emoji: '🔝', color: '#e63946' },
-  'simple-footer':      { label: 'Footer simple',    emoji: '📄', color: '#4ecdc4' },
+  'hero-section':       { label: 'Hero (Calendly)',   emoji: '🚀', color: '#06d6a0' },
+  'calculator-section': { label: 'Calculadora',       emoji: '🔢', color: '#9b5de5' },
+  'results-section':    { label: 'Resultados',        emoji: '🏆', color: '#f15bb5' },
+  'gift-section':       { label: 'Sección regalo',    emoji: '🎁', color: '#ffd166' },
+  'services-section':   { label: 'Servicios',         emoji: '💼', color: '#fee440' },
+  'video-section':      { label: 'Vídeo',             emoji: '▶️', color: '#00bbf9' },
+  'full-footer':        { label: 'Footer principal',  emoji: '📋', color: '#00f5d4' },
+  'full-navbar':        { label: 'Navbar',            emoji: '🔝', color: '#e63946' },
+  'simple-footer':      { label: 'Footer simple',     emoji: '📄', color: '#4ecdc4' },
 }
 
 const SIGMA_COLORS = [
