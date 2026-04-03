@@ -288,7 +288,7 @@ const SOURCE_CFG = {
 // y REEMPLÁZALO por esto:
 
 const BUTTON_CFG = {
-  'hero-section':       { label: 'Hero (Calendly)',   emoji: '🚀', color: '#06d6a0' },
+  'hero-section':       { label: 'Hero',   emoji: '🚀', color: '#06d6a0' },
   'calculator-section': { label: 'Calculadora',       emoji: '🔢', color: '#9b5de5' },
   'results-section':    { label: 'Resultados',        emoji: '🏆', color: '#f15bb5' },
   'gift-section':       { label: 'Sección regalo',    emoji: '🎁', color: '#ffd166' },
