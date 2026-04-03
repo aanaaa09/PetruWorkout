@@ -71,26 +71,13 @@ class LeadService:
         if not token_result['success']:
             logger.error(f"No se pudo crear token calculadora para {email}")
 
-        # ── Email de bienvenida ────────────────────────────────────
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # contexto async (FastAPI): crear tarea
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as pool:
-                    future = pool.submit(
-                        asyncio.run,
-                        email_service.send_welcome_lead_email(email, nombre, calculator_url),
-                    )
-                    email_enviado = future.result(timeout=15)
-            else:
-                email_enviado = loop.run_until_complete(
-                    email_service.send_welcome_lead_email(email, nombre, calculator_url)
-                )
-        except Exception as e:
-            logger.error(f"Error enviando email bienvenida a {email}: {e}")
-            email_enviado = False
+            # ── Email de bienvenida ────────────────────────────────────────────
+            try:
+                email_enviado = email_service.send_welcome_lead_email(email, nombre, calculator_url)
+            except Exception as e:
+                logger.error(f"Error enviando email bienvenida a {email}: {e}")
+                email_enviado = False
+
 
         if email_enviado:
             logger.info(f"Nuevo lead registrado con email de bienvenida: {email}")

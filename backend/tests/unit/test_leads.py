@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock
 def test_lead_registration_new_user(client, db):
     """Test registro de nuevo lead"""
 
-    with patch('backend.routers.leads.enviar_email_bienvenida') as mock_email:
+    with patch('backend.services.email_service.email_service.send_welcome_lead_email') as mock_email:
         mock_email.return_value = True
 
         response = client.post("/api/lead/register", json={
@@ -65,7 +65,7 @@ def test_lead_registration_rate_limit(client, db):
 
     email = "ratelimit@test.com"
 
-    with patch('backend.routers.leads.enviar_email_bienvenida') as mock_email:
+    with patch('backend.services.email_service.email_service.send_welcome_lead_email') as mock_email:
         mock_email.return_value = True
 
         # Primer intento (OK)
@@ -108,7 +108,7 @@ def test_team_access_grant(db):
 def test_calculator_token_creation_on_lead_registration(client, db):
     """Test que se crea token de calculadora al registrar lead"""
 
-    with patch('backend.routers.leads.enviar_email_bienvenida') as mock_email:
+    with patch('backend.services.email_service.email_service.send_welcome_lead_email') as mock_email:
         mock_email.return_value = True
 
         response = client.post("/api/lead/register", json={

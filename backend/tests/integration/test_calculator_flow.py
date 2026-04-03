@@ -10,7 +10,7 @@ def test_flujo_completo_calculadora(client, db):
     """Test flujo: registro → token → cálculo de calorías"""
 
     # 1. Registro de lead
-    with patch('backend.routers.leads.enviar_email_bienvenida') as mock_email:
+    with patch('backend.services.email_service.email_service.send_welcome_lead_email') as mock_email:
         mock_email.return_value = True
 
         response = client.post("/api/lead/register", json={

@@ -48,7 +48,7 @@ class EmailService:
     # NEWSLETTER con adjuntos opcionales
     # ──────────────────────────────────────────────────────────
 
-    async def send_newsletter_email(
+    def send_newsletter_email(
         self,
         to_email: str,
         to_name: str,
@@ -110,7 +110,7 @@ class EmailService:
     # EMAIL SIMPLE (sin template)
     # ──────────────────────────────────────────────────────────
 
-    async def send_plain_email(
+    def send_plain_email(
         self,
         to_email: str,
         to_name: str,
@@ -129,7 +129,7 @@ class EmailService:
     # EMAIL DE BIENVENIDA PARA LEADS (antes función suelta en leads.py)
     # ──────────────────────────────────────────────────────────
 
-    async def send_welcome_lead_email(
+    def send_welcome_lead_email(
         self,
         to_email: str,
         to_name: str,
