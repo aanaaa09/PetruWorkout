@@ -43,9 +43,9 @@ def commit_file(path: str, content_bytes: bytes, message: str, sha: str | None =
 
     r = requests.put(url, json=payload, headers=_headers(), timeout=30)
     if r.status_code in (200, 201):
-        logger.info(f"✅ Commit OK: {path}")
+        logger.info(f"Commit OK: {path}")
         return True
-    logger.error(f"❌ Commit error {r.status_code}: {r.text[:300]}")
+    logger.error(f"Commit error {r.status_code}: {r.text[:300]}")
     return False
 
 
@@ -106,7 +106,7 @@ def commit_multiple_files(files: list[dict], message: str) -> bool:
         json={"sha": new_commit_sha},
     )
     if update_r.status_code in (200, 201):
-        logger.info(f"✅ Multi-commit OK: {[f['path'] for f in files]}")
+        logger.info(f"Multi-commit OK: {[f['path'] for f in files]}")
         return True
-    logger.error(f"❌ Multi-commit error: {update_r.text[:300]}")
+    logger.error(f"Multi-commit error: {update_r.text[:300]}")
     return False

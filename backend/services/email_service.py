@@ -129,15 +129,15 @@ class EmailService:
             )
 
             if response.status_code == 201:
-                logger.info(f"✅ Email enviado a {to_email}")
+                logger.info(f"Email enviado a {to_email}")
                 return True
             else:
-                logger.error(f"❌ Error enviando email a {to_email}: {response.status_code}")
+                logger.error(f"Error enviando email a {to_email}: {response.status_code}")
                 logger.error(f"Response: {response.text}")
                 return False
 
         except Exception as e:
-            logger.error(f"❌ Excepción enviando email a {to_email}: {e}")
+            logger.error(f"Excepción enviando email a {to_email}: {e}")
             import traceback
             traceback.print_exc()
             return False
