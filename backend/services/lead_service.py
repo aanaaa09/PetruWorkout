@@ -71,13 +71,12 @@ class LeadService:
         if not token_result['success']:
             logger.error(f"No se pudo crear token calculadora para {email}")
 
-            # ── Email de bienvenida ────────────────────────────────────────────
-            try:
-                email_enviado = email_service.send_welcome_lead_email(email, nombre, calculator_url)
-            except Exception as e:
-                logger.error(f"Error enviando email bienvenida a {email}: {e}")
-                email_enviado = False
-
+        # ── Email de bienvenida ────────────────────────────────────
+        email_enviado = False
+        try:
+            email_enviado = email_service.send_welcome_lead_email(email, nombre, calculator_url)
+        except Exception as e:
+            logger.error(f"Error enviando email bienvenida a {email}: {e}")
 
         if email_enviado:
             logger.info(f"Nuevo lead registrado con email de bienvenida: {email}")
