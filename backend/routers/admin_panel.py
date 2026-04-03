@@ -126,7 +126,7 @@ def get_bookings(
 # ── Envío masivo de emails ─────────────────────────────────────────
 
 @router.post("/send-email")
-def send_email_to_users(
+async def send_email_to_users(
     admin: Usuario = Depends(verify_admin_token),
     db: Session = Depends(get_db),
     subject: str = Form(...),
@@ -159,7 +159,7 @@ def send_email_to_users(
         attachment_data = []
         if attachments:
             for file in attachments:
-                content = file.read()
+                content = await file.read()
                 attachment_data.append({'content': content, 'name': file.filename})
 
         # Enviar
