@@ -59,7 +59,7 @@ function detectTrafficSource() {
     return 'organic_search';
   }
 
-  // 8. TRÁFICO INTERNO (de tu propia web)
+  // 8. TRÁFICO INTERNO
   if (referrer.includes('petrucalistenia.com') ||
       referrer.includes(window.location.hostname)) {
     return 'internal';
@@ -84,7 +84,7 @@ function detectTrafficSource() {
     }
   }
 
-  // 10. TRÁFICO DIRECTO (usuario escribió la URL o bookmark)
+  // 10. TRÁFICO DIRECTO (usuario escribió la URL)
   if (!referrer || referrer === '') {
     return 'direct';
   }

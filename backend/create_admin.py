@@ -6,11 +6,15 @@ Uso:
     python -m backend.create_admin
 """
 
+import os
+import sys
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import bcrypt
 from datetime import datetime
-import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def hash_password(password: str) -> str:
@@ -22,27 +26,29 @@ def create_admin_users():
     """
     Crea los usuarios administradores en la base de datos de Railway
     """
-    # URL de conexión directa a Railway
-    DATABASE_URL = "postgresql://postgres:zmBLqeCqmmSgCCJkXQmKdZviqkOVWuVP@switchyard.proxy.rlwy.net:47023/railway"
+    database_url = os.getenv('DATABASE_URL')
+
+    if not database_url:
+        print("❌ ERROR: DATABASE_URL no configurada en el .env")
+        sys.exit(1)
 
     # Lista de admins a crear
     admins = [
         {
-            'nombre': 'Petru Admin',
-            'email': 'petruworkout@gmail.com',
-            'password': input('Introduce contraseña para petruworkout@gmail.com: ')
+            'nombre': input('Introduce nombre para el primer admin: '),
+            'email': input('Introduce email para el primer admin: '),
+            'password': input('Introduce contraseña para el primer admin: ')
         },
         {
-            'nombre': 'Admin Petru',
-            'email': 'admn.petruworkout@gmail.com',
-            'password': input('Introduce contraseña para admn.petruworkout@gmail.com: ')
+            'nombre': input('Introduce nombre para el segundo admin: '),
+            'email': input('Introduce email para el segundo admin: '),
+            'password': input('Introduce contraseña para el segundo admin: ')
         }
     ]
 
     try:
-        # Conectar a la base de datos
         print("\n🔌 Conectando a Railway...")
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg2.connect(database_url)
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = conn.cursor()
         print("✅ Conectado correctamente\n")
@@ -61,7 +67,6 @@ def create_admin_users():
                 print(f"⚠️  El usuario {email} ya existe")
                 print(f"   ID: {existing[0]}, Tipo: {existing[2]}")
 
-                # Preguntar si quiere actualizar
                 respuesta = input(f"   ¿Actualizar contraseña? (s/n): ").lower()
                 if respuesta == 's':
                     password_hash = hash_password(admin['password'])
@@ -100,7 +105,7 @@ def create_admin_users():
                     admin['nombre'],
                     email,
                     password_hash,
-                    'ADMIN',  # tipo_usuario como string (enum)
+                    'ADMIN',
                     True,
                     datetime.now()
                 )

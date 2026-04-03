@@ -309,15 +309,6 @@ class TestGetDashboardKpis:
 # ══════════════════════════════════════════
 
 class TestAnalyticsEndpoints:
-    """
-    Tras los cambios en main.py (analytics registrado PRIMERO, /funnel y /stats
-    eliminados de tracking.py), todos los endpoints requieren auth de admin.
-
-      /api/admin/analytics   → analytics.py  (auth requerida)
-      /api/admin/dashboard   → analytics.py  (auth requerida)
-      /api/tracking/funnel   → analytics.py  (auth requerida)
-      /api/tracking/stats    → analytics.py  (auth requerida)
-    """
 
     # ── /api/admin/analytics ──────────────────────────────────────────
 
