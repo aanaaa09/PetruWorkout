@@ -26,17 +26,17 @@ def get_database_url():
     # Si Railway CLI inyectó las variables, usarlas
     if pg_host and pg_password:
         url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}"
-        logger.info(f"🚂 Usando variables de Railway CLI: {pg_host}:{pg_port}")
+        logger.info(f"Usando variables de Railway CLI: {pg_host}:{pg_port}")
         return url
 
     # Sino, usar settings (para backend local o en Railway)
-    logger.info("🌐 Usando configuración de settings")
+    logger.info("Usando configuración de settings")
     return settings.DATABASE_URL
 
 
 DATABASE_URL = get_database_url()
 
-# ✅ Pool pequeño optimizado para Railway con poco tráfico
+# Pool pequeño optimizado para Railway con poco tráfico
 engine = create_engine(
     DATABASE_URL,
     poolclass=QueuePool,
@@ -49,7 +49,7 @@ engine = create_engine(
 )
 
 
-# ✅ SessionLocal optimizado
+# SessionLocal optimizado
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
@@ -78,7 +78,7 @@ def init_db():
     """Crea todas las tablas en la base de datos"""
     try:
         Base.metadata.create_all(bind=engine)
-        logger.info("✅ Tablas creadas/verificadas")
+        logger.info("Tablas creadas/verificadas")
         return True
     except SQLAlchemyError as e:
         logger.error("Error al inicializar la base de datos")
@@ -90,6 +90,6 @@ def close_db_connections():
     """Cierra todas las conexiones del pool (útil para shutdown)"""
     try:
         engine.dispose()
-        logger.info("✅ Pool de conexiones cerrado")
+        logger.info("Pool de conexiones cerrado")
     except Exception as e:
         logger.error(f"Error cerrando pool: {e}")
