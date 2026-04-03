@@ -1,27 +1,21 @@
 # backend/routers/analytics.py
 """
-Router de analytics — usa AnalyticsService para toda la lógica de cálculo.
-Endpoints:
-  GET /api/admin/analytics  → todo en uno (tendencia + Six Sigma + por fuente + por botón)
-  GET /api/admin/dashboard  → KPIs básicos con filtros
-  GET /api/tracking/funnel  → embudo visita → click → booking
-  GET /api/tracking/stats   → distribución por fuente
+Router de analytics.
+Delega toda la lógica en analytics_service.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import Optional
 import logging
 
 from ..config.database import get_db
-from ..models.usuario import Usuario, TipoUsuario
+from ..models.usuario import Usuario
 from ..models.page_visit import PageVisit
 from ..models.calendly_click import CalendlyClick
 from ..models.calendly_booking import CalendlyBooking
-from ..crud.sesion import sesion_crud
-from ..crud.usuario import usuario_crud
-from fastapi.responses import HTMLResponse
+from ..services.auth_service import verify_admin_token
 from ..services.analytics_service import (
     get_full_analytics,
     get_dashboard_kpis,
@@ -36,40 +30,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["analytics"])
 
 
-# ════════════════════════════════════════════════════════════
-#  DEPENDENCIA: verificar admin
-# ════════════════════════════════════════════════════════════
-
-def verify_admin_token(
-        token: str = Header(None, alias="token"),
-        db: Session = Depends(get_db)
-) -> Usuario:
-    if not token:
-        raise HTTPException(status_code=401, detail="Token no proporcionado en el header")
-    sesion = sesion_crud.validate_token(db, token)
-    if not sesion:
-        raise HTTPException(status_code=401, detail="Sesión expirada o inválida")
-    usuario = usuario_crud.get_by_id(db, sesion.usuario_id)
-    if not usuario:
-        raise HTTPException(status_code=401, detail="Usuario no encontrado")
-    if usuario.tipo_usuario != TipoUsuario.ADMIN:
-        raise HTTPException(status_code=403, detail="Acceso denegado.")
-    return usuario
-
-
-# ════════════════════════════════════════════════════════════
-#  ENDPOINT 1: /api/admin/analytics
-# ════════════════════════════════════════════════════════════
+# ── Analytics completo ────────────────────────────────────────────
 
 @router.get("/api/admin/analytics")
 def get_analytics(
-        admin: Usuario = Depends(verify_admin_token),
-        db: Session = Depends(get_db),
-        days:      Optional[int] = Query(None),
-        date_from: Optional[str] = Query(None),
-        date_to:   Optional[str] = Query(None),
-        source:    Optional[str] = Query(None),
-        button:    Optional[str] = Query(None),
+    admin: Usuario = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+    days:      Optional[int] = Query(None),
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    source:    Optional[str] = Query(None),
+    button:    Optional[str] = Query(None),
 ):
     try:
         return get_full_analytics(
@@ -84,21 +55,18 @@ def get_analytics(
         raise HTTPException(status_code=500, detail="Error al obtener analytics")
 
 
-# ════════════════════════════════════════════════════════════
-#  ENDPOINT 1b: /api/admin/trend-chart  (Plotly HTML)
-# ════════════════════════════════════════════════════════════
+# ── Gráfico de tendencia (Plotly HTML) ───────────────────────────
 
 @router.get("/api/admin/trend-chart", response_class=HTMLResponse)
 def get_trend_chart(
-        admin: Usuario = Depends(verify_admin_token),
-        db: Session = Depends(get_db),
-        days:      Optional[int] = Query(None),
-        date_from: Optional[str] = Query(None),
-        date_to:   Optional[str] = Query(None),
-        source:    Optional[str] = Query(None),
-        button:    Optional[str] = Query(None),
+    admin: Usuario = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+    days:      Optional[int] = Query(None),
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    source:    Optional[str] = Query(None),
+    button:    Optional[str] = Query(None),
 ):
-    """Devuelve el gráfico de tendencia temporal como HTML de Plotly."""
     try:
         html = generate_trend_chart_html(
             db, days=days, date_from=date_from, date_to=date_to,
@@ -111,23 +79,20 @@ def get_trend_chart(
         raise
     except Exception as e:
         logger.error(f"Error generando gráfico tendencia: {e}")
-        import traceback; traceback.print_exc()
         raise HTTPException(status_code=500, detail="Error al generar gráfico")
 
 
-# ════════════════════════════════════════════════════════════
-#  ENDPOINT 2: /api/admin/dashboard
-# ════════════════════════════════════════════════════════════
+# ── Dashboard KPIs ────────────────────────────────────────────────
 
 @router.get("/api/admin/dashboard")
 def get_dashboard_filtered(
-        admin: Usuario = Depends(verify_admin_token),
-        db: Session = Depends(get_db),
-        days:      Optional[int] = Query(30),
-        date_from: Optional[str] = Query(None),
-        date_to:   Optional[str] = Query(None),
-        source:    Optional[str] = Query(None),
-        button:    Optional[str] = Query(None),
+    admin: Usuario = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+    days:      Optional[int] = Query(30),
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    source:    Optional[str] = Query(None),
+    button:    Optional[str] = Query(None),
 ):
     try:
         return get_dashboard_kpis(
@@ -141,19 +106,17 @@ def get_dashboard_filtered(
         raise HTTPException(status_code=500, detail="Error al obtener estadísticas")
 
 
-# ════════════════════════════════════════════════════════════
-#  ENDPOINT 3: /api/tracking/funnel
-# ════════════════════════════════════════════════════════════
+# ── Embudo de conversión ──────────────────────────────────────────
 
 @router.get("/api/tracking/funnel")
 def get_funnel(
-        admin: Usuario = Depends(verify_admin_token),
-        db: Session = Depends(get_db),
-        days:      Optional[int] = Query(30),
-        date_from: Optional[str] = Query(None),
-        date_to:   Optional[str] = Query(None),
-        source:    Optional[str] = Query(None),
-        button:    Optional[str] = Query(None),
+    admin: Usuario = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+    days:      Optional[int] = Query(30),
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    source:    Optional[str] = Query(None),
+    button:    Optional[str] = Query(None),
 ):
     try:
         start, end = get_date_range(days, date_from, date_to)
@@ -175,19 +138,17 @@ def get_funnel(
         raise HTTPException(status_code=500, detail="Error al obtener embudo")
 
 
-# ════════════════════════════════════════════════════════════
-#  ENDPOINT 4: /api/tracking/stats
-# ════════════════════════════════════════════════════════════
+# ── Stats por fuente ──────────────────────────────────────────────
 
 @router.get("/api/tracking/stats")
 def get_stats(
-        admin: Usuario = Depends(verify_admin_token),
-        db: Session = Depends(get_db),
-        days:      Optional[int] = Query(30),
-        date_from: Optional[str] = Query(None),
-        date_to:   Optional[str] = Query(None),
-        source:    Optional[str] = Query(None),
-        button:    Optional[str] = Query(None),
+    admin: Usuario = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+    days:      Optional[int] = Query(30),
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    source:    Optional[str] = Query(None),
+    button:    Optional[str] = Query(None),
 ):
     try:
         start, end = get_date_range(days, date_from, date_to)

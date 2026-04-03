@@ -1,16 +1,21 @@
+# backend/routers/leads.py
+"""
+Router de registro de leads.
+El flujo de negocio (crear usuario, token, email) vive en lead_service.
+El rate limiter se queda aquí porque es responsabilidad de la capa HTTP.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
-from backend.config.database import get_db
-from backend.models.usuario import Usuario, TipoUsuario
-from backend.crud.usuario import usuario_crud
-from backend.config.settings import settings
-import requests
 import logging
+import hashlib
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict
-import hashlib
+
+from ..config.database import get_db
+from ..services.lead_service import lead_service
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +26,11 @@ class LeadRegistrationRequest(BaseModel):
     email: EmailStr
 
 
-# ==========================================
-# RATE LIMITING SOLO POR EMAIL (sin IP)
-# ==========================================
+# ── Rate limiter (responsabilidad HTTP, se queda en el router) ────
+
 class RateLimiter:
     """
-    Rate limiter basado SOLO en email.
+    Rate limiter basado en email.
     No usa IP porque en Railway/Vercel todos comparten la misma IP del proxy.
     """
 
@@ -35,279 +39,62 @@ class RateLimiter:
         self.window_minutes = window_minutes
         self.email_requests: Dict[str, list] = defaultdict(list)
 
-    def _clean_old_requests(self, request_dict: Dict[str, list], cutoff: datetime):
-        """Limpia requests antiguos de memoria"""
-        for key in list(request_dict.keys()):
-            request_dict[key] = [
-                req_time for req_time in request_dict[key]
-                if req_time > cutoff
-            ]
-            if not request_dict[key]:
-                del request_dict[key]
+    def _clean_old_requests(self, cutoff: datetime):
+        for key in list(self.email_requests.keys()):
+            self.email_requests[key] = [t for t in self.email_requests[key] if t > cutoff]
+            if not self.email_requests[key]:
+                del self.email_requests[key]
 
-    def is_allowed_by_email(self, email: str) -> bool:
-        """Verifica si el email puede intentar registrarse de nuevo"""
+    def is_allowed(self, email: str) -> bool:
         email_hash = hashlib.sha256(email.lower().encode()).hexdigest()
-
         now = datetime.now()
         cutoff = now - timedelta(minutes=self.window_minutes)
-
-        # Limpiar requests antiguos
-        self._clean_old_requests(self.email_requests, cutoff)
-
-        # Verificar límite
+        self._clean_old_requests(cutoff)
         if len(self.email_requests[email_hash]) >= self.max_requests:
             return False
-
-        # Registrar nueva request
         self.email_requests[email_hash].append(now)
         return True
 
-    def get_remaining_time(self, email: str) -> int:
-        """Retorna minutos hasta que pueda hacer otra request"""
+    def remaining_minutes(self, email: str) -> int:
         email_hash = hashlib.sha256(email.lower().encode()).hexdigest()
-
-        if not self.email_requests[email_hash]:
+        if not self.email_requests.get(email_hash):
             return 0
-
-        oldest_request = min(self.email_requests[email_hash])
-        available_at = oldest_request + timedelta(minutes=self.window_minutes)
+        oldest = min(self.email_requests[email_hash])
+        available_at = oldest + timedelta(minutes=self.window_minutes)
         remaining = available_at - datetime.now()
-
         return max(0, int(remaining.total_seconds() / 60))
 
 
-# Instancia global: 2 intentos por email cada 60 minutos
 rate_limiter = RateLimiter(max_requests=2, window_minutes=60)
 
 
-def enviar_email_bienvenida(email: str, nombre: str, calculator_url: str) -> bool:
-    """
-    Envía email de bienvenida usando Brevo (SendinBlue)
-    """
-    try:
-        url = "https://api.brevo.com/v3/smtp/email"
+# ── Endpoint ──────────────────────────────────────────────────────
 
-        headers = {
-            "accept": "application/json",
-            "api-key": settings.EMAIL_API,
-            "content-type": "application/json"
-        }
-
-        html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-</head>
-<body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color:#ffffff; color:#333333;">
-  <div style="max-width:600px; margin:0 auto; padding:20px;">
-
-    <p style="font-size:16px; line-height:1.6; margin-bottom:15px;">
-      ¡Ey, te escribe Petru!
-    </p>
-
-    <p style="font-size:15px; line-height:1.7; margin-bottom:15px;">
-      Me alegra un montón que estés aquí, de verdad.<br>
-      Dar este primer paso ya dice mucho de ti.
-    </p>
-
-    <p style="font-size:15px; line-height:1.7; margin-bottom:15px;">
-      Quiero que sepas algo desde ya: <strong>no vas a estar solo</strong>.
-    </p>
-
-    <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
-      He creado el grupo de WhatsApp para que sepas cómo organizar tus rutinas, 
-      te ayudo con la alimentación, puedes preguntarme todas las dudas, mandar videos 
-      y no ir perdido.
-    </p>
-
-    <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
-      Estoy dentro y respondo yo, asique si no te has unido aún. 
-      <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1" 
-         style="color:#06d6a0; font-weight:bold; text-decoration:none;">
-        <strong>Haz clic aquí</strong>
-      </a>
-    </p>
-
-    <p style="font-size:15px; line-height:1.7; margin-bottom:20px;">
-      Y ahora sí, vamos a lo importante 😏<br>
-      Te dejo este regalito para que lo aproveches y sepas 
-      <strong>cuánto comer según tu objetivo</strong>, sin líos ni cálculos raros.
-    </p>
-
-    <!-- Botón CTA -->
-    <div style="margin:30px 0; text-align:center;">
-      <a href="{calculator_url}"
-         style="display:inline-block; background-color:#06d6a0; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-size:15px; font-weight:600;">
-        🔥 CALCULAR MIS CALORÍAS AHORA
-      </a>
-    </div>
-
-    <p style="font-size:15px; line-height:1.7; margin-top:25px;">
-      Nos vemos dentro 💪
-    </p>
-
-    <p style="font-size:15px; line-height:1.7; margin-top:15px;">
-      <strong>Petru</strong><br>
-      <span style="font-size:13px; color:#666666;">
-        Entrenador Personal Especializado en Calistenia
-      </span>
-    </p>
-
-    <hr style="border:none; border-top:1px solid #eeeeee; margin:30px 0;">
-
-    <p style="font-size:12px; color:#999999; line-height:1.5;">
-      PetruWorkout - Entrenador Personal de Calistenia<br>
-      📧 petruworkout@gmail.com · 🌐 petrucalistenia.com<br>
-      Has recibido este email porque te registraste en PetruWorkout
-    </p>
-
-  </div>
-</body>
-</html>
-"""
-
-        payload = {
-            "sender": {
-                "name": "PetruWorkout",
-                "email": "petruworkout@gmail.com"
-            },
-            "to": [
-                {
-                    "email": email,
-                    "name": nombre
-                }
-            ],
-            "subject": "🎁 ¡Bienvenido al equipo PetruWorkout!",
-            "htmlContent": html_content
-        }
-
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
-
-        if response.status_code == 201:
-            logger.info(f"Email de bienvenida enviado a {email}")
-            return True
-        else:
-            logger.error(f"Error enviando email con Brevo: {response.status_code} - {response.text}")
-            return False
-
-    except Exception as e:
-        logger.error(f"Excepción enviando email con Brevo: {e}")
-        return False
-
-
-# ==========================================
-# ENDPOINT PROTEGIDO CON RATE LIMITING
-# ==========================================
 @router.post("/register")
 def register_lead(
-        data: LeadRegistrationRequest,
-        request: Request,
-        db: Session = Depends(get_db)
+    data: LeadRegistrationRequest,
+    request: Request,
+    db: Session = Depends(get_db),
 ):
     """
-    Registra un lead (email) para acceso al grupo de WhatsApp
-
-    **PROTECCIONES:**
-    - Rate limiting por email: máximo 2 intentos cada 60 minutos
-    - Validación de email duplicado
-    - Token único para calculadora con validez de 30 días
-
-    **FLUJO:**
-    - Si el email ya existe: retorna success=True, nuevo=False (no envía email)
-    - Si es nuevo: crea usuario, envía email de bienvenida, retorna success=True, nuevo=True
+    Registra un lead para acceso al grupo de WhatsApp.
+    Rate limit: 2 intentos por email cada 60 minutos.
     """
-
     logger.info(f"Intento de registro: {data.email}")
 
-    # ==========================================
-    # VERIFICAR RATE LIMIT POR EMAIL
-    # ==========================================
-    if not rate_limiter.is_allowed_by_email(data.email.lower()):
-        remaining_minutes = rate_limiter.get_remaining_time(data.email.lower())
-        logger.warning(f"Rate limit por email excedido: {data.email}")
+    if not rate_limiter.is_allowed(data.email.lower()):
+        remaining = rate_limiter.remaining_minutes(data.email.lower())
+        logger.warning(f"Rate limit excedido: {data.email}")
         raise HTTPException(
             status_code=429,
-            detail=f"Has intentado registrar este email demasiadas veces. Espera {remaining_minutes} minutos."
+            detail=f"Has intentado registrar este email demasiadas veces. Espera {remaining} minutos.",
         )
 
     try:
-        # ==========================================
-        # VERIFICAR SI YA EXISTE
-        # ==========================================
-        usuario_existente = usuario_crud.get_by_email(db, data.email.lower())
-
-        if usuario_existente:
-            # Conceder acceso si no lo tiene
-            if not usuario_existente.team_access_granted:
-                usuario_existente.team_access_granted = True
-                db.commit()
-                logger.info(f"Acceso concedido a usuario existente: {data.email}")
-
-            return {
-                'success': True,
-                'mensaje': 'Email ya registrado',
-                'nuevo': False,
-                'has_team_access': True
-            }
-
-        # ==========================================
-        # CREAR NUEVO USUARIO
-        # ==========================================
-        import secrets
-        temp_password = secrets.token_urlsafe(32)
-
-        # Extraer nombre del email (parte antes del @)
-        nombre = data.email.split('@')[0].capitalize()
-
-        usuario = usuario_crud.create(
-            db,
-            nombre=nombre,
-            email=data.email.lower(),
-            password=temp_password,
-            tipo_usuario=TipoUsuario.NEWSLETTER
-        )
-        usuario.team_access_granted = True
-        db.commit()
-        db.refresh(usuario)
-
-        # ==========================================
-        # GENERAR TOKEN DE CALCULADORA
-        # ==========================================
-        from backend.services.calculator_token_service import calculator_token_service
-
-        token_result = calculator_token_service.create_token_for_user(db, data.email.lower())
-
-        if not token_result['success']:
-            logger.error(f"No se pudo crear token para {data.email}")
-            calculator_url = "https://petrucalistenia.com/calculator"
-        else:
-            calculator_url = token_result['url']
-
-        # ==========================================
-        # ENVIAR EMAIL CON LINK PERSONALIZADO
-        # ==========================================
-        email_enviado = enviar_email_bienvenida(data.email.lower(), nombre, calculator_url)
-
-        if email_enviado:
-            logger.info(f"Nuevo lead registrado con email de bienvenida: {data.email}")
-        else:
-            logger.warning(f"Lead registrado pero email no enviado: {data.email}")
-
-        return {
-            'success': True,
-            'mensaje': 'Email registrado correctamente. Revisa tu bandeja de entrada.',
-            'nuevo': True,
-            'email_enviado': email_enviado,
-            'has_team_access': True
-        }
-
+        return lead_service.register(db, data.email)
     except HTTPException:
-        # Re-lanzar excepciones HTTP (rate limit)
         raise
     except Exception as e:
         logger.error(f"Error registrando lead {data.email}: {e}")
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         raise HTTPException(status_code=500, detail="Error al registrar el email")
