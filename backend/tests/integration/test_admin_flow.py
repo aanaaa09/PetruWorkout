@@ -186,7 +186,7 @@ def test_flujo_gestion_consultas(client, db):
     from backend.crud.usuario import usuario_crud
     from backend.models.usuario import TipoUsuario
 
-    with patch('backend.routers.consultas.enviar_email_brevo') as mock_email:
+    with patch('backend.services.email_service.email_service.send_consulta_email') as mock_email:
         mock_email.return_value = True
         response = client.post("/api/consultas/enviar", json={
             "nombre": "Juan Pérez", "email": "juan@test.com",
