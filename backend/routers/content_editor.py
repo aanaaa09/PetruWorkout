@@ -88,24 +88,3 @@ async def upload_image(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/video")
-async def upload_video(
-    slot: str = Form(...),
-    file: UploadFile = File(...),
-    admin: Usuario = Depends(verify_admin_token),
-):
-    """Sube un vídeo .mp4 de testimonio y hace commit."""
-    if not file.filename.lower().endswith(".mp4"):
-        raise HTTPException(status_code=400, detail="Solo se aceptan vídeos .mp4")
-
-    try:
-        video_bytes = await file.read()
-        result = content_service.upload_testimonial_video(slot, video_bytes)
-        return {"success": True, **result}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error subiendo vídeo: {e}")
-        raise HTTPException(status_code=500, detail=str(e))

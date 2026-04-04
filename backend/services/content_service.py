@@ -14,9 +14,8 @@ logger = logging.getLogger(__name__)
 
 CONTENT_JSON_PATH = "frontend/public/content.json"
 IMAGES_BASE_PATH  = "frontend/public/images/results"
-VIDEOS_BASE_PATH  = "frontend/public/videos"
 
-ALLOWED_VIDEO_SLOTS = {"video1", "video2", "video3"}
+
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -132,41 +131,3 @@ def upload_result_image(name: str, image_bytes: bytes) -> dict:
     }
 
 
-def upload_testimonial_video(slot: str, video_bytes: bytes) -> dict:
-    """
-    Sube un vídeo .mp4 de testimonio y hace commit.
-    Actualiza _video_version en content.json para romper caché.
-
-    Returns:
-        dict con slot y path público.
-    Raises:
-        ValueError si el slot no es válido.
-        RuntimeError si el commit falla.
-    """
-    if slot not in ALLOWED_VIDEO_SLOTS:
-        raise ValueError(f"Slot inválido. Usa: {ALLOWED_VIDEO_SLOTS}")
-
-    path = f"{VIDEOS_BASE_PATH}/{slot}.mp4"
-    existing = github_service.get_file(path)
-    sha = existing["sha"] if existing else None
-
-    ok = github_service.commit_file(
-        path,
-        video_bytes,
-        f"admin: actualizar vídeo testimonio → {slot}",
-        sha,
-    )
-    if not ok:
-        raise RuntimeError("Error al subir vídeo a GitHub")
-
-    # Bump _video_version para romper caché
-    try:
-        current, sha_content = _read_content_file()
-        if "results" not in current:
-            current["results"] = {}
-        current["results"]["_video_version"] = int(time.time())
-        _write_content_file(current, sha_content, f"admin: bump _video_version tras subir vídeo {slot}")
-    except Exception as e:
-        logger.warning(f"No se pudo actualizar _video_version: {e}")
-
-    return {"slot": slot, "path": f"/videos/{slot}.mp4"}

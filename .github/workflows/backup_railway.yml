@@ -4,8 +4,10 @@ on:
   schedule:
     - cron: '0 3 1 * *'
   workflow_dispatch:
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   backup-railway:
     name: Descargar backup desde Railway
@@ -24,8 +26,7 @@ jobs:
           python-version: '3.11'
 
       - name: Instalar dependencias
-        run: |
-          pip install psycopg2-binary
+        run: pip install psycopg2-binary
 
       - name: Descargar backup
         env:
@@ -45,26 +46,33 @@ jobs:
           ls -1 backups/ 2>/dev/null || echo "Carpeta vacía"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      - name: Commit y push del backup
+      - name: Subir backup como Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ github.run_id }}
+          path: backups/*.sql
+          retention-days: 90
+
+      - name: Guardar log en el repo
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add backups/
-          
+          git add backups/backup-log.json
+
           if git diff --staged --quiet; then
-            echo "ℹ  No hay datos nuevos"
+            echo "ℹ Sin cambios en el log"
           else
             FECHA=$(date '+%Y-%m-%d')
-            git commit -m "Backup mensual - $FECHA"
+            git commit -m "Actualizar log de backup - $FECHA"
             git push
-            echo " Backup subido"
+            echo "Log actualizado"
           fi
 
       - name: Completado
         if: success()
         run: |
           echo "BACKUP COMPLETADO"
-          echo " $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "$(date '+%Y-%m-%d %H:%M:%S')"
 
       - name: Error
         if: failure()
