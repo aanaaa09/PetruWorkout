@@ -94,11 +94,12 @@ export default {
     SimpleFooter
   },
   mounted() {
-    const hasAccess = sessionStorage.getItem('petru_has_team_access')
-    if (!hasAccess) {
-      this.$router.push('/')
-    }
-  },
+  window.scrollTo({ top: 0, behavior: 'instant' })
+  const hasAccess = sessionStorage.getItem('petru_has_team_access')
+  if (!hasAccess) {
+    this.$router.push('/')
+  }
+},
   methods: {
     trackWhatsAppClick() {
       // Tracking del click al grupo de WhatsApp
