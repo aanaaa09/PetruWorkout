@@ -43,34 +43,6 @@ Plataforma web de captación de clientes para un entrenador personal de calisten
 - Gestión de usuarios registrados
 
 
-
-## Puesta en marcha local
-
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-python -m backend.main
-
-# Frontend
-cd frontend
-npm install
-npm run dev
-```
-
----
-
-## Tests
-
-```bash
-cd backend
-pytest tests/unit/        # Tests unitarios
-pytest tests/integration/ # Tests de integración
-pytest tests/e2e/         # Tests E2E (requiere Chrome)
-```
-
-Cobertura actual: **67.5%** · CI/CD automatizado en cada push a `main` y `development`.
-
 ---
 
 ## Workflows automatizados
