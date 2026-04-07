@@ -54,6 +54,11 @@ jobs:
           CALENDLY_API_KEY: ${{ secrets.CALENDLY_API_KEY }}
           CALENDLY_USER_URI: ${{ secrets.CALENDLY_USER_URI }}
           CALENDLY_EVENT_URL: ${{ secrets.CALENDLY_EVENT_URL }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
         run: |
           echo "Iniciando sincronización de Calendly..."
