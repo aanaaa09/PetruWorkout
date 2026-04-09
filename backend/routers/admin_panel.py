@@ -15,7 +15,7 @@ from ..crud import admin_crud
 from ..models.usuario import Usuario, TipoUsuario
 from ..crud.usuario import usuario_crud
 from ..crud.sesion import sesion_crud
-from ..schemas.admin import AdminLoginRequest
+from ..schemas.admin import AdminLoginRequest,AdminChangePasswordRequest
 from ..services.auth_service import verify_admin_token
 from ..services.email_service import email_service
 
@@ -49,6 +49,31 @@ def admin_login(data: AdminLoginRequest, db: Session = Depends(get_db)):
         logger.error(f"Error en login de admin: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
+@router.post("/change-password")
+def change_password(
+    data: AdminChangePasswordRequest,
+    admin: Usuario = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+):
+    """Cambia la contraseña del administrador autenticado."""
+    try:
+        if not usuario_crud.verify_password(data.current_password, admin.password_hash):
+            raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
+
+        if len(data.new_password) < 6:
+            raise HTTPException(status_code=400, detail="La nueva contraseña debe tener al menos 6 caracteres")
+
+        admin.password_hash = usuario_crud.hash_password(data.new_password)
+        db.commit()
+
+        logger.info(f"Contraseña cambiada para admin: {admin.email}")
+        return {"success": True, "mensaje": "Contraseña actualizada correctamente"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error cambiando contraseña: {e}")
+        raise HTTPException(status_code=500, detail="Error al cambiar la contraseña")
 
 # ── Usuarios ──────────────────────────────────────────────────────
 
