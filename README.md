@@ -28,7 +28,7 @@ Plataforma web de captación de clientes para un entrenador personal de calisten
 **Sistema de tracking propio**
 - Detección del origen del tráfico (Instagram, YouTube, Facebook, LinkedIn, Organic Search)
 - Registro de visitas, clics en Calendly y reservas confirmadas
-- Sincronización diaria con la API de Calendly mediante GitHub Actions con matching temporal inteligente
+- Sincronización diaria con la API de Calendly mediante GitHub Actions con matching temporal
 
 **Dashboard administrativo**
 - Embudo de conversión (visita → clic → reserva)
