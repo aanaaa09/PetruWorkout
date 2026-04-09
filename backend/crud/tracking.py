@@ -33,7 +33,14 @@ class TrackingCRUD:
     def create_page_visit(self, db: Session, session_id: str, traffic_source: str,
                           referrer_url: str = None, user_agent: str = None,
                           landing_page: str = None) -> PageVisit:
-        detected = detect_source(referrer_url, user_agent)
+        # Solo sobreescribir con detección automática si hay señales reales.
+        # Si el llamador ya pasó una fuente conocida (p.ej. desde el frontend
+        # vía query param utm), respetarla tal cual.
+        if referrer_url or user_agent:
+            detected = detect_source(referrer_url, user_agent)
+        else:
+            detected = traffic_source if traffic_source else detect_source(None, None)
+
         self._ensure_session(db, session_id, detected)
 
         now_spain = datetime.utcnow() + timedelta(hours=1)
@@ -60,7 +67,15 @@ class TrackingCRUD:
         session = db.query(SessionTracking).filter(
             SessionTracking.session_id == session_id
         ).first()
-        detected = session.traffic_source if session else detect_source(None, None)
+
+        # Prioridad: sesión existente > parámetro explícito > detección automática
+        if session:
+            detected = session.traffic_source
+        elif traffic_source and traffic_source not in ("unknown", ""):
+            detected = traffic_source
+        else:
+            detected = detect_source(None, None)
+
         self._ensure_session(db, session_id, detected)
 
         now_spain = datetime.utcnow() + timedelta(hours=1)
