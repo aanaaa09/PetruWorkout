@@ -33,13 +33,9 @@ class TrackingCRUD:
     def create_page_visit(self, db: Session, session_id: str, traffic_source: str,
                           referrer_url: str = None, user_agent: str = None,
                           landing_page: str = None) -> PageVisit:
-        # Solo sobreescribir con detección automática si hay señales reales.
-        # Si el llamador ya pasó una fuente conocida (p.ej. desde el frontend
-        # vía query param utm), respetarla tal cual.
-        if referrer_url or user_agent:
-            detected = detect_source(referrer_url, user_agent)
-        else:
-            detected = traffic_source if traffic_source else detect_source(None, None)
+
+        detected = traffic_source if traffic_source and traffic_source != 'unknown' else detect_source(referrer_url,
+                                                                                                       user_agent)
 
         self._ensure_session(db, session_id, detected)
 
