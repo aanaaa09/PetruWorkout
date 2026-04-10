@@ -1,37 +1,26 @@
 function detectTrafficSource() {
-  const params = new URLSearchParams(window.location.search);
+  const referrer = document.referrer.toLowerCase();
+  const userAgent = navigator.userAgent.toLowerCase();
 
-  // UTM params tienen prioridad
-  const utm = params.get('utm_source');
-  if (utm) return utm;
+  if (referrer.includes('linkedin.com') || referrer.includes('lnkd.in') || referrer.includes('android-app://com.linkedin.android')) return 'linkedin';
+  if (referrer.includes('instagram.com') || referrer.includes('ig.me')) return 'instagram';
+  if (referrer.includes('tiktok.com') || referrer.includes('tiktokv.com')) return 'tiktok';
+  if (referrer.includes('youtube.com') || referrer.includes('m.youtube.com') || referrer.includes('youtu.be')) return 'youtube';
+  if (referrer.includes('facebook.com') || referrer.includes('fb.com') || referrer.includes('m.facebook.com')) return 'facebook';
+  if (referrer.includes('twitter.com') || referrer.includes('t.co') || referrer.includes('x.com')) return 'twitter';
+  if (referrer.includes('google.') || referrer.includes('bing.com') || referrer.includes('yahoo.com') || referrer.includes('duckduckgo.com') || referrer.includes('googlequicksearchbox')) return 'organic_search';
+  if (referrer.includes('petrucalistenia.com') || referrer.includes(window.location.hostname)) return 'internal';
 
-  const ref = document.referrer.toLowerCase();
-  const ua = navigator.userAgent.toLowerCase();
-
-  const patterns = {
-    instagram: [/instagram\.com/, /ig\.me/, /com\.instagram/],
-    facebook:  [/facebook\.com/, /fb\.com/, /fban/, /fbav/],
-    youtube:   [/youtube\.com/, /youtu\.be/],
-    linkedin:  [/linkedin\.com/],
-    tiktok:    [/tiktok\.com/],
-    twitter:   [/twitter\.com/, /t\.co/, /x\.com/],
-  };
-
-  const searchPatterns = [/google\./, /bing\.com/, /yahoo\.com/, /duckduckgo\.com/];
-
-  if (ref) {
-    for (const [source, pats] of Object.entries(patterns)) {
-      if (pats.some(p => p.test(ref))) return source;
-    }
-    if (searchPatterns.some(p => p.test(ref))) return 'organic_search';
+  if (!referrer) {
+    if (userAgent.includes('instagram')) return 'instagram';
+    if (userAgent.includes('tiktok')) return 'tiktok';
+    if (userAgent.includes('linkedin')) return 'linkedin';
+    if (userAgent.includes('fban') || userAgent.includes('fbav')) return 'facebook';
+    if (userAgent.includes('twitter')) return 'twitter';
+    return 'direct';
   }
 
-  // Fallback a user-agent (in-app browsers)
-  for (const [source, pats] of Object.entries(patterns)) {
-    if (pats.some(p => p.test(ua))) return source;
-  }
-
-  return ref ? 'unknown' : 'direct';
+  return 'unknown';
 }
 
 function getOrCreateSessionId() {
@@ -49,18 +38,22 @@ function getOrCreateSessionId() {
 
 function getTrafficSourceFromSession() {
   const KEY = 'petru_traffic_source';
-  let source = sessionStorage.getItem(KEY);
-  if (!source) {
-    source = detectTrafficSource();
+  return sessionStorage.getItem(KEY) || 'unknown';
+}
+
+function saveTrafficSourceToSession(source) {
+  const KEY = 'petru_traffic_source';
+  if (!sessionStorage.getItem(KEY)) {
     sessionStorage.setItem(KEY, source);
   }
-  return source;
+  return sessionStorage.getItem(KEY);
 }
 
 async function trackPageVisit() {
   try {
     const sessionId = getOrCreateSessionId();
-    const trafficSource = getTrafficSourceFromSession(); // detectado en cliente
+    const trafficSource = saveTrafficSourceToSession(detectTrafficSource());
+
     const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/visit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -82,6 +75,7 @@ async function trackCalendlyClick(buttonId, buttonLocation) {
   try {
     const sessionId = getOrCreateSessionId();
     const trafficSource = getTrafficSourceFromSession();
+
     const response = await fetch('https://petruworkout-production.up.railway.app/api/tracking/click', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -104,6 +98,7 @@ function initTracking() {
 }
 
 export {
+  detectTrafficSource,
   getOrCreateSessionId,
   getTrafficSourceFromSession,
   trackPageVisit,
