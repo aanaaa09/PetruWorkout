@@ -50,7 +50,7 @@
       <p class="video-whatsapp-line">
         o si lo prefieres escríbeme al
         <a href="https://wa.link/svhddh" target="_blank" rel="noopener noreferrer" class="video-whatsapp-phone">
-          642 662 849
+          +34 642 662 849
         </a>
       </p>
 

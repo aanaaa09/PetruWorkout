@@ -22,7 +22,7 @@
             <div>
               <h4>WhatsApp</h4>
               <a href="https://wa.link/svhddh" target="_blank" rel="noopener noreferrer" class="whatsapp-phone-link">
-                642 662 849
+                +34 642 662 849
               </a>
             </div>
           </div>
