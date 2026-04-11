@@ -47,6 +47,15 @@
         >
           📅 Agendar Llamada GRATIS
         </a>
+        <p class="video-cta-or">o si lo prefieres</p>
+        <a
+          href="https://wa.link/svhddh"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-whatsapp-cta"
+        >
+          💬 Escríbeme al <strong>642 662 849</strong>
+        </a>
       </div>
     </div>
   </section>
@@ -239,7 +248,29 @@ export default {
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
 }
-
+.video-cta-or {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin: 0.5rem 0 0 0;
+}
+.btn-whatsapp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 2.5rem;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+}
+.btn-whatsapp-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(37, 211, 102, 0.6);
+}
 @media (max-width: 768px) {
   .video-section {
     padding: 4rem 1rem;
@@ -268,5 +299,6 @@ export default {
     padding: 1rem 1.5rem;
     font-size: 1rem;
   }
+
 }
 </style>

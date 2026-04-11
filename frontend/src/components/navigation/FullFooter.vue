@@ -35,6 +35,7 @@
 
             <a href="#contacto" @click.prevent="scrollTo('contacto')">Formulario</a>
             <a href="mailto:petruworkout@gmail.com">Email</a>
+            <a href="https://wa.link/svhddh" target="_blank" rel="noopener noreferrer">WhatsApp</a>
           </div>
 
           <div class="link-group">

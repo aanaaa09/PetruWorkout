@@ -21,6 +21,9 @@
             <span class="info-icon">📱</span>
             <div>
               <h4>WhatsApp</h4>
+              <a href="https://wa.link/svhddh" target="_blank" rel="noopener noreferrer" class="whatsapp-phone-link">
+                642 662 849
+              </a>
             </div>
           </div>
 
@@ -335,7 +338,17 @@ export default {
 .form-group textarea::placeholder {
   color: var(--color-text-muted);
 }
-
+.whatsapp-phone-link {
+  color: #25D366;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.whatsapp-phone-link:hover {
+  color: #4dff8a;
+  text-decoration: underline;
+}
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
