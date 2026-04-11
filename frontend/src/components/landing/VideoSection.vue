@@ -7,7 +7,6 @@
       </div>
 
       <div class="video-wrapper" @click="loadVideo">
-        <!-- Thumbnail mientras no se carga -->
         <div v-if="!videoLoaded" class="video-thumbnail">
           <img
             :src="thumbnailUrl"
@@ -21,7 +20,6 @@
           </button>
         </div>
 
-        <!-- iframe solo se carga al hacer click -->
         <iframe
           v-if="videoLoaded"
           class="video-frame"
@@ -38,7 +36,7 @@
       <div class="video-cta">
         <h3 class="cta-title">{{ ctaTitle }}</h3>
         <p class="cta-description">{{ ctaDescription }}</p>
-        <a
+
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
@@ -47,16 +45,15 @@
         >
           📅 Agendar Llamada GRATIS
         </a>
-        <p class="video-cta-or">o si lo prefieres</p>
-        <a
-          href="https://wa.link/svhddh"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-whatsapp-cta"
-        >
-          💬 Escríbeme al <strong>642 662 849</strong>
-        </a>
       </div>
+
+      <p class="video-whatsapp-line">
+        o si lo prefieres escríbeme al
+        <a href="https://wa.link/svhddh" target="_blank" rel="noopener noreferrer" class="video-whatsapp-phone">
+          642 662 849
+        </a>
+      </p>
+
     </div>
   </section>
 </template>
@@ -248,28 +245,23 @@ export default {
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(6, 214, 160, 0.6);
 }
-.video-cta-or {
-  font-size: 0.95rem;
+.video-whatsapp-line {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 1rem;
   color: var(--color-text-muted);
-  margin: 0.5rem 0 0 0;
 }
-.btn-whatsapp-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1.25rem 2.5rem;
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white;
-  text-decoration: none;
-  border-radius: 12px;
+
+.video-whatsapp-phone {
+  color: #25D366;
   font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
-.btn-whatsapp-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(37, 211, 102, 0.6);
+
+.video-whatsapp-phone:hover {
+  color: #4dff8a;
+  text-decoration: underline;
 }
 @media (max-width: 768px) {
   .video-section {
