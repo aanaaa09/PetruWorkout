@@ -36,7 +36,7 @@
       <div class="video-cta">
         <h3 class="cta-title">{{ ctaTitle }}</h3>
         <p class="cta-description">{{ ctaDescription }}</p>
-
+        <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
