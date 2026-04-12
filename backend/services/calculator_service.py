@@ -39,11 +39,11 @@ def calculate_nutrition(
     height_m = height / 100
     bmi = round(weight / (height_m ** 2), 1)
 
-    # BMR — Harris-Benedict revisada
+    # BMR
     if gender == "male":
-        bmr = round(88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age))
+        bmr = round(66.5 + (13.397 * weight) + (4.799 * height) - (5.677 * age))
     else:
-        bmr = round(447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age))
+        bmr = round(655.1 + (9.247 * weight) + (3.098 * height) - (4.330 * age))
 
     # TDEE
     tdee = round(bmr * ACTIVITY_MULTIPLIERS[activity_level])
