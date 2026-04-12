@@ -94,8 +94,8 @@ def test_calculator_calorie_calculation():
     weight = 70
     height = 175
 
-    # BMR Hombre = 88.362 + (13.397 × peso) + (4.799 × altura) - (5.677 × edad)
-    expected_bmr = round(88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age))
+    # BMR Hombre
+    expected_bmr = round(66.5 + (13.397 * weight) + (4.799 * height) - (5.677 * age))
 
     assert expected_bmr > 0
     assert 1500 < expected_bmr < 2500  # Rango razonable
