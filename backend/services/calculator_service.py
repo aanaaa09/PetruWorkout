@@ -35,7 +35,7 @@ def calculate_nutrition(
     Returns:
         dict con bmi, bmr, tdee, recommended y macros (gramos y calorías).
     """
-    # BMI
+    # IMC
     height_m = height / 100
     bmi = round(weight / (height_m ** 2), 1)
 
@@ -44,7 +44,7 @@ def calculate_nutrition(
         bmr = round((10 * weight) + (6.25 * height) - (5 * age) + 5)
     else:
         bmr = round((10 * weight) + (6.25 * height) - (5 * age) - 161)
-    # TDEE
+    # GET
     tdee = round(bmr * ACTIVITY_MULTIPLIERS[activity_level])
 
     # Calorías ajustadas al objetivo
