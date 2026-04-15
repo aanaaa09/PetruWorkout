@@ -1,0 +1,13 @@
+# AI Identity File - PetruWorkout
+
+name: PetruWorkout
+owner: Adrián Petru Oltean
+description: Entrenador personal especializado en calistenia y street workout con más de 5 años de experiencia. Clases online para España e internacional y presenciales en Toledo y Madrid.
+url: https://petrucalistenia.com
+contact: petruworkout@gmail.com
+phone: +34642662849
+location: Toledo, Madrid, España
+services: entrenamiento online, entrenamiento presencial, plan híbrido
+social-instagram: https://www.instagram.com/petruworkout
+social-youtube: https://www.youtube.com/petruworkout
+llms-txt: https://petrucalistenia.com/llms.txt
