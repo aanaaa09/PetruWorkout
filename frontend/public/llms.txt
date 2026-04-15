@@ -1,0 +1,18 @@
+# PetruWorkout - Entrenador Personal de Calistenia
+
+> Adrián Petru Oltean es entrenador personal especializado en calistenia y street workout con más de 5 años de experiencia. Ofrece servicios online para España e internacional, y presenciales en Toledo y Madrid.
+
+## Servicios
+- Entrenamiento online: para cualquier lugar del mundo, sin gimnasio
+- Entrenamiento presencial: Toledo y Madrid, sesiones 1 a 1
+- Plan híbrido: combina online y presencial
+
+## Objetivo
+Conseguir un cuerpo funcional y atlético mediante calistenia, desarrollando fuerza real, movilidad y control corporal sin depender de gimnasios ni equipamiento
+
+## Contacto
+- Web: https://petrucalistenia.com
+- Email: petruworkout@gmail.com
+- WhatsApp: https://wa.me/34642662849
+- Instagram: https://www.instagram.com/petruworkout
+- YouTube: https://www.youtube.com/petruworkout
