@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
 
-from .routers import auth, consultas, tracking, leads, calculator, admin_panel, analytics, content_editor
+from .routers import auth, consultas, tracking, leads, calculator, admin_panel, analytics, content_editor, fuerza
 from .config.database import Base, engine, close_db_connections
 from .init_db import crear_base_datos
 
@@ -120,6 +120,7 @@ app.include_router(analytics.router, tags=["analytics"])      # primero
 app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
 app.include_router(admin_panel.router, tags=["admin"])
 app.include_router(content_editor.router)
+app.include_router(fuerza.router)
 # --------------------------
 # Health y info API (ULTRA LIGEROS)
 # --------------------------

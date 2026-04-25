@@ -54,6 +54,18 @@ const routes = [
     }
   },
   {
+    path: '/testfuerza',
+    name: 'test fuerza',
+    component: () => import('@/views/TestFuerza.vue'),
+    meta: {
+      title: 'Test de fuerza | Calcula Fuerza Real',
+      description: 'Calculadora gratuita de fuerza. Descubre cómo progresar adecuadamente.',
+      keywords: 'calculadora fuerza, sentadillas, fondos, dominadas, flexiones',
+      ogImage: 'https://petrucalistenia.com/logo.png',
+      canonical: 'https://petrucalistenia.com/testffuerza'
+    }
+  },
+  {
   path: '/admin',
   name: 'admin',
   component: () => import('@/components/admin/AdminView.vue'),
