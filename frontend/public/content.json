@@ -4,15 +4,15 @@
     "highlight": "tu Propio Cuerpo",
     "button_text": "Únete al grupo de WhatsApp + calculadora de calorías 🎁",
     "benefits": [
-      "Entrena sin pensar: sabes exactamente qué hacer cada día",
       "Más fuerza y control real de tu cuerpo (no músculo inútil)",
       "Resultados visibles sin perder horas entrenando",
-      "Vuelves a sentirte fuerte, ágil y seguro"
+      "Vuelves a sentirte fuerte, ágil y seguro",
+      "+3Kg de músculo en 90 días reales"
     ],
     "calendly_button_text": "EMPEZAR AHORA"
   },
   "video": {
-    "youtube_id": "qDc5uScLz2c",
+    "youtube_id": "J0Smcj8H0A8",
     "section_tag": "EMPIEZA DESDE CERO",
     "title": "Así cambia la gente cuando empieza bien (de verdad)",
     "cta_title": "¿Listo para tu cambio?",
@@ -29,7 +29,7 @@
         "name": "Esteban",
         "age": "37 años",
         "stats": "Antes 28% de grasa, ahora 12%",
-        "duration": "4 Meses",
+        "duration": "3 Meses",
         "whatsapp_text": "Muchas gracias Petru! Me siento renovado. Como tu dices antes me costaba hasta agacharme y ahora puedo hacer sentadillas sin problema. Hasta en el trabajo me han dicho que se me nota más fuerte",
         "whatsapp_time": "17:12",
         "image_slug": "user1"
