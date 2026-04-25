@@ -123,6 +123,9 @@ const API = 'https://petruworkout-production.up.railway.app'
 
 export default {
   name: 'TestFuerza',
+  mounted() {
+    document.title = 'Test de Fuerza Gratis | PetruWorkout'
+  },
   data() {
     return {
       step: 1,
