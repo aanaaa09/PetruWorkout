@@ -17,15 +17,13 @@
         <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Reseñas</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
         <li class="nav-cta">
-          <a
-            href="https://calendly.com/petruworkout/reunion"
-            target="_blank"
-            rel="noopener noreferrer"
+          <router-link
+            to="/testfuerza"
             class="btn-cta"
-            @click="handleCalendlyClick"
-          >
-            📅 Agendar Llamada
-          </a>
+            @click="menuOpen = false"
+            >
+            💪 Test de Fuerza
+          </router-link>
         </li>
       </ul>
     </div>
