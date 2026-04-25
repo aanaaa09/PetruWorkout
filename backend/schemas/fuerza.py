@@ -1,5 +1,4 @@
-# backend/schemas/fuerza.py
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, model_validator
 from typing import Literal
 
 
@@ -20,6 +19,11 @@ class FuerzaRegisterRequest(BaseModel):
     push:   int = 0
     squat:  int = 0
 
+    @model_validator(mode='after')
+    def at_least_one_exercise(self):
+        if self.pull == 0 and self.dips == 0 and self.push == 0 and self.squat == 0:
+            raise ValueError('Introduce al menos un ejercicio con valor mayor que 0')
+        return self
 
 class FuerzaScores(BaseModel):
     pull:  int

@@ -190,7 +190,14 @@ export default {
     },
     openModal() {
       this.modalError = ''
-      this.showModal = true
+
+        const alguno = Object.values(this.reps).some(v => v !== null && v > 0)
+      if (!alguno) {
+      this.modalError = 'Introduce al menos un ejercicio para continuar'
+      return
+    }
+
+    this.showModal = true
     },
     async submitAndCalculate() {
       this.modalError = ''
