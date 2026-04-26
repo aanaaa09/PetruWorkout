@@ -22,10 +22,22 @@ import SimpleFooter from '@/components/navigation/SimpleFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
 import LegalNotice from '@/components/legal/LegalNotice.vue'
-
+import { useHead } from '@unhead/vue'
 
 export default {
-  name: 'HomeView',
+   name: 'HomeView',
+  setup() {
+    useHead({
+      title: 'PetruWorkout - Entrenador Personal de Calistenia',
+      meta: [
+        { name: 'description', content: 'Entrenador personal de calistenia en Toledo, Madrid y online. Transforma tu cuerpo con el método PetruWorkout. Garantía de devolución del 100%.' },
+        { property: 'og:title', content: 'PetruWorkout - Entrenador Personal de Calistenia' },
+        { property: 'og:description', content: 'Entrenador personal de calistenia en Toledo, Madrid y online. Garantía de devolución del 100%.' },
+        { property: 'og:url', content: 'https://petrucalistenia.com/' },
+        { name: 'robots', content: 'index, follow' },
+      ]
+    })
+  },
   components: {
     SimpleNavbar,
     HeroSection,

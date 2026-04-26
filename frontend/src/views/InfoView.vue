@@ -36,9 +36,21 @@ import FullFooter from '@/components/navigation/FullFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
 import LegalNotice from '@/components/legal/LegalNotice.vue'
-
+import { useHead } from '@unhead/vue'
 export default {
   name: 'InfoView',
+  setup() {
+    useHead({
+      title: 'Servicios - PetruWorkout | Entrenador Personal de Calistenia',
+      meta: [
+        { name: 'description', content: 'Servicios de entrenamiento personal online y presencial en Toledo y Madrid. Sobre mí, testimonios y contacto.' },
+        { property: 'og:title', content: 'Servicios - PetruWorkout | Entrenador Personal' },
+        { property: 'og:description', content: 'Entrenamiento online para España e internacional, presencial en Toledo y Madrid.' },
+        { property: 'og:url', content: 'https://petrucalistenia.com/info' },
+        { name: 'robots', content: 'index, follow' },
+      ]
+    })
+  },
   components: {
     FullNavbar,
     AboutSection,
