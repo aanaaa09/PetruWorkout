@@ -264,16 +264,21 @@ export default {
     },
 
     handleDeleteClick(user) {
-      // Validación adicional en frontend
-      if (user.tipo_usuario !== 'newsletter') {
-        alert('⚠️ Solo se pueden eliminar usuarios de tipo NEWSLETTER')
-        return
-      }
+  if (user.tipo_usuario !== 'newsletter') {
+    alert('⚠️ Solo se pueden eliminar usuarios de tipo NEWSLETTER')
+    return
+  }
 
-      this.userToDelete = user
-      this.showDeleteModal = true
-      this.deleteError = ''
-    },
+  this.userToDelete = user
+  this.showDeleteModal = true
+  this.deleteError = ''
+
+
+  this.$nextTick(() => {
+    const modal = document.querySelector('.modal-overlay')
+    if (modal) modal.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+},
 
     closeDeleteModal() {
       this.showDeleteModal = false
