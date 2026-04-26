@@ -133,11 +133,20 @@
 
 <script>
 const API = 'https://petruworkout-production.up.railway.app'
-
+import { useHead } from '@unhead/vue'
 export default {
   name: 'TestFuerza',
-  mounted() {
-    document.title = 'Test de Fuerza Gratis | PetruWorkout'
+  setup() {
+    useHead({
+      title: 'Test de Fuerza Gratis | PetruWorkout',
+      meta: [
+        { name: 'description', content: 'Descubre tu nivel real de fuerza en 30 segundos. Test gratuito de dominadas, fondos, flexiones y sentadillas.' },
+        { property: 'og:title', content: 'Test de Fuerza Gratis | PetruWorkout' },
+        { property: 'og:description', content: 'Descubre tu nivel real de fuerza en 30 segundos. Test gratuito de calistenia.' },
+        { property: 'og:url', content: 'https://petrucalistenia.com/test-fuerza' },
+        { name: 'robots', content: 'index, follow' },
+      ]
+    })
   },
   data() {
     return {
