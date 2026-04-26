@@ -139,6 +139,9 @@ export default {
   setup() {
     useHead({
       title: 'Test de Fuerza Gratis | PetruWorkout',
+      link: [
+    { rel: 'canonical', href: 'https://petrucalistenia.com/test-fuerza' }
+  ],
       meta: [
         { name: 'description', content: 'Descubre tu nivel real de fuerza en 30 segundos. Test gratuito de dominadas, fondos, flexiones y sentadillas.' },
         { property: 'og:title', content: 'Test de Fuerza Gratis | PetruWorkout' },

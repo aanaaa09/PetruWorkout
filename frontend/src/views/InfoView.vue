@@ -42,6 +42,9 @@ export default {
   setup() {
     useHead({
       title: 'Servicios - PetruWorkout | Entrenador Personal de Calistenia',
+      link: [
+    { rel: 'canonical', href: 'https://petrucalistenia.com/info' }
+  ],
       meta: [
         { name: 'description', content: 'Servicios de entrenamiento personal online y presencial en Toledo y Madrid. Sobre mí, testimonios y contacto.' },
         { property: 'og:title', content: 'Servicios - PetruWorkout | Entrenador Personal' },
