@@ -41,7 +41,6 @@
 
     <!-- Lista de usuarios -->
     <div v-else class="users-section">
-
       <div class="users-table">
         <table>
           <thead>
@@ -93,21 +92,11 @@
 
         <!-- Paginación -->
         <div class="pagination" v-if="totalPages > 1">
-          <button
-            @click="currentPage--"
-            :disabled="currentPage === 1"
-            class="btn-page"
-          >
+          <button @click="currentPage--" :disabled="currentPage === 1" class="btn-page">
             ← Anterior
           </button>
-          <span class="page-info">
-            Página {{ currentPage }} de {{ totalPages }}
-          </span>
-          <button
-            @click="currentPage++"
-            :disabled="currentPage === totalPages"
-            class="btn-page"
-          >
+          <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+          <button @click="currentPage++" :disabled="currentPage === totalPages" class="btn-page">
             Siguiente →
           </button>
         </div>
@@ -116,7 +105,7 @@
 
     <!-- Modal de confirmación -->
     <transition name="modal-fade">
-      <div v-if="showDeleteModal" class="modal-overif (response.ok && data.success)lay" @click.self="closeDeleteModal">
+      <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
         <div class="modal-content">
           <button @click="closeDeleteModal" class="modal-close" :disabled="deleting">✕</button>
 
@@ -140,19 +129,10 @@
           </div>
 
           <div class="modal-buttons">
-            <button
-              @click="closeDeleteModal"
-              class="btn-cancel"
-              :disabled="deleting"
-            >
+            <button @click="closeDeleteModal" class="btn-cancel" :disabled="deleting">
               Cancelar
             </button>
-
-            <button
-              @click="handleConfirmDelete"
-              class="btn-confirm-delete"
-              :disabled="deleting"
-            >
+            <button @click="handleConfirmDelete" class="btn-confirm-delete" :disabled="deleting">
               {{ deleting ? '🗑️ Eliminando...' : '🗑️ Eliminar Usuario' }}
             </button>
           </div>
@@ -187,7 +167,6 @@ export default {
     },
     filteredUsers() {
       let filtered = this.users
-
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase()
         filtered = filtered.filter(user =>
@@ -195,7 +174,6 @@ export default {
           user.nombre.toLowerCase().includes(query)
         )
       }
-
       return filtered
     },
     paginatedUsers() {
@@ -214,23 +192,16 @@ export default {
     async loadUsers() {
       this.loading = true
       this.error = null
-
       try {
         const token = localStorage.getItem('admin_token')
         const url = new URL('https://petruworkout-production.up.railway.app/api/admin/users')
-
         if (this.filterType) {
           url.searchParams.append('tipo', this.filterType)
         }
-
         const response = await fetch(url, {
-          headers: {
-            'token': token
-          }
+          headers: { 'token': token }
         })
-
         const data = await response.json()
-
         if (response.ok && data.success) {
           this.users = data.usuarios
         } else {
@@ -264,21 +235,14 @@ export default {
     },
 
     handleDeleteClick(user) {
-  if (user.tipo_usuario !== 'newsletter') {
-    alert('⚠️ Solo se pueden eliminar usuarios de tipo NEWSLETTER')
-    return
-  }
-
-  this.userToDelete = user
-  this.showDeleteModal = true
-  this.deleteError = ''
-
-
-  this.$nextTick(() => {
-    const modal = document.querySelector('.modal-overlay')
-    if (modal) modal.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  })
-},
+      if (user.tipo_usuario !== 'newsletter') {
+        alert('⚠️ Solo se pueden eliminar usuarios de tipo NEWSLETTER')
+        return
+      }
+      this.userToDelete = user
+      this.showDeleteModal = true
+      this.deleteError = ''
+    },
 
     closeDeleteModal() {
       this.showDeleteModal = false
@@ -288,19 +252,14 @@ export default {
 
     async handleConfirmDelete() {
       if (!this.userToDelete) return
-
-      // Validación de seguridad
       if (this.userToDelete.tipo_usuario !== 'newsletter') {
         this.deleteError = 'Solo se pueden eliminar usuarios de tipo NEWSLETTER'
         return
       }
-
       this.deleting = true
       this.deleteError = ''
-
       try {
         const token = localStorage.getItem('admin_token')
-
         const response = await fetch(
           `https://petruworkout-production.up.railway.app/api/admin/users/${this.userToDelete.id}`,
           {
@@ -308,17 +267,10 @@ export default {
             headers: { 'token': token }
           }
         )
-
         const data = await response.json()
-
         if (response.ok && data.deleted) {
-          // Eliminar del array local
           this.users = this.users.filter(u => u.id !== this.userToDelete.id)
-
-          // Cerrar modal
           this.closeDeleteModal()
-
-          console.log('Usuario eliminado:', data.message)
         } else {
           this.deleteError = data.detail || 'Error al eliminar usuario'
         }
@@ -491,19 +443,10 @@ tbody tr:hover {
   color: #ffc107;
 }
 
-.status {
-  font-size: 0.9rem;
-}
+.status { font-size: 0.9rem; }
+.status-active { color: var(--color-success); }
+.status-inactive { color: var(--color-text-muted); }
 
-.status-active {
-  color: var(--color-success);
-}
-
-.status-inactive {
-  color: var(--color-text-muted);
-}
-
-/* ✅ BOTÓN DELETE - FUERA DEL MEDIA QUERY */
 .btn-delete {
   background: rgba(239, 35, 60, 0.2);
   border: 1px solid rgba(239, 35, 60, 0.4);
@@ -525,7 +468,6 @@ tbody tr:hover {
   cursor: not-allowed;
 }
 
-/* ✅ BADGE PARA USUARIOS NO ELIMINABLES */
 .non-deletable-badge {
   display: inline-block;
   padding: 0.5rem 0.75rem;
@@ -571,16 +513,10 @@ tbody tr:hover {
   font-size: 0.9rem;
 }
 
-/* Modal */
 .modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
+.modal-fade-leave-active { transition: opacity 0.3s ease; }
 .modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
+.modal-fade-leave-to { opacity: 0; }
 
 .modal-overlay {
   position: fixed;
@@ -661,9 +597,7 @@ tbody tr:hover {
   font-size: 0.95rem;
 }
 
-.user-info-box strong {
-  color: white;
-}
+.user-info-box strong { color: white; }
 
 .modal-warning {
   background: rgba(255, 193, 7, 0.15);
@@ -676,9 +610,7 @@ tbody tr:hover {
   font-size: 0.9rem;
 }
 
-.modal-warning strong {
-  color: #ff9800;
-}
+.modal-warning strong { color: #ff9800; }
 
 .modal-buttons {
   display: flex;
@@ -734,27 +666,13 @@ tbody tr:hover {
 }
 
 @media (max-width: 968px) {
-  .users-table {
-    overflow-x: auto;
-  }
-
-  table {
-    min-width: 700px;
-  }
-
-  .pagination {
-    flex-direction: column;
-    gap: 1rem;
-  }
+  .users-table { overflow-x: auto; }
+  table { min-width: 700px; }
+  .pagination { flex-direction: column; gap: 1rem; }
 }
 
 @media (max-width: 640px) {
-  .modal-content {
-    padding: 2rem 1.5rem;
-  }
-
-  .modal-buttons {
-    flex-direction: column;
-  }
+  .modal-content { padding: 2rem 1.5rem; }
+  .modal-buttons { flex-direction: column; }
 }
 </style>
