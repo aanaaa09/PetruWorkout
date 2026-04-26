@@ -18,6 +18,19 @@
             <button :class="['toggle-btn', sexo === 'f' ? 'active' : '']" @click="sexo = 'f'">Mujer</button>
           </div>
         </div>
+        <div class="form-section">
+  <label class="form-label">Peso corporal</label>
+  <div class="peso-input-wrap">
+    <input
+      v-model.number="peso"
+      type="number"
+      min="0"
+      placeholder="70"
+      class="peso-input"
+    />
+    <span class="peso-unit">kg</span>
+  </div>
+</div>
 
         <div class="exercises-grid">
           <div v-for="ex in exercises" :key="ex.key" class="exercise-input">
@@ -304,6 +317,7 @@ export default {
   display: flex;
   gap: 0.75rem;
 }
+
 .toggle-btn {
   flex: 1;
   padding: 0.75rem 1rem;
@@ -324,6 +338,33 @@ export default {
   background: rgba(6,214,160,0.18);
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+.peso-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 160px;
+}
+.peso-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 8px;
+  color: white;
+  padding: 0.6rem 0.875rem;
+  font-size: 1rem;
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+.peso-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.peso-input::placeholder { color: rgba(255,255,255,0.25); }
+.peso-unit {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 600;
 }
 
 /* EXERCISES GRID */
