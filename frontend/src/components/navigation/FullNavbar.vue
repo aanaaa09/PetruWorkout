@@ -17,14 +17,16 @@
         <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Reseñas</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
         <li class="nav-cta">
-          <router-link
-            to="/testfuerza"
-            class="btn-cta"
-            @click="menuOpen = false"
-            >
-            💪 Test de Fuerza
-          </router-link>
-        </li>
+         <a
+          href="https://calendly.com/"
+          class="btn-cta"
+          @click="handleCalendlyClick"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          📅 Agendar llamada
+      </a>
+</li>
       </ul>
     </div>
   </nav>
