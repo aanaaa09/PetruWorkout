@@ -2,8 +2,8 @@
   <section id="resultados" class="results-section">
     <div class="results-container">
       <div class="section-header">
-        <span class="section-tag">{{ content.section_tag || 'RESULTADOS REALES' }}</span>
-        <h2 class="section-title">{{ content.title || 'Transformaciones de mis clientes' }}</h2>
+        <span class="section-tag">{{ sectionTag }}</span>
+        <h2 class="section-title">{{ sectionTitle }}</h2>
       </div>
 
       <div class="results-grid">
@@ -44,10 +44,10 @@
         </div>
       </div>
 
-      <!-- CTA DEBAJO DE LAS FOTOS DE TRANSFORMACIONES (results-section) -->
+      <!-- CTA DEBAJO DE LAS FOTOS -->
       <div class="results-cta">
         <p>¿Quieres ser el próximo?</p>
-        <a
+
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
@@ -61,8 +61,8 @@
       <!-- SECCIÓN DE VIDEOS -->
       <div class="videos-section">
         <div class="videos-header">
-          <h3>{{ content.videos_title || 'Esto es lo que opinan mis clientes' }}</h3>
-          <p>{{ content.videos_subtitle || 'Testimonios reales de personas que han logrado sus objetivos' }}</p>
+          <h3>{{ videosTitle }}</h3>
+          <p>{{ videosSubtitle }}</p>
         </div>
 
         <div class="videos-grid">
@@ -111,7 +111,7 @@
         </div>
       </div>
 
-      <!-- SECCIÓN REGALO — debajo de vídeos -->
+      <!-- SECCIÓN REGALO -->
       <div class="gift-cta-section">
         <div class="gift-cta-inner">
           <div class="gift-icon-wrap">🎁</div>
@@ -189,43 +189,21 @@
 </template>
 
 <script>
-import { useContent } from '@/composables/useContent.js'
 import { trackCalendlyClick } from '@/utils/tracking.js'
 
 export default {
   name: 'ResultsSection',
+  props: {
+    content: { type: Object, default: null }
+  },
   data() {
     return {
-      content: {
-        section_tag: 'RESULTADOS REALES',
-        title: 'Transformaciones de mis clientes',
-        videos_title: 'Esto es lo que opinan mis clientes',
-        videos_subtitle: 'Testimonios reales de personas que han logrado sus objetivos',
-        users: [],
-        _img_version: null,
-      },
       videoTestimonials: [
-        {
-          id: 1,
-          src: '/videos/video1.mp4',
-          poster: '/videos/thumbs/thumb1.webp',
-          posterSmall: '/videos/thumbs/thumb1-small.webp',
-        },
-        {
-          id: 2,
-          src: '/videos/video2.mp4',
-          poster: '/videos/thumbs/thumb2.webp',
-          posterSmall: '/videos/thumbs/thumb2-small.webp',
-        },
-        {
-          id: 3,
-          src: '/videos/video3.mp4',
-          poster: '/videos/thumbs/thumb3.webp',
-          posterSmall: '/videos/thumbs/thumb3-small.webp',
-        },
+        { id: 1, src: '/videos/video1.mp4', poster: '/videos/thumbs/thumb1.webp', posterSmall: '/videos/thumbs/thumb1-small.webp' },
+        { id: 2, src: '/videos/video2.mp4', poster: '/videos/thumbs/thumb2.webp', posterSmall: '/videos/thumbs/thumb2-small.webp' },
+        { id: 3, src: '/videos/video3.mp4', poster: '/videos/thumbs/thumb3.webp', posterSmall: '/videos/thumbs/thumb3-small.webp' },
       ],
       playingVideos: {},
-      // Modal regalo
       showGiftModal:     false,
       giftEmail:         '',
       giftAcceptPrivacy: false,
@@ -236,30 +214,30 @@ export default {
     }
   },
   computed: {
+    sectionTag() {
+      return this.content?.section_tag || 'RESULTADOS REALES'
+    },
+    sectionTitle() {
+      return this.content?.title || 'Transformaciones de mis clientes'
+    },
+    videosTitle() {
+      return this.content?.videos_title || 'Esto es lo que opinan mis clientes'
+    },
+    videosSubtitle() {
+      return this.content?.videos_subtitle || 'Testimonios reales de personas que han logrado sus objetivos'
+    },
     activeUsers() {
-      return (this.content.users || []).filter(u => u.name && u.name.trim())
+      return (this.content?.users || []).filter(u => u.name && u.name.trim())
     },
     imgV() {
-      return this.content._img_version ? `?v=${this.content._img_version}` : ''
+      return this.content?._img_version ? `?v=${this.content._img_version}` : ''
     },
-  },
-  async mounted() {
-    try {
-      const c = await useContent()
-      if (c?.results) {
-        const { _video_version, ...rest } = c.results
-        this.content = { ...this.content, ...rest }
-      }
-    } catch (e) {
-      console.warn('useContent error:', e)
-    }
   },
   methods: {
     handleImageError(e) {
       if (e.target.dataset.errorHandled) return
       e.target.dataset.errorHandled = 'true'
-      e.target.src =
-        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E'
+      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="250"%3E%3Crect width="200" height="250" fill="%231a1a1a"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23e63946" text-anchor="middle" dominant-baseline="middle"%3EFOTO%3C/text%3E%3C/svg%3E'
     },
     playVideo(id) {
       this.playingVideos = { ...this.playingVideos, [id]: true }
@@ -271,13 +249,9 @@ export default {
     },
     onPlay(id)  { this.playingVideos = { ...this.playingVideos, [id]: true  } },
     onPause(id) { this.playingVideos = { ...this.playingVideos, [id]: false } },
-
-    // Botón Calendly debajo de las fotos — sí se trackea
     handleCalendlyClick() {
       trackCalendlyClick('results-cta-button', 'results-section')
     },
-
-    // Modal regalo — NO se trackea (no es Calendly)
     closeGiftModal() {
       this.showGiftModal     = false
       this.giftEmail         = ''
@@ -301,16 +275,8 @@ export default {
       this.giftError      = ''
       this.giftSuccess    = ''
       this.giftEmailError = ''
-
-      if (!this.validateGiftEmail()) {
-        this.giftError = 'Por favor, introduce un email válido'
-        return
-      }
-      if (!this.giftAcceptPrivacy) {
-        this.giftError = 'Debes aceptar la política de privacidad'
-        return
-      }
-
+      if (!this.validateGiftEmail()) { this.giftError = 'Por favor, introduce un email válido'; return }
+      if (!this.giftAcceptPrivacy)   { this.giftError = 'Debes aceptar la política de privacidad'; return }
       this.giftLoading = true
       try {
         const response = await fetch('https://petruworkout-production.up.railway.app/api/lead/register', {
@@ -320,7 +286,6 @@ export default {
         })
         const data = await response.json()
         sessionStorage.setItem('petru_has_team_access', 'true')
-
         if (response.ok) {
           this.giftSuccess = data.nuevo
             ? '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
@@ -330,7 +295,6 @@ export default {
           this.giftError = data.error || 'Error al registrar. Intenta de nuevo.'
         }
       } catch (err) {
-        console.error('Error:', err)
         this.giftError = 'Error de conexión. Intenta de nuevo.'
       } finally {
         this.giftLoading = false

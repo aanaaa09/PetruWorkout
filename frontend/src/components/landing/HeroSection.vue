@@ -64,50 +64,40 @@
 </template>
 
 <script>
-import { useContent } from '@/composables/useContent.js'
 import { trackCalendlyClick } from '@/utils/tracking.js'
-
-// Valores por defecto hardcodeados (fallback si content.json no carga)
-const DEFAULTS = {
-  desktopImage: '/images/petru-hero-nuevo.webp',
-  mobileImage:  '/images/petru-hero-nuevo.webp',
-  heroTitle:    'El Sistema para entrenar en Casa o en el Parque y conseguir',
-  heroHighlight:'fuerza real',
-  benefits: [
-    'Cuerpo atlético y definido',
-    'Gana fuerza y movilidad para el día a día',
-    'Estrategia secreta para activar tu metabolismo y quemar grasa',
-    'Motivación diaria para mantenerte constante y no abandonar',
-  ],
-  btnText: 'EMPIEZA AHORA',
-}
 
 export default {
   name: 'HeroSection',
-  data() {
-    return {
-      ...DEFAULTS,
-    }
+  props: {
+    content: { type: Object, default: null }
   },
-
-  async mounted() {
-    try {
-      const c = await useContent()
-      if (c?.hero) {
-        const h = c.hero
-        if (h.title)                this.heroTitle     = h.title
-        if (h.highlight)            this.heroHighlight = h.highlight
-        if (h.benefits && Array.isArray(h.benefits) && h.benefits.length)
-                                    this.benefits      = h.benefits
-        if (h.calendly_button_text) this.btnText       = h.calendly_button_text
-        if (h.desktop_image)        this.desktopImage  = h.desktop_image
-        if (h.mobile_image)         this.mobileImage   = h.mobile_image
-      }
-    } catch (e) {
-      console.warn('useContent falló, usando defaults:', e)
-    }
+  computed: {
+    heroTitle() {
+      return this.content?.title || 'El Sistema para entrenar en Casa o en el Parque y conseguir'
+    },
+    heroHighlight() {
+      return this.content?.highlight || 'fuerza real'
+    },
+    benefits() {
+      return this.content?.benefits?.length
+        ? this.content.benefits
+        : [
+            'Cuerpo atlético y definido',
+            'Gana fuerza y movilidad para el día a día',
+            'Estrategia secreta para activar tu metabolismo y quemar grasa',
+            'Motivación diaria para mantenerte constante y no abandonar',
+          ]
+    },
+    btnText() {
+      return this.content?.calendly_button_text || 'EMPIEZA AHORA'
+    },
+    desktopImage() {
+      return this.content?.desktop_image || '/images/petru-hero-nuevo.webp'
+    },
+    mobileImage() {
+      return this.content?.mobile_image || '/images/petru-hero-nuevo.webp'
+    },
   },
-
   methods: {
     handleImageError(e) {
       e.target.style.display = 'none'

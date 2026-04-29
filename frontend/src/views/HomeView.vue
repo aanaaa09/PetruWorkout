@@ -1,9 +1,9 @@
 <template>
   <div class="home-view">
     <SimpleNavbar />
-    <HeroSection />
-    <VideoSection />
-    <ResultsSection />
+    <HeroSection :content="content?.hero" />
+    <VideoSection :content="content?.video" />
+    <ResultsSection :content="content?.results" />
     <SimpleFooter @show-legal="showLegalPage" />
     <component
       v-if="currentLegalPage"
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { useContent } from '@/composables/useContent.js'
 import SimpleNavbar from '@/components/navigation/SimpleNavbar.vue'
 import HeroSection from '@/components/landing/HeroSection.vue'
 import VideoSection from '@/components/landing/VideoSection.vue'
@@ -25,32 +26,34 @@ import LegalNotice from '@/components/legal/LegalNotice.vue'
 import { useHead } from '@unhead/vue'
 
 export default {
-   name: 'HomeView',
+  name: 'HomeView',
   setup() {
     useHead({
       title: 'PetruWorkout - Entrenador Personal de Calistenia',
       meta: [
-        { name: 'description', content: 'Entrenador personal de calistenia en Toledo, Madrid y online. Transforma tu cuerpo con el método PetruWorkout. Garantía de devolución del 100%.' },
+        { name: 'description', content: 'Entrenador personal de calistenia en Toledo, Madrid y online.' },
         { property: 'og:title', content: 'PetruWorkout - Entrenador Personal de Calistenia' },
-        { property: 'og:description', content: 'Entrenador personal de calistenia en Toledo, Madrid y online. Garantía de devolución del 100%.' },
         { property: 'og:url', content: 'https://petrucalistenia.com/' },
         { name: 'robots', content: 'index, follow' },
       ]
     })
   },
   components: {
-    SimpleNavbar,
-    HeroSection,
-    VideoSection,
-    ResultsSection,
-    SimpleFooter,
-    PrivacyPolicy,
-    TermsConditions,
-    LegalNotice
+    SimpleNavbar, HeroSection, VideoSection, ResultsSection,
+    SimpleFooter, PrivacyPolicy, TermsConditions, LegalNotice
   },
   data() {
     return {
+      content: null,
       currentLegalPage: null
+    }
+  },
+  async serverPrefetch() {
+    this.content = await useContent()
+  },
+  async created() {
+    if (!this.content) {
+      this.content = await useContent()
     }
   },
   computed: {
@@ -71,7 +74,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .home-view {
   width: 100%;

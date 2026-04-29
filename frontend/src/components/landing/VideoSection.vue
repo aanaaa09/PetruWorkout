@@ -58,46 +58,41 @@
   </section>
 </template>
 
-<script>
-import { useContent } from '@/composables/useContent.js'
+<<script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
-
-const DEFAULT_ID = 'qDc5uScLz2c'
 
 export default {
   name: 'VideoSection',
+  props: {
+    content: { type: Object, default: null }
+  },
   data() {
     return {
       videoLoaded: false,
-      youtubeId: DEFAULT_ID,
-      sectionTag: 'EMPIEZA DESDE CERO',
-      sectionTitle: 'Así cambia la gente cuando empieza bien (de verdad)',
-      ctaTitle: '¿Listo para tu cambio?',
-      ctaDescription: 'Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas. Sin compromiso ni presión',
     }
   },
   computed: {
+    youtubeId() {
+      return this.content?.youtube_id || 'qDc5uScLz2c'
+    },
+    sectionTag() {
+      return this.content?.section_tag || 'EMPIEZA DESDE CERO'
+    },
+    sectionTitle() {
+      return this.content?.title || 'Así cambia la gente cuando empieza bien (de verdad)'
+    },
+    ctaTitle() {
+      return this.content?.cta_title || '¿Listo para tu cambio?'
+    },
+    ctaDescription() {
+      return this.content?.cta_description || 'Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas.'
+    },
     thumbnailUrl() {
       return `https://img.youtube.com/vi/${this.youtubeId}/maxresdefault.jpg`
     },
     embedUrl() {
       return `https://www.youtube.com/embed/${this.youtubeId}?autoplay=1&rel=0&modestbranding=1`
     },
-  },
-  async mounted() {
-    try {
-      const c = await useContent()
-      if (c?.video) {
-        const v = c.video
-        if (v.youtube_id)       this.youtubeId      = v.youtube_id
-        if (v.section_tag)      this.sectionTag     = v.section_tag
-        if (v.title)            this.sectionTitle   = v.title
-        if (v.cta_title)        this.ctaTitle       = v.cta_title
-        if (v.cta_description)  this.ctaDescription = v.cta_description
-      }
-    } catch (e) {
-      console.warn('VideoSection: no se pudo leer content.json, usando defaults:', e)
-    }
   },
   methods: {
     loadVideo() {
