@@ -47,7 +47,7 @@
       <!-- CTA DEBAJO DE LAS FOTOS -->
       <div class="results-cta">
         <p>¿Quieres ser el próximo?</p>
-
+        <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
           rel="noopener noreferrer"
@@ -187,14 +187,14 @@
     </div>
   </section>
 </template>
-
 <script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
 
 export default {
   name: 'ResultsSection',
   props: {
-    content: { type: Object, default: null }
+    content: { type: Object, default: null },
+    loading: { type: Boolean, default: true }
   },
   data() {
     return {
@@ -204,28 +204,20 @@ export default {
         { id: 3, src: '/videos/video3.mp4', poster: '/videos/thumbs/thumb3.webp', posterSmall: '/videos/thumbs/thumb3-small.webp' },
       ],
       playingVideos: {},
-      showGiftModal:     false,
-      giftEmail:         '',
+      showGiftModal: false,
+      giftEmail: '',
       giftAcceptPrivacy: false,
-      giftLoading:       false,
-      giftError:         '',
-      giftSuccess:       '',
-      giftEmailError:    '',
+      giftLoading: false,
+      giftError: '',
+      giftSuccess: '',
+      giftEmailError: '',
     }
   },
   computed: {
-    sectionTag() {
-      return this.content?.section_tag || 'RESULTADOS REALES'
-    },
-    sectionTitle() {
-      return this.content?.title || 'Transformaciones de mis clientes'
-    },
-    videosTitle() {
-      return this.content?.videos_title || 'Esto es lo que opinan mis clientes'
-    },
-    videosSubtitle() {
-      return this.content?.videos_subtitle || 'Testimonios reales de personas que han logrado sus objetivos'
-    },
+    sectionTag() { return this.content?.section_tag || 'RESULTADOS REALES' },
+    sectionTitle() { return this.content?.title || 'Transformaciones de mis clientes' },
+    videosTitle() { return this.content?.videos_title || 'Esto es lo que opinan mis clientes' },
+    videosSubtitle() { return this.content?.videos_subtitle || 'Testimonios reales de personas que han logrado sus objetivos' },
     activeUsers() {
       return (this.content?.users || []).filter(u => u.name && u.name.trim())
     },
@@ -253,13 +245,13 @@ export default {
       trackCalendlyClick('results-cta-button', 'results-section')
     },
     closeGiftModal() {
-      this.showGiftModal     = false
-      this.giftEmail         = ''
+      this.showGiftModal = false
+      this.giftEmail = ''
       this.giftAcceptPrivacy = false
-      this.giftError         = ''
-      this.giftSuccess       = ''
-      this.giftLoading       = false
-      this.giftEmailError    = ''
+      this.giftError = ''
+      this.giftSuccess = ''
+      this.giftLoading = false
+      this.giftEmailError = ''
     },
     validateGiftEmail() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -272,8 +264,8 @@ export default {
       return true
     },
     async handleGiftSubmit() {
-      this.giftError      = ''
-      this.giftSuccess    = ''
+      this.giftError = ''
+      this.giftSuccess = ''
       this.giftEmailError = ''
       if (!this.validateGiftEmail()) { this.giftError = 'Por favor, introduce un email válido'; return }
       if (!this.giftAcceptPrivacy)   { this.giftError = 'Debes aceptar la política de privacidad'; return }
@@ -288,13 +280,13 @@ export default {
         sessionStorage.setItem('petru_has_team_access', 'true')
         if (response.ok) {
           this.giftSuccess = data.nuevo
-            ? '¡Perfecto! Revisa tu email para confirmar tu suscripción. Redirigiendo...'
-            : '¡Ya estás registrado! Redirigiendo al grupo...'
+            ? '¡Perfecto! Revisa tu email. Redirigiendo...'
+            : '¡Ya estás registrado! Redirigiendo...'
           setTimeout(() => this.$router.push('/team'), 2000)
         } else {
           this.giftError = data.error || 'Error al registrar. Intenta de nuevo.'
         }
-      } catch (err) {
+      } catch {
         this.giftError = 'Error de conexión. Intenta de nuevo.'
       } finally {
         this.giftLoading = false

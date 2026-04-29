@@ -6,33 +6,32 @@
         <h2 class="section-title">{{ sectionTitle }}</h2>
       </div>
 
-      <div class="video-wrapper" @click="loadVideo">
-        <div v-if="!videoLoaded" class="video-thumbnail">
-          <img
-            :src="thumbnailUrl"
-            alt="Video thumbnail"
-          >
-          <button class="play-button" aria-label="Reproducir video">
-            <svg width="68" height="48" viewBox="0 0 68 48">
-              <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#f00"></path>
-              <path d="M 45,24 27,14 27,34" fill="#fff"></path>
-            </svg>
-          </button>
-        </div>
+      <!-- skeleton mientras carga -->
+<div v-if="loading || !youtubeId" class="video-skeleton"></div>
 
-        <iframe
-          v-if="videoLoaded"
-          class="video-frame"
-          width="100%"
-          height="100%"
-          :src="embedUrl"
-          title="Petru Workout - Método de Entrenamiento"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-      </div>
-
+<!-- video real cuando ya hay datos -->
+<div v-else class="video-wrapper" @click="loadVideo">
+  <div v-if="!videoLoaded" class="video-thumbnail">
+    <img :src="thumbnailUrl" alt="Video thumbnail">
+    <button class="play-button" aria-label="Reproducir video">
+      <svg width="68" height="48" viewBox="0 0 68 48">
+        <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#f00"></path>
+        <path d="M 45,24 27,14 27,34" fill="#fff"></path>
+      </svg>
+    </button>
+  </div>
+  <iframe
+    v-if="videoLoaded"
+    class="video-frame"
+    width="100%"
+    height="100%"
+    :src="embedUrl"
+    title="Petru Workout"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+  ></iframe>
+</div>
       <div class="video-cta">
         <h3 class="cta-title">{{ ctaTitle }}</h3>
         <p class="cta-description">{{ ctaDescription }}</p>
@@ -58,46 +57,35 @@
   </section>
 </template>
 
-<<script>
+<script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
 
 export default {
   name: 'VideoSection',
   props: {
-    content: { type: Object, default: null }
+    content: { type: Object, default: null },
+    loading: { type: Boolean, default: true }
   },
   data() {
-    return {
-      videoLoaded: false,
-    }
+    return { videoLoaded: false }
   },
   computed: {
-    youtubeId() {
-      return this.content?.youtube_id || 'qDc5uScLz2c'
-    },
-    sectionTag() {
-      return this.content?.section_tag || 'EMPIEZA DESDE CERO'
-    },
-    sectionTitle() {
-      return this.content?.title || 'Así cambia la gente cuando empieza bien (de verdad)'
-    },
-    ctaTitle() {
-      return this.content?.cta_title || '¿Listo para tu cambio?'
-    },
-    ctaDescription() {
-      return this.content?.cta_description || 'Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas.'
-    },
+    youtubeId() { return this.content?.youtube_id || null },
+    sectionTag() { return this.content?.section_tag || 'EMPIEZA DESDE CERO' },
+    sectionTitle() { return this.content?.title || 'Así cambia la gente cuando empieza bien (de verdad)' },
+    ctaTitle() { return this.content?.cta_title || '¿Listo para tu cambio?' },
+    ctaDescription() { return this.content?.cta_description || 'Llama gratis: Analizamos tu situación, te doy un plan claro para empezar y resolvemos todas tus dudas.' },
     thumbnailUrl() {
+      if (!this.youtubeId) return null
       return `https://img.youtube.com/vi/${this.youtubeId}/maxresdefault.jpg`
     },
     embedUrl() {
+      if (!this.youtubeId) return null
       return `https://www.youtube.com/embed/${this.youtubeId}?autoplay=1&rel=0&modestbranding=1`
     },
   },
   methods: {
-    loadVideo() {
-      this.videoLoaded = true
-    },
+    loadVideo() { this.videoLoaded = true },
     handleCalendlyClick() {
       trackCalendlyClick('video-section-cta-button', 'video-section')
     },
@@ -129,7 +117,19 @@ export default {
   display: block;
   margin-bottom: 1rem;
 }
+.video-skeleton {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  animation: pulse 1.5s ease-in-out infinite;
+}
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
 .section-title {
   font-size: 2.5rem;
   font-weight: 800;

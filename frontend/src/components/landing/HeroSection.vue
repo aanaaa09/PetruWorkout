@@ -69,7 +69,8 @@ import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'HeroSection',
   props: {
-    content: { type: Object, default: null }
+    content: { type: Object, default: null },
+    loading: { type: Boolean, default: true }
   },
   computed: {
     heroTitle() {
@@ -79,14 +80,12 @@ export default {
       return this.content?.highlight || 'fuerza real'
     },
     benefits() {
-      return this.content?.benefits?.length
-        ? this.content.benefits
-        : [
-            'Cuerpo atlético y definido',
-            'Gana fuerza y movilidad para el día a día',
-            'Estrategia secreta para activar tu metabolismo y quemar grasa',
-            'Motivación diaria para mantenerte constante y no abandonar',
-          ]
+      return this.content?.benefits?.length ? this.content.benefits : [
+        'Cuerpo atlético y definido',
+        'Gana fuerza y movilidad para el día a día',
+        'Estrategia secreta para activar tu metabolismo y quemar grasa',
+        'Motivación diaria para mantenerte constante y no abandonar',
+      ]
     },
     btnText() {
       return this.content?.calendly_button_text || 'EMPIEZA AHORA'
@@ -99,16 +98,13 @@ export default {
     },
   },
   methods: {
-    handleImageError(e) {
-      e.target.style.display = 'none'
-    },
+    handleImageError(e) { e.target.style.display = 'none' },
     handleCalendlyClick() {
       trackCalendlyClick('hero-calendly-button', 'hero-section')
     },
   },
 }
 </script>
-
 <style scoped>
 /* ===== ESTILOS GENERALES ===== */
 .hero-section {

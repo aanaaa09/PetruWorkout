@@ -1,9 +1,9 @@
 <template>
   <div class="home-view">
     <SimpleNavbar />
-    <HeroSection :content="content?.hero" />
-    <VideoSection :content="content?.video" />
-    <ResultsSection :content="content?.results" />
+    <HeroSection :content="content?.hero" :loading="!content" />
+    <VideoSection :content="content?.video" :loading="!content" />
+    <ResultsSection :content="content?.results" :loading="!content" />
     <SimpleFooter @show-legal="showLegalPage" />
     <component
       v-if="currentLegalPage"
@@ -48,13 +48,8 @@ export default {
       currentLegalPage: null
     }
   },
-  async serverPrefetch() {
-    this.content = await useContent()
-  },
   async created() {
-    if (!this.content) {
-      this.content = await useContent()
-    }
+    this.content = await useContent()
   },
   computed: {
     currentLegalComponent() {
