@@ -2,8 +2,8 @@ name: Fuerza Email Sequence
 
 on:
   schedule:
-    # Todos los días a las 10:00 hora España (09:00 UTC en horario de verano)
-    - cron: '0 9 * * *'
+    # Todos los días a las 20:00 hora España de verano
+    - cron: '0 18 * * *'
   workflow_dispatch:  # Para ejecutarlo manualmente si hace falta
 
 env:
