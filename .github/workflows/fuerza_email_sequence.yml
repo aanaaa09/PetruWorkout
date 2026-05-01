@@ -1,0 +1,52 @@
+name: Fuerza Email Sequence
+
+on:
+  schedule:
+    # Todos los días a las 10:00 hora España (09:00 UTC en horario de verano)
+    - cron: '0 9 * * *'
+  workflow_dispatch:  # Para ejecutarlo manualmente si hace falta
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  send-sequence:
+    name: Enviar emails de secuencia Fuerza Real
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          pip install --no-cache-dir -r backend/requirements.txt
+
+      - name: Enviar emails de secuencia
+        env:
+          DATABASE_URL:   ${{ secrets.RAILWAY_DATABASE_URL }}
+          DB_HOST:        ${{ secrets.DB_HOST }}
+          DB_PORT:        ${{ secrets.DB_PORT }}
+          DB_NAME:        ${{ secrets.DB_NAME }}
+          DB_USER:        ${{ secrets.DB_USER }}
+          DB_PASSWORD:    ${{ secrets.DB_PASSWORD }}
+          EMAIL_API:      ${{ secrets.EMAIL_API }}
+          PYTHONPATH:     "${{ github.workspace }}:${{ github.workspace }}/backend"
+        run: |
+          echo "Iniciando secuencia de emails Fuerza Real..."
+          python -m backend.send_fuerza_sequence
+
+      - name: Resumen
+        if: always()
+        run: |
+          echo "================================"
+          echo "SECUENCIA FUERZA REAL"
+          echo "Fecha: $(date)"
+          echo "Status: ${{ job.status }}"
+          echo "================================"
