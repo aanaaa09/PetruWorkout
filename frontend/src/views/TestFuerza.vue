@@ -31,6 +31,20 @@
     <span class="peso-unit">kg</span>
   </div>
 </div>
+        <div class="form-section">
+  <label class="form-label">Edad</label>
+  <div class="peso-input-wrap">
+    <input
+      v-model.number="edad"
+      type="number"
+      min="10"
+      max="100"
+      placeholder="30"
+      class="peso-input"
+    />
+    <span class="peso-unit">años</span>
+  </div>
+</div>
 
         <div class="exercises-grid">
           <div v-for="ex in exercises" :key="ex.key" class="exercise-input">
@@ -163,6 +177,7 @@ export default {
       loading: false,
       modalError: '',
       result: null,
+      edad: null,
       exercises: [
         { key: 'pull',  icon: '⬆️', label: 'Dominadas',   placeholder: '0', hint: 'Máximo seguido' },
         { key: 'dips',  icon: '💪', label: 'Fondos',       placeholder: '0', hint: 'Máximo seguido' },
@@ -239,6 +254,7 @@ export default {
             nombre: this.nombre,
             email: this.email,
             sexo: this.sexo,
+            edad: this.edad || 0,
             pull:  this.reps.pull  || 0,
             dips:  this.reps.dips  || 0,
             push:  this.reps.push  || 0,
@@ -259,6 +275,7 @@ export default {
     reset() {
       this.step = 1
       this.result = null
+      this.edad = null
       this.reps = { pull: null, dips: null, push: null, squat: null }
     },
   },

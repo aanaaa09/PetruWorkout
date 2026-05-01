@@ -26,34 +26,36 @@ def calculate(data: FuerzaRequest):
 @router.post("/register-and-calculate", response_model=FuerzaRegisterResult)
 def register_and_calculate(data: FuerzaRegisterRequest, db: Session = Depends(get_db)):
     try:
-        lead_result = lead_service.register(db, data.email)
+        es_menor = data.edad > 0 and data.edad < 20
 
-        nombre = data.nombre.strip().capitalize()
-
-        if lead_result.get("nuevo"):
-            usuario = usuario_crud.get_by_email(db, data.email.lower())
-            if usuario:
-                usuario.nombre = nombre
-                db.commit()
+        if not es_menor:
+            lead_result = lead_service.register(db, data.email)
+            nombre = data.nombre.strip().capitalize()
+            if lead_result.get("nuevo"):
+                usuario = usuario_crud.get_by_email(db, data.email.lower())
+                if usuario:
+                    usuario.nombre = nombre
+                    db.commit()
+        else:
+            lead_result = {"nuevo": False}
+            nombre = data.nombre.strip().capitalize()
 
         calc = calculate_fuerza(data.sexo, data.pull, data.dips, data.push, data.squat)
 
-        # Enviar email día 0 con el resultado personalizado
-        # (los datos ya están en memoria, no se guarda nada extra)
-        try:
-            send_day0(
-                to_email=data.email,
-                nombre=nombre,
-                score=calc["score"],
-                level=calc["level"],
-                scores=calc["scores"],
-                reps=calc["reps"],
-            )
-        except Exception as e:
-            # El email no es bloqueante — si falla, el resultado igual se devuelve
-            logger.error(f"Error enviando email día 0 a {data.email}: {e}")
+        if not es_menor:
+            try:
+                send_day0(
+                    to_email=data.email,
+                    nombre=nombre,
+                    score=calc["score"],
+                    level=calc["level"],
+                    scores=calc["scores"],
+                    reps=calc["reps"],
+                )
+            except Exception as e:
+                logger.error(f"Error enviando email día 0 a {data.email}: {e}")
 
-        return {**calc, "registered": True, "nuevo": lead_result.get("nuevo", False)}
+        return {**calc, "registered": not es_menor, "nuevo": lead_result.get("nuevo", False)}
 
     except HTTPException:
         raise

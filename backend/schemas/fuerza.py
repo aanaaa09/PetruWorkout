@@ -10,10 +10,12 @@ class FuerzaRequest(BaseModel):
     squat: int = 0
 
 
+
 class FuerzaRegisterRequest(BaseModel):
     nombre: str
     email:  EmailStr
     sexo:   Literal["m", "f"]
+    edad: int = 0
     pull:   int = 0
     dips:   int = 0
     push:   int = 0
