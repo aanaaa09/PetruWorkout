@@ -163,7 +163,7 @@ class EmailService:
     </p>
 
     <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
-      Estoy dentro y respondo yo, asique si no te has unido aún.
+      Estoy dentro y respondo yo, así que si no te has unido aún.
       <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
          style="color:#06d6a0;font-weight:bold;text-decoration:none;">
         <strong>Haz clic aquí</strong>
