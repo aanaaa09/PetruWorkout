@@ -221,7 +221,7 @@ class EmailService:
         payload = {
             "sender": {"name": "PetruWorkout", "email": self.sender_email},
             "to":     [{"email": to_email, "name": to_name}],
-            "subject": "🎁 ¡Bienvenido al equipo PetruWorkout!",
+            "subject": "🎁 Tengo una sorpresa para ti!",
             "htmlContent": html_content,
         }
 
