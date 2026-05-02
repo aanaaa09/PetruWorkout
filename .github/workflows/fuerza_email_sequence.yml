@@ -2,9 +2,8 @@ name: Fuerza Email Sequence
 
 on:
   schedule:
-    # Todos los días a las 20:00 hora España de verano
     - cron: '0 18 * * *'
-  workflow_dispatch:  # Para ejecutarlo manualmente si hace falta
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
@@ -28,16 +27,33 @@ jobs:
         run: |
           pip install --no-cache-dir -r backend/requirements.txt
 
+      - name: Despertar Railway
+        run: |
+          echo "Despertando Railway..."
+          BACKEND_URL="https://petruworkout-production.up.railway.app"
+          echo "URL: $BACKEND_URL/health"
+          for i in 1 2 3; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout 30 --max-time 60 "${BACKEND_URL}/health" || echo "000")
+            echo "Response code: $response"
+            if [ "$response" = "200" ]; then
+              echo "Railway despierto"
+              break
+            fi
+            if [ $i -lt 3 ]; then
+              sleep_time=$((i * 20))
+              echo "Esperando ${sleep_time}s..."
+              sleep $sleep_time
+            else
+              echo "⚠ No respondió, seguimos..."
+            fi
+          done
+
       - name: Enviar emails de secuencia
         env:
-          DATABASE_URL:   ${{ secrets.RAILWAY_DATABASE_URL }}
-          DB_HOST:        ${{ secrets.DB_HOST }}
-          DB_PORT:        ${{ secrets.DB_PORT }}
-          DB_NAME:        ${{ secrets.DB_NAME }}
-          DB_USER:        ${{ secrets.DB_USER }}
-          DB_PASSWORD:    ${{ secrets.DB_PASSWORD }}
-          EMAIL_API:      ${{ secrets.EMAIL_API }}
-          PYTHONPATH:     "${{ github.workspace }}:${{ github.workspace }}/backend"
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          EMAIL_API:    ${{ secrets.EMAIL_API }}
+          PYTHONPATH:   "${{ github.workspace }}:${{ github.workspace }}/backend"
         run: |
           echo "Iniciando secuencia de emails Fuerza Real..."
           python -m backend.send_fuerza_sequence
