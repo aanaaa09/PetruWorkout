@@ -3,19 +3,21 @@ from typing import ClassVar
 from pydantic_settings import BaseSettings
 
 
-class Settings(BaseSettings):
-    # Base de datos PostgreSQL
-    DB_HOST: str
-    DB_PORT: str
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
+from typing import Optional
+from pydantic_settings import BaseSettings
+from pydantic import model_validator
 
-    # Email (para enviar códigos de registro, notificaciones)
+class Settings(BaseSettings):
+    # Base de datos - pueden venir por separado o como URL completa
+    DATABASE_URL: Optional[str] = None
+    DB_HOST: Optional[str] = None
+    DB_PORT: Optional[str] = None
+    DB_NAME: Optional[str] = None
+    DB_USER: Optional[str] = None
+    DB_PASSWORD: Optional[str] = None
 
     EMAIL_API: str = ""
 
-    # Calendly
     CALENDLY_API_KEY: str = ""
     CALENDLY_USER_URI: str = ""
     CALENDLY_EVENT_URL: str = ""
@@ -25,17 +27,16 @@ class Settings(BaseSettings):
     GITHUB_REPO: str = ""
     GITHUB_BRANCH: str = "main"
 
-    @property
-    def DATABASE_URL(self) -> str:
-        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    @model_validator(mode='after')
+    def build_database_url(self):
+        if not self.DATABASE_URL and self.DB_HOST:
+            # Construye la URL desde las piezas (como antes)
+            self.DATABASE_URL = f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return self
 
     class Config:
         env_file = ".env"
         case_sensitive = True
         extra = "allow"
-        GITHUB_TOKEN: str = ""
-        GITHUB_REPO: str = ""
-        GITHUB_BRANCH: str = "main"
-
 
 settings = Settings()
