@@ -148,44 +148,60 @@ class EmailService:
     <p style="font-size:16px;line-height:1.6;margin-bottom:15px;">¡Ey, te escribe Petru!</p>
 
     <p style="font-size:15px;line-height:1.7;margin-bottom:15px;">
-      Me alegra un montón que estés aquí, de verdad.<br>
-      Dar este primer paso ya dice mucho de ti.
+      Me alegra que estés aquí, pero voy directo al grano:
     </p>
 
     <p style="font-size:15px;line-height:1.7;margin-bottom:15px;">
-      Quiero que sepas algo desde ya: <strong>no vas a estar solo</strong>.
+      Sé que no es falta de tiempo, es <strong>falta de claridad</strong>.
+    </p>
+
+    <p style="font-size:15px;line-height:1.7;margin-bottom:15px;">
+      Por eso he creado un grupo de WhatsApp donde <strong>dejas de pensar y empiezas a hacer</strong>.
+    </p>
+
+    <p style="font-size:15px;line-height:1.7;margin-bottom:8px;">Dentro tienes esto:</p>
+    <ul style="font-size:15px;line-height:1.9;margin:0 0 20px 0;padding-left:20px;">
+      <li>Rutinas claras para entrenar sin perder tiempo</li>
+      <li>Guía simple para comer según tu objetivo</li>
+      <li>Respuesta directa mía (sí, soy yo)</li>
+      <li>Corrección de ejercicios si mandas vídeos</li>
+      <li>Y gente como tú, dispuesta a aprender y mejorar</li>
+    </ul>
+
+    <p style="font-size:15px;line-height:1.7;margin-bottom:15px;">
+      Si entras y haces lo que te digo, <strong>en 2 semanas vuelves a sentirte fuerte y en marcha otra vez</strong>.
     </p>
 
     <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
-      He creado el grupo de WhatsApp para que sepas cómo organizar tus rutinas,
-      te ayudo con la alimentación, puedes preguntarme todas las dudas, mandar videos
-      y no ir perdido.
+      Esto no es contenido suelto.<br>
+      Es <strong>estructura, ejecución y resultados</strong>.
     </p>
 
     <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
-      Estoy dentro y respondo yo, así que si no te has unido aún.
-      <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
-         style="color:#06d6a0;font-weight:bold;text-decoration:none;">
-        <strong>Haz clic aquí</strong>
-      </a>
-    </p>
-
-    <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
-      Y ahora sí, vamos a lo importante 😏<br>
-      Te dejo este regalito para que lo aproveches y sepas
-      <strong>cuánto comer según tu objetivo</strong>, sin líos ni cálculos raros.
+      👉 Entra ahora aquí (es gratis):
     </p>
 
     <div style="margin:30px 0;text-align:center;">
-      <a href="{calculator_url}"
+      <a href="https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
          style="display:inline-block;background-color:#06d6a0;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-size:15px;font-weight:600;">
-        🔥 CALCULAR MIS CALORÍAS AHORA
+        💬 ÚNETE AL GRUPO DE WHATSAPP
       </a>
     </div>
 
-    <p style="font-size:15px;line-height:1.7;margin-top:25px;">Nos vemos dentro 💪</p>
+    <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
+      Si no estás dentro, estás aceptando seguir por debajo de tu nivel.
+    </p>
 
-    <p style="font-size:15px;line-height:1.7;margin-top:15px;">
+    <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
+      Nos vemos dentro 👊
+    </p>
+
+    <p style="font-size:15px;line-height:1.7;margin-bottom:20px;">
+      <strong>PD:</strong> Si además quieres saber exactamente cuántas calorías necesitas según tu objetivo,
+      <a href="{calculator_url}" style="color:#06d6a0;font-weight:bold;text-decoration:none;">haz clic aquí</a>.
+    </p>
+
+    <p style="font-size:15px;line-height:1.7;margin-top:25px;">
       <strong>Petru</strong><br>
       <span style="font-size:13px;color:#666666;">Entrenador Personal Especializado en Calistenia</span>
     </p>

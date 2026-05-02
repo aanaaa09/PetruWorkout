@@ -18,7 +18,7 @@ from .email_service import email_service
 logger = logging.getLogger(__name__)
 
 WHATSAPP_GROUP   = "https://chat.whatsapp.com/EPtwBr6DqUk0Y9kfUF0YB1"
-WHATSAPP_DIRECTO = "https://wa.me/34642662849?text=FUERTE"
+WHATSAPP_DIRECTO = "https://wa.me/34642662849?text=FUERZA"
 
 NIVEL_ES = {
     "principiante": "Principiante",
@@ -65,7 +65,7 @@ def send_day0(
         "push":  "flexiones",
         "squat": "sentadillas",
     }
-    # Ejemplo práctico personalizado con su ejercicio más fuerte
+
     mejor = max(reps, key=reps.get)
     mejor_reps = reps[mejor]
     ejemplo_70 = round(mejor_reps * 0.7)
@@ -211,12 +211,7 @@ def send_day1(to_email: str, nombre: str) -> bool:
       nunca. Y cuando lo veas, vas a entender por qué sigues dónde estás.
     </p>
 
-    <p style="font-size:15px;line-height:1.7;margin:0 0 15px 0;">
-      P.D.: Estoy compartiendo algo extra cada día en un grupo de WhatsApp para los que
-      quieren ir más rápido. Si quieres entrar,
-      <a href="{WHATSAPP_GROUP}" style="color:#06d6a0;font-weight:600;text-decoration:none;">haz clic aquí</a>
-    </p>
-
+    
     <p style="font-size:15px;line-height:1.7;margin:0;"><strong>Petru</strong></p>
     """)
 
@@ -395,7 +390,7 @@ def send_day5(to_email: str, nombre: str) -> bool:
     </p>
 
     <p style="font-size:15px;line-height:1.7;margin:0 0 25px 0;">
-      Si eso eres tú: escríbeme <strong>"FUERTE"</strong> al WhatsApp
+      Si eso eres tú: escríbeme <strong>"FUERZA"</strong> al WhatsApp
       <a href="{WHATSAPP_DIRECTO}" style="color:#06d6a0;font-weight:600;text-decoration:none;">
         haciendo clic aquí
       </a>
