@@ -31,7 +31,6 @@ jobs:
         run: |
           echo "Despertando Railway..."
           BACKEND_URL="https://petruworkout-production.up.railway.app"
-          echo "URL: $BACKEND_URL/health"
           for i in 1 2 3; do
             response=$(curl -s -o /dev/null -w "%{http_code}" \
               --connect-timeout 30 --max-time 60 "${BACKEND_URL}/health" || echo "000")
@@ -52,6 +51,11 @@ jobs:
       - name: Enviar emails de secuencia
         env:
           DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          DB_HOST:      ${{ secrets.DB_HOST }}
+          DB_PORT:      ${{ secrets.DB_PORT }}
+          DB_NAME:      ${{ secrets.DB_NAME }}
+          DB_USER:      ${{ secrets.DB_USER }}
+          DB_PASSWORD:  ${{ secrets.DB_PASSWORD }}
           EMAIL_API:    ${{ secrets.EMAIL_API }}
           PYTHONPATH:   "${{ github.workspace }}:${{ github.workspace }}/backend"
         run: |
