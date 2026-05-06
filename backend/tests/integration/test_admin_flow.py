@@ -8,8 +8,6 @@ from unittest.mock import patch
 
 
 def _move_to_yesterday(db, obj):
-    """Mueve un registro de tracking a ayer para que entre en el rango del dashboard.
-    El dashboard siempre corta en 'ayer' como máximo, incluso con date_to explícito."""
     yesterday = date.today() - timedelta(days=1)
     obj.fecha = yesterday
     if hasattr(obj, 'timestamp'):

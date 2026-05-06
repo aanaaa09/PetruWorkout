@@ -11,22 +11,11 @@ from ..models.usuario import Usuario, TipoUsuario
 logger = logging.getLogger(__name__)
 
 
-# ============================================================
-# DEPENDENCIA FASTAPI — compartida por todos los routers admin
-# ============================================================
 
 def verify_admin_token(
     token: str = Header(None, alias="token"),
     db: Session = Depends(get_db),
 ) -> Usuario:
-    """
-    Dependencia FastAPI reutilizable.
-    Verifica que el header 'token' pertenezca a una sesión ADMIN activa.
-
-    Raises:
-        HTTPException 401: Token ausente, sesión expirada o usuario no encontrado.
-        HTTPException 403: El usuario existe pero no es ADMIN.
-    """
     if not token:
         raise HTTPException(status_code=401, detail="Token no proporcionado en el header")
 

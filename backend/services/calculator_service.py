@@ -1,8 +1,4 @@
 # backend/services/calculator_service.py
-"""
-Lógica de dominio para el cálculo nutricional.
-Extraída del router para que este solo gestione HTTP.
-"""
 
 from typing import Literal
 import logging

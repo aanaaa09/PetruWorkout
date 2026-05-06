@@ -78,14 +78,14 @@ async function optimizeImages() {
     }
   }
 
-  console.log('\n✨ ¡Todas las imágenes optimizadas!\n');
+  console.log('\n ¡Todas las imágenes optimizadas!\n');
   console.log('Archivos generados:');
-  console.log('  📁 public/images/results/*-small.webp (330px)');
-  console.log('  📁 public/images/results/*-medium.webp (660px)');
-  console.log('  📁 public/images/results/*-large.webp (1000px)');
-  console.log('  📁 public/videos/thumbs/*-small.webp (378px)');
-  console.log('  📁 public/images/petru-hero-nuevo.webp (342px)');
-  console.log('  📁 public/images/petru-hero-nuevo.webp (441px)');
+  console.log('  public/images/results/*-small.webp (330px)');
+  console.log('  public/images/results/*-medium.webp (660px)');
+  console.log('  public/images/results/*-large.webp (1000px)');
+  console.log('  public/videos/thumbs/*-small.webp (378px)');
+  console.log('  public/images/petru-hero-nuevo.webp (342px)');
+  console.log('  public/images/petru-hero-nuevo.webp (441px)');
 }
 
 optimizeImages().catch(console.error);

@@ -1,8 +1,5 @@
 # backend/routers/consultas.py
-"""
-Router de consultas del formulario de contacto.
-El envío de email se delega a email_service.
-"""
+
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session

@@ -9,10 +9,6 @@ SIZES = {
 
 
 def validate_image(image_bytes: bytes) -> dict:
-    """
-    Valida que los bytes sean una imagen válida que Pillow pueda abrir.
-    No restringe dimensiones: se acepta cualquier tamaño y se redimensiona automáticamente.
-    """
     try:
         img = Image.open(io.BytesIO(image_bytes))
         w, h = img.size

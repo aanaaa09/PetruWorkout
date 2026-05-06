@@ -1,8 +1,5 @@
 # backend/routers/content_editor.py
-"""
-Router para editar el contenido de la landing desde el panel de admin.
-Toda la lógica (merge, GitHub, generación de imágenes) vive en content_service.
-"""
+
 
 import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form

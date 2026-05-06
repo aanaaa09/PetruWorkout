@@ -1,8 +1,5 @@
 # backend/routers/tracking.py
-"""
-Router de tracking de visitas, clicks y bookings.
-El webhook de Calendly se elimina (no se usa, se usa sync_calendly.py via GitHub Actions).
-"""
+
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session

@@ -1,8 +1,5 @@
 # backend/routers/analytics.py
-"""
-Router de analytics.
-Delega toda la lógica en analytics_service.
-"""
+
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse

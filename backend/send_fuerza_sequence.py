@@ -7,8 +7,6 @@ y envía el email de la secuencia que corresponda (días 1, 3, 4, 5).
 
 El día 0 ya se envió en el momento del registro desde el router de fuerza.
 
-Uso:
-    python -m backend.send_fuerza_sequence
 """
 
 import sys

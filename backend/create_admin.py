@@ -2,8 +2,6 @@
 Script para crear usuarios administradores en la base de datos.
 Ejecutar UNA SOLA VEZ para crear los admins.
 
-Uso:
-    python -m backend.create_admin
 """
 
 import os

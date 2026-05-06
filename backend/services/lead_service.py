@@ -20,16 +20,6 @@ class LeadService:
 
     @staticmethod
     def register(db: Session, email: str) -> dict:
-        """
-        Registra un lead nuevo o concede acceso a uno existente.
-
-        Flujo:
-        - Email ya existe  → conceder team_access si no lo tenía, devolver nuevo=False
-        - Email nuevo      → crear usuario, generar token calculadora, enviar email bienvenida
-
-        Returns:
-            dict con success, nuevo, has_team_access y email_enviado (solo si nuevo=True).
-        """
         email = email.lower()
 
         # ── Usuario ya existe ──────────────────────────────────────

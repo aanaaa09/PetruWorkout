@@ -18,7 +18,6 @@ from ..crud.analytics_crud import (
     visits_by_source, clicks_by_source, bookings_by_source,
     visits_daily, clicks_daily, bookings_daily,
     group_by_button,
-    # re-exportados para que los routers que los importaban directamente sigan funcionando
     count_filtered, group_by_source, daily_series,
 )
 

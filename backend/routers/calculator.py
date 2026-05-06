@@ -1,8 +1,4 @@
 # backend/routers/calculator.py
-"""
-Router de calculadora nutricional.
-La validación de token y los cálculos viven en sus servicios correspondientes.
-"""
 
 from fastapi import APIRouter, HTTPException, Depends, Header
 from sqlalchemy.orm import Session

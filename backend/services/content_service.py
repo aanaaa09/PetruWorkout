@@ -1,8 +1,4 @@
 # backend/services/content_service.py
-"""
-Lógica de negocio para la gestión del content.json de la landing.
-Extraída de content_editor.py para mantener el router limpio.
-"""
 
 import json
 import time

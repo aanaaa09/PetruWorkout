@@ -1,9 +1,5 @@
 # backend/routers/admin_panel.py
-"""
-Panel de administración.
-Solo gestión HTTP: login, usuarios, consultas, bookings y envío de emails.
-Toda la lógica de negocio vive en los servicios correspondientes.
-"""
+
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session

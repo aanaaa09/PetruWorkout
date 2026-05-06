@@ -1,9 +1,4 @@
 # backend/routers/leads.py
-"""
-Router de registro de leads.
-El flujo de negocio (crear usuario, token, email) vive en lead_service.
-El rate limiter se queda aquí porque es responsabilidad de la capa HTTP.
-"""
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
