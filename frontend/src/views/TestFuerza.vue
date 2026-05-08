@@ -103,7 +103,7 @@
         </div>
 
         <!-- CTA WhatsApp -->
-        <div :class="['cta-card', 'level-' + result.level]">
+        <div v-if="!edad || edad >= 20" :class="['cta-card', 'level-' + result.level]">
           <p v-html="ctaText"></p>
           <a class="wa-btn" href="https://wa.me/34642662849?text=Hola, he realizado el test y quiero que revises mi caso para ver cómo puedo seguir mejorando mi fuerza y físico" target="_blank">
             Solicitar evaluación física personalizada
@@ -216,7 +216,7 @@ export default {
       const wa = 'https://wa.me/34642662849?text=FUERZA'
       const targets = { principiante: Math.min(s+38,64), novato: Math.min(s+38,80), intermedio: Math.min(s+27,95), avanzado: Math.min(s+15,98) }
       if (lv === 'principiante' || lv === 'novato' || lv === 'intermedio' || lv === 'avanzado') {
-        return `Ahora mismo estás en <strong>${s}/100</strong>. Si quieres que analicemos tu caso de forma individual y te diga exactamente qué cambiar para llegar a <strong>${targets[lv]}</strong> en menos de 90 días, solicita tu <strong>"DIAGNÓSTICO FÍSICO PERSONALIZADO"</strong> al WhatsApp y te explico cómo.`
+        return `Ahora mismo estás en <strong>${s}/100</strong>. Si quieres que analicemos tu caso de forma individual y te diga exactamente qué cambiar para llegar a <strong>${targets[lv]}</strong> en menos de 90 días, solicita tu <strong>DIAGNÓSTICO FÍSICO PERSONALIZADO</strong>.`
       }
       return `La mayoría en este nivel se estanca porque entrena fuerte… pero no inteligente. Si quieres pasar a un nivel <strong>realmente completo (100/100)</strong>, solicita tu <strong>Diagnóstico físico personalizado</strong>.`
     },
