@@ -46,7 +46,7 @@
 
       <!-- CTA DEBAJO DE LAS FOTOS -->
       <div class="results-cta">
-        <p>¿Quieres ser el próximo?</p>
+        <p>El siguiente cambio puede ser el tuyo</p>
         <a
           href="https://calendly.com/petruworkout/reunion"
           target="_blank"
@@ -54,7 +54,7 @@
           class="btn btn-primary"
           @click="handleCalendlyClick"
         >
-          Empieza Tu Transformación →
+          Descubre cómo mejorar →
         </a>
       </div>
 

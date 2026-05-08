@@ -10,7 +10,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# Detectar variables de Railway CLI (PG*) o usar settings
 def get_database_url():
     """
     Construye la URL de la base de datos.
@@ -23,13 +22,13 @@ def get_database_url():
     pg_user = os.getenv('PGUSER')
     pg_password = os.getenv('PGPASSWORD')
 
-    # Si Railway CLI inyectó las variables, usarlas
+
     if pg_host and pg_password:
         url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}"
         logger.info(f"Usando variables de Railway CLI: {pg_host}:{pg_port}")
         return url
 
-    # Sino, usar settings (para backend local o en Railway)
+
     logger.info("Usando configuración de settings")
     return settings.DATABASE_URL
 
