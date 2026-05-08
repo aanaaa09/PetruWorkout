@@ -103,7 +103,7 @@
         </div>
 
         <!-- CTA WhatsApp -->
-        <div v-if="!edad || edad >= 20" :class="['cta-card', 'level-' + result.level]">
+        <div v-if="edad && edad >= 20" :class="['cta-card', 'level-' + result.level]">
           <p v-html="ctaText"></p>
           <a class="wa-btn" href="https://wa.me/34642662849?text=Hola, he realizado el test y quiero que revises mi caso para ver cómo puedo seguir mejorando mi fuerza y físico" target="_blank">
             Solicitar evaluación física personalizada
