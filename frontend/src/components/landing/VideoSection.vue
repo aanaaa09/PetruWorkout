@@ -42,7 +42,7 @@
           class="btn-calendly-cta"
           @click="handleCalendlyClick"
         >
-          📅 Agendar Llamada GRATIS
+          Revisar mi caso
         </a>
       </div>
 
