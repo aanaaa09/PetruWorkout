@@ -102,13 +102,16 @@
           <p>Tu mayor problema: <strong>fuerza de {{ result.weak_label }}</strong></p>
         </div>
 
-        <!-- CTA WhatsApp -->
         <div v-if="edad && edad >= 20" :class="['cta-card', 'level-' + result.level]">
-          <p v-html="ctaText"></p>
-          <a class="wa-btn" href="https://wa.me/34642662849?text=Hola, he realizado el test y quiero que revises mi caso para ver cómo puedo seguir mejorando mi fuerza y físico" target="_blank">
-            Solicitar evaluación física personalizada
-          </a>
-        </div>
+  <p v-html="ctaText"></p>
+  <a class="wa-btn" href="https://wa.me/34642662849?text=Hola, he realizado el test y quiero saber que rutina debería seguir para mejorar el nivel de fuerza" target="_blank">
+    Recibir RUTINA personalizada
+  </a>
+  <p class="wa-contact">
+    WhatsApp Petru →
+    <a href="https://wa.me/34642662849" target="_blank">+34 642 66 28 49</a>
+  </p>
+</div>
 
         <!-- Repetir test -->
         <button class="btn-reset" @click="reset">Repetir el test</button>
@@ -216,7 +219,7 @@ export default {
       const wa = 'https://wa.me/34642662849?text=FUERZA'
       const targets = { principiante: Math.min(s+38,64), novato: Math.min(s+38,80), intermedio: Math.min(s+27,95), avanzado: Math.min(s+15,98) }
       if (lv === 'principiante' || lv === 'novato' || lv === 'intermedio' || lv === 'avanzado') {
-        return `Ahora mismo estás en <strong>${s}/100</strong>. Si quieres que analicemos tu caso de forma individual y te diga exactamente qué cambiar para llegar a <strong>${targets[lv]}</strong> en menos de 90 días, solicita tu <strong>DIAGNÓSTICO FÍSICO PERSONALIZADO</strong>.`
+        return `Ahora mismo estás en <strong>${s}/100</strong>. Si quieres mejorar de nivel más rápido, aquí abajo tienes una rutina exacta adaptada a tu punto débil.`
       }
       return `La mayoría en este nivel se estanca porque entrena fuerte… pero no inteligente. Si quieres pasar a un nivel <strong>realmente completo (100/100)</strong>, solicita tu <strong>Diagnóstico físico personalizado</strong>.`
     },
@@ -657,6 +660,21 @@ export default {
   justify-content: center;
   z-index: 9999;
   padding: 1rem;
+}
+.wa-contact {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.wa-contact a {
+  color: #25D366;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.wa-contact a:hover {
+  text-decoration: underline;
 }
 .modal-content {
   background: rgba(26,26,26,0.98);
