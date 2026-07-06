@@ -5,7 +5,7 @@
       <!-- HEADER -->
       <div class="page-header">
         <span class="section-tag">TEST GRATUITO</span>
-        <h1>¿Cuál es tu nivel real de fuerza?</h1>
+        <h1>¿Cuál es tu nivel real de fuerza? Te lo digo ahora en 3min</h1>
         <p class="header-sub">Introduce tus máximos y descubre en qué punto estás en 30 segundos</p>
       </div>
 
