@@ -1,16 +1,77 @@
-let cached = null
-let cachedAt = 0
-const TTL = 60_000
-
-export async function useContent() {
-  const now = Date.now()
-  if (cached && (now - cachedAt) < TTL) return cached
-  try {
-    const r = await fetch('/content.json?v=' + now)
-    cached = await r.json()
-    cachedAt = now
-  } catch {
-    cached = cached || {}
+export function useContent() {
+  return {
+    hero: {
+      title: "Recupero tu Forma Física con más FUERZA REAL usando solo ",
+      highlight: "tu Propio Cuerpo",
+      button_text: "Únete al grupo de WhatsApp + calculadora de calorías 🎁",
+      benefits: [
+        "Más fuerza y control real de tu cuerpo (no músculo inútil)",
+        "Resultados visibles sin perder horas entrenando",
+        "Vuelves a sentirte fuerte, ágil y seguro",
+        "+3Kg de músculo en 90 días reales"
+      ],
+      calendly_button_text: "EMPEZAR AHORA"
+    },
+    video: {
+      youtube_id: "J0Smcj8H0A8",
+      section_tag: "EMPIEZA CON ESTRUCTURA ",
+      title: "Así cambia tú Físico y Fuerza cuando se hace bien",
+      cta_title: "Descubre tu Punto Débil",
+      cta_description: "Analizamos tu situación y te explico exactamente qué está fallando en tu caso y qué deberías cambiar."
+    },
+    results: {
+      section_tag: "RESULTADOS REALES",
+      title: "Transformaciones de mis clientes",
+      videos_title: "Esto es lo que opinan mis clientes",
+      videos_subtitle: "Testimonios reales de personas que han logrado sus objetivos",
+      users: [
+        {
+          id: 1,
+          name: "Esteban",
+          age: "37 años",
+          stats: "Antes 28% de grasa, ahora 12%",
+          duration: "3 Meses",
+          whatsapp_text: "Muchas gracias Petru! Me siento renovado. Como tu dices antes me costaba hasta agacharme y ahora puedo hacer sentadillas sin problema. Hasta en el trabajo me han dicho que se me nota más fuerte",
+          whatsapp_time: "17:12",
+          image_slug: "user1"
+        },
+        {
+          id: 2,
+          name: "Oscar",
+          age: "27 años",
+          stats: "Antes 26% grasa, ahora 17%",
+          duration: "6 Meses",
+          whatsapp_text: "Uff tus rutinas son mortales jajajaj. Cada día que voy a entrenar se sienten todo los músculos y eso me gusta. Es lo que necesitaba tener un paso a paso y seguirlo además que me ahorra muchisimo tiempo. Gracias Petru 💪",
+          whatsapp_time: "22:31",
+          image_slug: "user2"
+        },
+        {
+          id: 3,
+          name: "Frank",
+          age: "29 años",
+          stats: "+5kg de músculo ",
+          duration: "6 Meses",
+          whatsapp_text: " No se como lo haces, pero funciona de verdad 😂. Antes me costaba subir solo 2 kilos y contigo he subido más de 5. Muy contento con tu trabajo y además que me encata como lo organizas. Voy al parque ilusionado cada día a ver que me toca nuevo jajajaj",
+          whatsapp_time: "17:33",
+          image_slug: "user3"
+        },
+        {
+          id: 4,
+          name: "Pedro",
+          age: "63 años",
+          stats: "Antes 26% grasa, ahora 22%",
+          duration: "3 Meses",
+          whatsapp_text: "Buenas tardes Petru 😆👋 Las rutinas muy bien, me siento con más fuerzas. He conseguido hacer 12 de seguido así que muy contento. Demasiado duras las rutinas pero me gustan mucho. A seguir mejorando!",
+          whatsapp_time: "18:23",
+          image_slug: "user4"
+        }
+      ],
+      _img_version: 1774981036
+    },
+    testimonials: {
+      section_tag: "RESEÑAS",
+      title: "Lo que dicen mis clientes",
+      subtitle: "Opiniones verificadas sobre mi"
+    }
   }
-  return cached
 }

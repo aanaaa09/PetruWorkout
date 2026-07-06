@@ -44,12 +44,9 @@ export default {
   },
   data() {
     return {
-      content: null,
+      content: useContent(),
       currentLegalPage: null
     }
-  },
-  async created() {
-    this.content = await useContent()
   },
   computed: {
     currentLegalComponent() {
