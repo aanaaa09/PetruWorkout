@@ -17,16 +17,13 @@
           </li>
         </ul>
 
-        <!-- Botón Calendly (ya no abre modal, va directo a Calendly) -->
-        <a
-          href="https://calendly.com/petruworkout/reunion"
-          target="_blank"
-          rel="noopener noreferrer"
+        <!-- Botón Calendly (ahora abre modal) -->
+        <button
           class="btn-gift"
-          @click="handleCalendlyClick"
+          @click="openModal"
         >
           {{ btnText }}
-        </a>
+        </button>
       </div>
 
       <!-- Imagen escritorio -->
@@ -60,6 +57,27 @@
       <span>Descubre más</span>
       <div class="scroll-arrow">↓</div>
     </div>
+
+    <!-- Modal de Ayuda -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <h2 class="modal-title">¿Necesitas ayuda para mejorar en calistenia?</h2>
+        <div class="modal-actions">
+          <a
+            href="https://calendly.com/petruworkout/reunion"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-yes"
+            @click="handleCalendlyClick"
+          >
+            Sí
+          </a>
+          <button class="btn-no" @click="closeModal">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -71,6 +89,11 @@ export default {
   props: {
     content: { type: Object, default: null },
     loading: { type: Boolean, default: true }
+  },
+  data() {
+    return {
+      showModal: false
+    }
   },
   computed: {
     heroTitle() {
@@ -99,8 +122,15 @@ export default {
   },
   methods: {
     handleImageError(e) { e.target.style.display = 'none' },
+    openModal() {
+      this.showModal = true
+    },
+    closeModal() {
+      this.showModal = false
+    },
     handleCalendlyClick() {
       trackCalendlyClick('hero-calendly-button', 'hero-section')
+      this.showModal = false
     },
   },
 }
@@ -260,5 +290,89 @@ export default {
   .benefits-list li   { font-size: 1rem; }
   .btn-gift           { order: 2; font-size: 1rem; padding: 1.1rem 1.5rem; width: 100%; }
   .scroll-indicator   { display: none; }
+}
+
+/* ===== MODAL AYUDA ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: #1a1a1a;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  line-height: 1.3;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-yes, .btn-no {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-yes {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(6,214,160,0.3);
+}
+
+.btn-yes:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(6,214,160,0.5);
+}
+
+.btn-no {
+  background: transparent;
+  color: #a0a0a0;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.btn-no:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+  border-color: rgba(255,255,255,0.4);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
