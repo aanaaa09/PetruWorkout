@@ -35,23 +35,14 @@
       <div class="video-cta">
         <h3 class="cta-title">{{ ctaTitle }}</h3>
         <p class="cta-description">{{ ctaDescription }}</p>
-        <a
-          href="https://calendly.com/petruworkout/reunion"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
           class="btn-calendly-cta"
-          @click="handleCalendlyClick"
+          @click="$emit('open-form')"
         >
           Revisar mi caso
-        </a>
+        </button>
       </div>
 
-      <p class="video-whatsapp-line">
-        si prefieres escríbeme al
-        <a href="https://wa.link/svhddh" target="_blank" rel="noopener noreferrer" class="video-whatsapp-phone">
-          +34 642 662 849
-        </a>
-      </p>
 
     </div>
   </section>
@@ -85,10 +76,7 @@ export default {
     },
   },
   methods: {
-    loadVideo() { this.videoLoaded = true },
-    handleCalendlyClick() {
-      trackCalendlyClick('video-section-cta-button', 'video-section')
-    },
+    loadVideo() { this.videoLoaded = true }
   },
 }
 </script>
@@ -228,6 +216,9 @@ export default {
   padding: 1.25rem 2.5rem;
   background: var(--gradient-primary);
   color: white;
+  border: none;
+  outline: none;
+  cursor: pointer;
   text-decoration: none;
   border-radius: 12px;
   font-weight: 700;

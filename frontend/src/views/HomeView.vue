@@ -1,15 +1,16 @@
 <template>
   <div class="home-view">
     <SimpleNavbar />
-    <HeroSection :content="content?.hero" :loading="!content" />
-    <VideoSection :content="content?.video" :loading="!content" />
-    <ResultsSection :content="content?.results" :loading="!content" />
+    <HeroSection :content="content?.hero" :loading="!content" @open-form="showAdmissionForm = true" />
+    <VideoSection :content="content?.video" :loading="!content" @open-form="showAdmissionForm = true" />
+    <ResultsSection :content="content?.results" :loading="!content" @open-form="showAdmissionForm = true" />
     <SimpleFooter @show-legal="showLegalPage" />
     <component
       v-if="currentLegalPage"
       :is="currentLegalComponent"
       @close="currentLegalPage = null"
     />
+    <AdmissionFormModal v-if="showAdmissionForm" @close="showAdmissionForm = false" />
   </div>
 </template>
 
@@ -23,6 +24,7 @@ import SimpleFooter from '@/components/navigation/SimpleFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
 import LegalNotice from '@/components/legal/LegalNotice.vue'
+import AdmissionFormModal from '@/components/landing/AdmissionFormModal.vue'
 import { useHead } from '@unhead/vue'
 
 export default {
@@ -40,12 +42,13 @@ export default {
   },
   components: {
     SimpleNavbar, HeroSection, VideoSection, ResultsSection,
-    SimpleFooter, PrivacyPolicy, TermsConditions, LegalNotice
+    SimpleFooter, PrivacyPolicy, TermsConditions, LegalNotice, AdmissionFormModal
   },
   data() {
     return {
       content: useContent(),
-      currentLegalPage: null
+      currentLegalPage: null,
+      showAdmissionForm: false
     }
   },
   computed: {

@@ -47,15 +47,12 @@
       <!-- CTA DEBAJO DE LAS FOTOS -->
       <div class="results-cta">
         <p>El siguiente cambio puede ser el tuyo</p>
-        <a
-          href="https://calendly.com/petruworkout/reunion"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
           class="btn btn-primary"
-          @click="handleCalendlyClick"
+          @click="$emit('open-form')"
         >
           Descubre cómo mejorar →
-        </a>
+        </button>
       </div>
 
       <!-- SECCIÓN DE VIDEOS -->
@@ -241,9 +238,7 @@ export default {
     },
     onPlay(id)  { this.playingVideos = { ...this.playingVideos, [id]: true  } },
     onPause(id) { this.playingVideos = { ...this.playingVideos, [id]: false } },
-    handleCalendlyClick() {
-      trackCalendlyClick('results-cta-button', 'results-section')
-    },
+    onPause(id) { this.playingVideos = { ...this.playingVideos, [id]: false } },
     closeGiftModal() {
       this.showGiftModal = false
       this.giftEmail = ''
@@ -390,6 +385,8 @@ export default {
   background: var(--gradient-primary);
   color: white;
   padding: 1rem 2.5rem;
+  border: none;
+  outline: none;
   border-radius: 10px;
   font-weight: 700;
   text-decoration: none;

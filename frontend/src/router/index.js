@@ -66,6 +66,26 @@ const routes = [
     }
   },
   {
+    path: '/mejorar',
+    name: 'mejorar',
+    component: () => import('@/views/MejorarView.vue'),
+    meta: {
+      title: 'Mejora en Calistenia - PetruWorkout',
+      description: 'Página para menores de 18 años.',
+      robots: 'noindex, nofollow'
+    }
+  },
+  {
+    path: '/fuerza',
+    name: 'fuerza',
+    component: () => import('@/views/FuerzaView.vue'),
+    meta: {
+      title: 'Plan Fuerza Real - PetruWorkout',
+      description: 'Página para mayores de 18 años.',
+      robots: 'noindex, nofollow'
+    }
+  },
+  {
   path: '/admin',
   name: 'admin',
   component: () => import('@/components/admin/AdminView.vue'),
