@@ -331,12 +331,6 @@ export default {
   color: var(--color-accent, #06d6a0);
 }
 
-@media (max-width: 768px) {
-  .modal-title .text-green {
-    display: block;
-  }
-}
-
 .modal-desc {
   color: var(--color-text-secondary, #e0e0e0);
   font-size: 1.05rem;
@@ -640,5 +634,64 @@ export default {
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+  .modal-content {
+    border-radius: 16px;
+  }
+  .modal-header {
+    padding: 1.25rem 1rem 0.5rem;
+  }
+  .header-box {
+    padding: 1rem;
+  }
+  .modal-title {
+    font-size: 1.25rem;
+  }
+  .modal-desc {
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+  }
+  .modal-body {
+    padding: 0.5rem 1rem 1rem;
+    min-height: auto;
+  }
+  .question-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  .options-grid {
+    gap: 0.5rem;
+  }
+  .option-btn {
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+  .modal-footer {
+    padding: 1rem;
+  }
+  .btn-next, .btn-submit {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+  .contact-step .header-box {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .contact-text {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  .country-dropdown-container {
+    width: 280px;
+  }
 }
 </style>
