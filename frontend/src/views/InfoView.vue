@@ -2,19 +2,22 @@
   <div class="info-view">
 
     <!-- Navbar solo si NO hay página legal -->
-    <FullNavbar v-if="!currentLegalPage" @scroll-to="scrollToSection" />
+    <FullNavbar v-if="!currentLegalPage" @scroll-to="scrollToSection" @open-form="showAdmissionForm = true" />
 
     <!-- Contenido principal - SOLO si NO hay página legal -->
     <main v-if="!currentLegalPage">
       <AboutSection id="sobre-mi" />
-      <ServicesSection id="servicios" />
+      <ServicesSection id="servicios" @open-form="showAdmissionForm = true" />
       <GuaranteeSection />
       <TestimonialsSection id="testimonios" />
       <ContactForm id="contacto" />
     </main>
 
     <!-- Footer solo si NO hay página legal -->
-    <FullFooter v-if="!currentLegalPage" />
+    <FullFooter v-if="!currentLegalPage" @open-form="showAdmissionForm = true" />
+
+    <!-- Formulario de admisión -->
+    <AdmissionFormModal v-if="showAdmissionForm" @close="showAdmissionForm = false" />
 
     <!-- Páginas legales - Se muestran SOLO cuando están activas -->
     <div v-if="currentLegalPage" class="legal-page-container">
@@ -36,6 +39,7 @@ import FullFooter from '@/components/navigation/FullFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
 import LegalNotice from '@/components/legal/LegalNotice.vue'
+import AdmissionFormModal from '@/components/landing/AdmissionFormModal.vue'
 import { useHead } from '@unhead/vue'
 export default {
   name: 'InfoView',
@@ -64,11 +68,13 @@ export default {
     FullFooter,
     PrivacyPolicy,
     TermsConditions,
-    LegalNotice
+    LegalNotice,
+    AdmissionFormModal
   },
   data() {
     return {
-      currentLegalPage: null
+      currentLegalPage: null,
+      showAdmissionForm: false
     }
   },
 

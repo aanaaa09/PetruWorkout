@@ -104,8 +104,8 @@
 
         <div v-if="edad && edad >= 20" :class="['cta-card', 'level-' + result.level]">
   <p v-html="ctaText"></p>
-  <a class="wa-btn" href="https://wa.me/34642662849?text=Hola, he realizado el test y quiero saber que rutina debería seguir para mejorar el nivel de fuerza" target="_blank">
-    Recibir RUTINA personalizada
+  <a class="wa-btn" href="https://wa.me/34642662849?text=Hola,%20he%20realizado%20el%20test%20y%20me%20gustar%C3%ADa%20analizar%20mi%20caso%20en%20detalle" target="_blank">
+    Analizar mi caso en detalle →
   </a>
   <p class="wa-contact">
     WhatsApp Petru →
@@ -216,12 +216,18 @@ export default {
     ctaText() {
       const s = this.result?.score || 0
       const lv = this.result?.level
-      const wa = 'https://wa.me/34642662849?text=FUERZA'
-      const targets = { principiante: Math.min(s+38,64), novato: Math.min(s+38,80), intermedio: Math.min(s+27,95), avanzado: Math.min(s+15,98) }
-      if (lv === 'principiante' || lv === 'novato' || lv === 'intermedio' || lv === 'avanzado') {
-        return `Ahora mismo estás en <strong>${s}/100</strong>. Si quieres mejorar de nivel más rápido, aquí abajo tienes una rutina exacta adaptada a tu punto débil.`
+      const label = this.levelLabels[lv] || ''
+      
+      let weakText = ''
+      if (this.result?.weak_label) {
+        const wl = this.result.weak_label.toLowerCase()
+        if (wl.includes('pierna')) weakText = 'en las piernas'
+        else if (wl === 'empuje') weakText = 'en empuje'
+        else if (wl === 'tirón' || wl === 'tiron') weakText = 'en tirón'
+        else weakText = 'de ' + wl
       }
-      return `La mayoría en este nivel se estanca porque entrena fuerte… pero no inteligente. Si quieres pasar a un nivel <strong>realmente completo (100/100)</strong>, solicita tu <strong>Diagnóstico físico personalizado</strong>.`
+
+      return `Tu nivel actual es <strong>${label} (${s}/100)</strong> y tu mayor freno es la fuerza <strong>${weakText}</strong>. Esto descompensa tu rendimiento y frena tu ganancia de músculo.<br><br>Si quieres que analice tu caso concreto y corregir este estancamiento con un plan estructurado, haz clic aquí para mirarlo más a detalle y ver cómo podemos trabajar juntos uno a uno.`
     },
   },
   methods: {
@@ -245,7 +251,10 @@ export default {
     async submitAndCalculate() {
       this.modalError = ''
       if (!this.nombre.trim()) { this.modalError = 'Introduce tu nombre'; return }
-      if (!this.email || !this.email.includes('@')) { this.modalError = 'Email inválido'; return }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!this.email || !emailRegex.test(this.email)) { this.modalError = 'Por favor, introduce un email válido'; return }
+      
       if (!this.privacyAccepted) { this.modalError = 'Acepta la política de privacidad'; return }
 
       this.loading = true
@@ -265,7 +274,14 @@ export default {
           }),
         })
         const data = await res.json()
-        if (!res.ok) { this.modalError = data.detail || 'Error al registrar'; return }
+        if (!res.ok) { 
+          if (Array.isArray(data.detail)) {
+            this.modalError = 'Por favor, revisa que los datos introducidos sean correctos.'
+          } else {
+            this.modalError = data.detail || 'Error al registrar'
+          }
+          return 
+        }
         this.result = data
         this.showModal = false
         this.step = 3

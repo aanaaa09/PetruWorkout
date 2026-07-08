@@ -13,7 +13,7 @@
           @error="handleImageError"
         />
         <div class="experience-badge">
-          <span class="years">5+</span>
+          <span class="years">7+</span>
           <span class="text">años de experiencia</span>
         </div>
       </div>
@@ -31,7 +31,7 @@
         </p>
 
         <p class="about-description">
-          He ayudado a más de <strong>50 personas</strong> a transformar su físico
+          He ayudado a más de <strong>150 personas</strong> a transformar su físico
           y su vida a través de mi método de entrenamiento personalizado.
         </p>
 

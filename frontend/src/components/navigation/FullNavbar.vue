@@ -17,16 +17,13 @@
         <li><a href="#testimonios" @click.prevent="navigateTo('testimonios')">Reseñas</a></li>
         <li><a href="#contacto" @click.prevent="navigateTo('contacto')">Contacto</a></li>
         <li class="nav-cta">
-         <a
-          href="https://calendly.com/"
-          class="btn-cta"
-          @click="handleCalendlyClick"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          📅 Agendar llamada
-      </a>
-</li>
+          <button
+            class="btn-cta"
+            @click="handleFormClick"
+          >
+            ANALIZAR MI CASO
+          </button>
+        </li>
       </ul>
     </div>
   </nav>
@@ -62,9 +59,9 @@ export default {
       this.menuOpen = false
       this.$emit('scroll-to', section)
     },
-    handleCalendlyClick() {
+    handleFormClick() {
       this.menuOpen = false
-      trackCalendlyClick('full-navbar-cta-button', 'full-navbar')
+      this.$emit('open-form')
     },
     handleWhatsAppClick() {
       this.menuOpen = false
@@ -171,6 +168,8 @@ export default {
   box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
   transition: all 0.3s ease !important;
   white-space: nowrap;
+  border: none;
+  cursor: pointer;
 }
 
 .btn-cta::after {

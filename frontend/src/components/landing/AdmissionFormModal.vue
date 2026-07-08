@@ -218,7 +218,24 @@ export default {
       )
     }
   },
+  mounted() {
+    this.detectCountry()
+  },
   methods: {
+    async detectCountry() {
+      try {
+        const response = await fetch('https://get.geojs.io/v1/ip/country.json')
+        const data = await response.json()
+        if (data && data.country) {
+          const found = this.countries.find(c => c.code === data.country)
+          if (found) {
+            this.answers.prefix = found.dialCode
+          }
+        }
+      } catch (e) {
+        console.warn('Could not auto-detect country for phone prefix')
+      }
+    },
     toggleCountryDropdown() {
       this.showCountryDropdown = !this.showCountryDropdown
       if (this.showCountryDropdown) {
@@ -247,11 +264,50 @@ export default {
     prevStep() {
       if (this.step > 1) this.step--
     },
-    submitForm() {
-      // Mock envio de datos (luego se integrará con Telegram)
-      console.log('Datos del formulario enviados:', this.answers)
+    async submitForm() {
+      // 1. Lógica de envío a Telegram (solo si es +18)
+      if (this.answers.age !== 'Menos de 18') {
+        const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN
+        const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID
 
-      // Lógica de redirección
+        if (botToken && chatId) {
+          const cleanPhoneStr = (this.answers.prefix + this.answers.phone).replace(/\D/g, '')
+          const waLink = `https://wa.me/${cleanPhoneStr}`
+          
+          const message = `
+🚨 <b>NUEVO POTENCIAL CLIENTE</b> 🚨
+
+👤 <b>Nombre:</b> ${this.answers.name}
+📱 <b>Teléfono:</b> ${this.answers.prefix}${this.answers.phone}
+🎂 <b>Edad:</b> ${this.answers.age}
+
+📊 <b>Nivel:</b> ${this.answers.level}
+🎯 <b>Objetivo:</b> ${this.answers.goal}
+🛑 <b>Freno:</b> ${this.answers.block}
+⚡ <b>Compromiso:</b> ${this.answers.solution}
+
+${waLink}
+          `
+
+          try {
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+                parse_mode: 'HTML'
+              })
+            })
+          } catch (error) {
+            console.error('Error enviando a Telegram:', error)
+          }
+        } else {
+          console.warn('Faltan las credenciales de Telegram en el archivo .env')
+        }
+      }
+
+      // 2. Lógica de redirección según la edad
       if (this.answers.age === 'Menos de 18') {
         this.router.push('/mejorar')
       } else {

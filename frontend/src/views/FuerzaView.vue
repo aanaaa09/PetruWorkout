@@ -41,6 +41,12 @@
         </p>
       </div>
 
+      <div class="back-link-wrapper">
+        <a href="/#resultados" class="btn-back-home">
+          ← Quiero ver más casos de éxito en la página principal
+        </a>
+      </div>
+
     </div>
   </div>
 </template>
@@ -185,6 +191,31 @@ export default {
   line-height: 1.5;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.back-link-wrapper {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.btn-back-home {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary, #e0e0e0);
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-back-home:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {

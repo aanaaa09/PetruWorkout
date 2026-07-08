@@ -4,7 +4,7 @@
     <HeroSection :content="content?.hero" :loading="!content" @open-form="showAdmissionForm = true" />
     <VideoSection :content="content?.video" :loading="!content" @open-form="showAdmissionForm = true" />
     <ResultsSection :content="content?.results" :loading="!content" @open-form="showAdmissionForm = true" />
-    <SimpleFooter @show-legal="showLegalPage" />
+    <SimpleFooter @open-form="showAdmissionForm = true" @show-legal="showLegalPage" />
     <component
       v-if="currentLegalPage"
       :is="currentLegalComponent"

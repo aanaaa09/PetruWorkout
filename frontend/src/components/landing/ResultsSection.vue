@@ -108,17 +108,16 @@
         </div>
       </div>
 
-      <!-- SECCIÓN REGALO -->
+      <!-- SECCIÓN TEST FUERZA -->
       <div class="gift-cta-section">
         <div class="gift-cta-inner">
-          <div class="gift-icon-wrap">🎁</div>
-          <h3 class="gift-title">Si has llegado hasta aquí, tienes un regalo</h3>
+          <h3 class="gift-title">¿Quieres saber en qué punto estás realmente? 📊</h3>
           <p class="gift-subtitle">
-            Únete al grupo privado de WhatsApp y accede a la calculadora de calorías personalizada
+            Introduce tus marcas actuales en el Test de Fuerza y descubre tus desequilibrios musculares en menos de 30 segundos.
           </p>
-          <button class="btn-gift" @click="showGiftModal = true">
-            Únete al grupo + calculadora de calorías 🎁
-          </button>
+          <router-link to="/testfuerza" class="btn-gift">
+            Calcular mi NIVEL
+          </router-link>
         </div>
       </div>
 
@@ -453,14 +452,7 @@ export default {
   align-items: center;
   gap: 1.25rem;
 }
-.gift-icon-wrap {
-  font-size: 3.5rem;
-  animation: giftBounce 2.5s ease-in-out infinite;
-}
-@keyframes giftBounce {
-  0%, 100% { transform: translateY(0) rotate(-5deg); }
-  50%       { transform: translateY(-10px) rotate(5deg); }
-}
+
 .gift-title {
   font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 900;
@@ -477,6 +469,8 @@ export default {
   line-height: 1.6;
 }
 .btn-gift {
+  display: inline-block;
+  text-decoration: none;
   background: var(--gradient-primary);
   color: white;
   padding: 1.2rem 2.5rem;

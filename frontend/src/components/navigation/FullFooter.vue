@@ -58,16 +58,6 @@
           © {{ currentYear }} PetruWorkout. Todos los derechos reservados.
         </p>
 
-        <p class="credits">
-          Desarrollado por
-          <a
-            href="https://www.linkedin.com/in/ana-seseña-ferrero-4290891bb"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Ana Seseña
-          </a>
-        </p>
       </div>
     </div>
   </footer>
@@ -185,22 +175,10 @@ export default {
   gap: 1rem;
 }
 
-.copyright,
-.credits {
+.copyright {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0;
-}
-
-.credits a {
-  color: var(--color-accent);
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.credits a:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 968px) {

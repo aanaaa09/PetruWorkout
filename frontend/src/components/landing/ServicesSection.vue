@@ -100,16 +100,13 @@
 
       <div class="services-cta">
         <h3>¿Listo para empezar tu transformación?</h3>
-        <p>Agenda una llamada gratuita de 20 minutos y te cuento cómo puedo ayudarte</p>
-        <a
-          href="https://calendly.com/petruworkout/reunion"
-          target="_blank"
-          rel="noopener noreferrer"
+        <p>Rellena el formulario para que pueda analizar tu caso y te diga cuál es el siguiente paso</p>
+        <button
           class="btn btn-primary"
-          @click="handleCalendlyClick"
+          @click="$emit('open-form')"
         >
-          📅 Agendar Llamada Gratuita
-        </a>
+          ANALIZAR MI CASO
+        </button>
       </div>
     </div>
   </section>
@@ -348,6 +345,8 @@ export default {
   font-size: 1.1rem;
   transition: all 0.3s ease;
   box-shadow: 0 8px 30px rgba(6, 214, 160, 0.4);
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
