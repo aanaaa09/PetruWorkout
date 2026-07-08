@@ -33,12 +33,8 @@
         </p>
         
         <a href="https://calendly.com/petruworkout/reunion" target="_blank" rel="noopener noreferrer" class="btn-calendly">
-          🗓️ Reservar mi valoración de 10 min
+          🗓️ Reservar mi valoración
         </a>
-        
-        <p class="cta-note">
-          Si prefieres no agendar ahora, no te preocupes, revisaré tu formulario y te escribiré por WhatsApp y lo vemos más a detalle por allí
-        </p>
       </div>
 
       <div class="back-link-wrapper">
