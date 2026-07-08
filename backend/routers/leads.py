@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 import logging
 import hashlib
+import os
+import requests
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict
@@ -19,6 +21,15 @@ router = APIRouter(prefix="/api/lead", tags=["leads"])
 
 class LeadRegistrationRequest(BaseModel):
     email: EmailStr
+
+class DiagnosisRequest(BaseModel):
+    name: str
+    phone: str
+    age: str
+    level: str
+    goal: str
+    block: str
+    solution: str
 
 
 # ── Rate limiter (responsabilidad HTTP, se queda en el router) ────
@@ -93,3 +104,48 @@ def register_lead(
         logger.error(f"Error registrando lead {data.email}: {e}")
         import traceback; traceback.print_exc()
         raise HTTPException(status_code=500, detail="Error al registrar el email")
+
+@router.post("/diagnosis")
+def process_diagnosis(data: DiagnosisRequest):
+    """
+    Envía los datos del diagnóstico a Telegram.
+    """
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    
+    if not bot_token or not chat_id:
+        logger.warning("Faltan las credenciales de Telegram en las variables de entorno.")
+        return {"status": "success", "message": "Datos recibidos (no enviados a Telegram por falta de credenciales)"}
+        
+    import re
+    clean_phone = re.sub(r'\D', '', data.phone)
+    wa_link = f"https://wa.me/{clean_phone}"
+    
+    message = f"""
+🚨 <b>NUEVO POTENCIAL CLIENTE</b> 🚨
+
+👤 <b>Nombre:</b> {data.name}
+📱 <b>Teléfono:</b> {data.phone}
+🎂 <b>Edad:</b> {data.age}
+
+📊 <b>Nivel:</b> {data.level}
+🎯 <b>Objetivo:</b> {data.goal}
+🛑 <b>Freno:</b> {data.block}
+⚡ <b>Compromiso:</b> {data.solution}
+
+{wa_link}
+    """
+    
+    try:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "HTML"
+        }
+        res = requests.post(url, json=payload)
+        res.raise_for_status()
+        return {"status": "success"}
+    except Exception as e:
+        logger.error(f"Error enviando mensaje a Telegram: {e}")
+        raise HTTPException(status_code=500, detail="Error al procesar el diagnóstico")

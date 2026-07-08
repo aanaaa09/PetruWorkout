@@ -103,7 +103,7 @@
         <p>Rellena el formulario para que pueda analizar tu caso y te diga cuál es el siguiente paso</p>
         <button
           class="btn btn-primary"
-          @click="$emit('open-form')"
+          @click="handleCtaClick"
         >
           ANALIZAR MI CASO
         </button>
@@ -117,8 +117,9 @@ import { trackCalendlyClick } from '@/utils/tracking.js'
 export default {
   name: 'ServicesSection',
   methods: {
-    handleCalendlyClick() {
+    handleCtaClick() {
       trackCalendlyClick('services-cta-button', 'services-section')
+      this.$emit('open-form')
     }
   }
 }

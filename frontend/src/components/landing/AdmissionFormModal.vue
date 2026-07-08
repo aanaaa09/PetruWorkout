@@ -265,45 +265,24 @@ export default {
       if (this.step > 1) this.step--
     },
     async submitForm() {
-      // 1. Lógica de envío a Telegram (solo si es +18)
+      // 1. Lógica de envío al backend (solo si es +18)
       if (this.answers.age !== 'Menos de 18') {
-        const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN
-        const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID
-
-        if (botToken && chatId) {
-          const cleanPhoneStr = (this.answers.prefix + this.answers.phone).replace(/\D/g, '')
-          const waLink = `https://wa.me/${cleanPhoneStr}`
-          
-          const message = `
-🚨 <b>NUEVO POTENCIAL CLIENTE</b> 🚨
-
-👤 <b>Nombre:</b> ${this.answers.name}
-📱 <b>Teléfono:</b> ${this.answers.prefix}${this.answers.phone}
-🎂 <b>Edad:</b> ${this.answers.age}
-
-📊 <b>Nivel:</b> ${this.answers.level}
-🎯 <b>Objetivo:</b> ${this.answers.goal}
-🛑 <b>Freno:</b> ${this.answers.block}
-⚡ <b>Compromiso:</b> ${this.answers.solution}
-
-${waLink}
-          `
-
-          try {
-            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: chatId,
-                text: message,
-                parse_mode: 'HTML'
-              })
+        try {
+          await fetch('https://petruworkout-production.up.railway.app/api/lead/diagnosis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: this.answers.name,
+              phone: this.answers.prefix + this.answers.phone,
+              age: this.answers.age,
+              level: this.answers.level,
+              goal: this.answers.goal,
+              block: this.answers.block,
+              solution: this.answers.solution
             })
-          } catch (error) {
-            console.error('Error enviando a Telegram:', error)
-          }
-        } else {
-          console.warn('Faltan las credenciales de Telegram en el archivo .env')
+          })
+        } catch (error) {
+          console.error('Error enviando datos al servidor:', error)
         }
       }
 

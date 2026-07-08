@@ -61,6 +61,7 @@ export default {
     },
     handleFormClick() {
       this.menuOpen = false
+      trackCalendlyClick('full-navbar-cta-button', 'full-navbar')
       this.$emit('open-form')
     },
     handleWhatsAppClick() {
