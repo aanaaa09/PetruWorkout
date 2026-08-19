@@ -227,7 +227,7 @@ export default {
         else weakText = 'de ' + wl
       }
 
-      return `Tu nivel actual es <strong>${label} (${s}/100)</strong> y tu mayor freno es la fuerza <strong>${weakText}</strong>. Esto descompensa tu rendimiento y frena tu ganancia de músculo.<br><br>Si quieres que analice tu caso concreto y corregir este estancamiento con un plan estructurado, haz clic aquí para mirarlo más a detalle y ver cómo podemos trabajar juntos uno a uno.`
+      return `Tu nivel actual es <strong>${label} (${s}/100)</strong> y tu mayor freno es la fuerza <strong>${weakText}</strong>. Esto descompensa tu rendimiento y frena tu ganancia de músculo.<br><br>Si quieres un plan más detallado de tu caso con más información para saber <strong>cómo seguir mejorando</strong>, haz clic aquí abajo y lo miramos.`
     },
   },
   methods: {
