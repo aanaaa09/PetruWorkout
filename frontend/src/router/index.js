@@ -94,6 +94,22 @@ const routes = [
     description: 'Panel de control administrativo',
     robots: 'noindex, nofollow'  //Evita que Google indexe esto
   }
+},
+{
+  path: '/yt/:videoId',
+  name: 'youtube-tracking',
+  beforeEnter: (to, from, next) => {
+    if (typeof window !== 'undefined') {
+      const videoId = to.params.videoId;
+      // Guardamos la fuente exacta (ej: yt-espalda)
+      sessionStorage.setItem('petru_traffic_source', 'yt-' + videoId);
+    }
+    // Redirigimos a la home automáticamente
+    next('/');
+  },
+  meta: {
+    robots: 'noindex, nofollow'
+  }
 }
 ]
 

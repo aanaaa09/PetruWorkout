@@ -253,6 +253,55 @@
         </div>
       </div>
 
+      <!-- FILA NUEVA · CAMPAÑAS PERSONALIZADAS (YOUTUBE ETC) -->
+      <div class="row">
+        <div class="card">
+          <div class="card-head">
+            <h3>🔗 Enlaces Personalizados / Campañas</h3>
+            <span class="tag">{{ periodLabel }}</span>
+          </div>
+          <div class="campaign-table-wrap">
+            <table class="campaign-table">
+              <thead>
+                <tr>
+                  <th style="text-align: left;">CAMPAÑA / VIDEO</th>
+                  <th>AUDIENCIA</th>
+                  <th style="text-align: right;">CLICS</th>
+                  <th style="text-align: right;">AGENDADAS</th>
+                  <th style="text-align: right;">CR %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="camp in customCampaigns" :key="camp.key">
+                  <td class="camp-title">
+                    <div class="camp-title-inner">
+                      <span class="camp-icon">▶️</span>
+                      <div class="camp-text">
+                        <span class="camp-name">{{ camp.label }}</span>
+                        <span class="camp-link">petrucalistenia.com/yt/{{ camp.slug }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="camp-audience">
+                    <div class="aud-pill">
+                      <span>Desconocido</span>
+                    </div>
+                  </td>
+                  <td class="camp-num">{{ fmt(camp.visits) }}</td>
+                  <td class="camp-num success">{{ fmt(camp.bookings) }}</td>
+                  <td class="camp-cr">
+                    <span class="cr-badge">{{ camp.pct.toFixed(1) }}%</span>
+                  </td>
+                </tr>
+                <tr v-if="customCampaigns.length === 0">
+                  <td colspan="5" class="empty-sources">No hay campañas personalizadas en este período</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- FILA 4 · TENDENCIA TEMPORAL -->
       <div class="row">
         <div class="card trend-card">
@@ -372,6 +421,23 @@ export default {
           visits: s.visits||0, pct: ((s.visits||0)/total)*100,
         }))
         .sort((a,b) => b.visits - a.visits)
+    },
+    customCampaigns() {
+      return this.sourcesRaw
+        .filter(s => s.source.startsWith('yt-'))
+        .map(s => {
+          const slug = s.source.replace('yt-', '')
+          const label = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          return {
+            key: s.source,
+            slug: slug,
+            label: label,
+            visits: s.visits || 0,
+            bookings: s.bookings || 0,
+            pct: (s.conv_rate || 0) * 100,
+          }
+        })
+        .sort((a, b) => b.visits - a.visits)
     },
     buttonDistribution() {
       const total = this.buttonsRaw.reduce((s, x) => s + (x.clicks||0), 0) || 1
@@ -793,6 +859,25 @@ export default {
   animation: spin .8s linear infinite; flex-shrink: 0;
 }
 .chart-wrap { width: 100%; min-height: 280px; }
+
+/* Tabla de campañas */
+.campaign-table-wrap { overflow-x: auto; margin-top: .5rem; }
+.campaign-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.campaign-table th {
+  font-size: .75rem; color: rgba(255,255,255,.4); text-transform: uppercase;
+  letter-spacing: .06em; font-weight: 600; padding: .75rem 1rem; border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.campaign-table td { padding: 1.2rem 1rem; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+.camp-title-inner { display: flex; align-items: center; gap: 1rem; }
+.camp-icon { font-size: 1.5rem; background: rgba(255,0,0,.15); width: 45px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.camp-text { display: flex; flex-direction: column; gap: .2rem; }
+.camp-name { font-size: .95rem; font-weight: 600; color: white; }
+.camp-link { font-size: .75rem; color: rgba(255,255,255,.35); }
+.aud-pill { display: inline-flex; align-items: center; background: rgba(255,255,255,.05); padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; color: rgba(255,255,255,.5); }
+.camp-num { font-size: .95rem; font-weight: 600; color: white; text-align: right; }
+.camp-num.success { color: var(--color-accent); }
+.camp-cr { text-align: right; }
+.cr-badge { display: inline-block; background: rgba(155,93,229,.15); color: #9b5de5; font-size: .75rem; font-weight: 700; padding: .25rem .6rem; border-radius: 6px; }
 
 /* Responsive */
 @media (max-width: 1200px) {

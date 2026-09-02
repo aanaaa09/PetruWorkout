@@ -53,13 +53,19 @@ def get_date_range(
 
 def _apply_source_filter(query, model, source: Optional[str]):
     """
-    Restringe la query a KNOWN_SOURCES.
-    Si se pasa una fuente concreta (y es conocida) filtra solo por ella.
-    Cualquier fuente no reconocida (direct, internal, unknown…) queda siempre excluida.
+    Restringe la query a KNOWN_SOURCES o campañas personalizadas yt-*.
+    Si se pasa una fuente concreta, filtra solo por ella.
+    Cualquier fuente genérica no reconocida (direct, internal, unknown…) queda excluida.
     """
-    if source and source in KNOWN_SOURCES:
-        return query.filter(model.traffic_source == source)
-    return query.filter(model.traffic_source.in_(KNOWN_SOURCES))
+    if source:
+        if source in KNOWN_SOURCES or source.startswith("yt-"):
+            return query.filter(model.traffic_source == source)
+        return query.filter(model.traffic_source.in_(KNOWN_SOURCES))
+    
+    return query.filter(
+        (model.traffic_source.in_(KNOWN_SOURCES)) |
+        (model.traffic_source.like("yt-%"))
+    )
 
 
 def _apply_button_filter(query, button: Optional[str]):
