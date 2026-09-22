@@ -13,7 +13,7 @@
           class="btn btn-primary"
           @click="$emit('open-form')"
         >
-          ANALIZAR MI CASO
+          DESCUBRIR MI PUNTO DÉBIL
         </button>
         <router-link to="/info" class="btn btn-secondary" @click="scrollToTop">
           📋 Más Información

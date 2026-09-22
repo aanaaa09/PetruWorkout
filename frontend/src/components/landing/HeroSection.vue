@@ -6,9 +6,7 @@
 
     <div class="hero-content">
       <div class="hero-text">
-        <h1 class="hero-title">
-          {{ heroTitle }}<span class="highlight"> {{ heroHighlight }}</span>
-        </h1>
+        <h1 class="hero-title" v-html="heroTitle"></h1>
 
         <ul class="benefits-list">
           <li v-for="(benefit, i) in benefits" :key="i">
@@ -151,7 +149,7 @@ export default {
   margin: 0;
 }
 
-.hero-title .highlight { color: var(--color-accent); }
+:deep(.hero-title .highlight) { color: var(--color-accent); }
 
 .benefits-list {
   list-style: none;
@@ -251,9 +249,9 @@ export default {
   .hero-image-mobile  { display: flex; order: 1; justify-content: center; }
   .hero-image img     { max-width: 300px; width: 100%; height: auto; }
   .hero-title         { font-size: 1.75rem; }
-  .benefits-list      { order: 3; align-items: flex-start; width: 100%; text-align: left; gap: 0.875rem; }
+  .benefits-list      { order: 2; align-items: flex-start; width: 100%; text-align: left; gap: 0.875rem; }
   .benefits-list li   { font-size: 1rem; }
-  .btn-gift           { order: 2; font-size: 1rem; padding: 1.1rem 1.5rem; width: 100%; }
+  .btn-gift           { order: 3; font-size: 1rem; padding: 1.1rem 1.5rem; width: 100%; }
   .scroll-indicator   { display: none; }
 }
 </style>

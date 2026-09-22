@@ -51,7 +51,7 @@
           class="btn btn-primary"
           @click="$emit('open-form')"
         >
-          Descubre cómo mejorar →
+          DESCUBRIR MI PUNTO DÉBIL
         </button>
       </div>
 

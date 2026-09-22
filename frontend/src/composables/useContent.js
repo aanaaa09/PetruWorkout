@@ -1,23 +1,23 @@
 export function useContent() {
   return {
     hero: {
-      title: "Recupero tu Forma Física con más FUERZA REAL usando solo ",
-      highlight: "tu Propio Cuerpo",
+      title: 'Descubre tu Punto Débil y Consigue más <span class="highlight">FUERZA REAL</span>',
+      highlight: '',
       button_text: "Únete al grupo de WhatsApp + calculadora de calorías 🎁",
       benefits: [
-        "Más fuerza y control real de tu cuerpo (no músculo inútil)",
-        "Resultados visibles sin perder horas entrenando",
-        "Vuelves a sentirte fuerte, ágil y seguro",
-        "+3Kg de músculo en 90 días reales"
+        "Responde unas preguntas rápidas (30 seg) sobre tu nivel y tu objetivo",
+        "Te digo exactamente qué te está fallando ahora mismo",
+        "Recibes tu paso a paso personalizado, no una rutina genérica",
+        "Gratis, sin compromiso"
       ],
-      calendly_button_text: "EMPEZAR AHORA"
+      calendly_button_text: "DESCUBRIR MI PUNTO DÉBIL"
     },
     video: {
       youtube_id: "J0Smcj8H0A8",
-      section_tag: "EMPIEZA CON ESTRUCTURA ",
-      title: "Así cambia tú Físico y Fuerza cuando se hace bien",
-      cta_title: "Descubre tu Punto Débil",
-      cta_description: "Analizamos tu situación y te explico exactamente qué está fallando en tu caso y qué deberías cambiar."
+      section_tag: "EMPIEZA CON ESTRUCTURA",
+      title: "Esto es lo que pasa cuando sigues el paso a paso correcto para tu punto débil",
+      client_result: "Esteban tenía Fuerza pero seguía igual sin avanzar. Esto es lo que cambió en 3 meses siguiendo su plan.",
+      cta_button: "DESCUBRIR MI PUNTO DÉBIL"
     },
     results: {
       section_tag: "RESULTADOS REALES",
