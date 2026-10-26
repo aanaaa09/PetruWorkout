@@ -2,8 +2,9 @@
   <div class="home-view">
     <SimpleNavbar />
     <HeroSection :content="content?.hero" :loading="!content" @open-form="showAdmissionForm = true" />
-    <VideoSection :content="content?.video" :loading="!content" @open-form="showAdmissionForm = true" />
+    <HowItWorks />
     <ResultsSection :content="content?.results" :loading="!content" @open-form="showAdmissionForm = true" />
+    <FaqSection />
     <SimpleFooter @open-form="showAdmissionForm = true" @show-legal="showLegalPage" />
     <component
       v-if="currentLegalPage"
@@ -18,8 +19,9 @@
 import { useContent } from '@/composables/useContent.js'
 import SimpleNavbar from '@/components/navigation/SimpleNavbar.vue'
 import HeroSection from '@/components/landing/HeroSection.vue'
-import VideoSection from '@/components/landing/VideoSection.vue'
 import ResultsSection from '@/components/landing/ResultsSection.vue'
+import HowItWorks from '@/components/landing/HowItWorks.vue'
+import FaqSection from '@/components/landing/FaqSection.vue'
 import SimpleFooter from '@/components/navigation/SimpleFooter.vue'
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy.vue'
 import TermsConditions from '@/components/legal/TermsConditions.vue'
@@ -36,12 +38,14 @@ export default {
         { name: 'description', content: 'Entrenador personal de calistenia en Toledo, Madrid y online.' },
         { property: 'og:title', content: 'PetruWorkout - Entrenador Personal de Calistenia' },
         { property: 'og:url', content: 'https://petrucalistenia.com/' },
+        { property: 'og:image', content: 'https://petrucalistenia.com/og-image.jpg' },
+        { name: 'twitter:image', content: 'https://petrucalistenia.com/og-image.jpg' },
         { name: 'robots', content: 'index, follow' },
       ]
     })
   },
   components: {
-    SimpleNavbar, HeroSection, VideoSection, ResultsSection,
+    SimpleNavbar, HeroSection, ResultsSection, HowItWorks, FaqSection,
     SimpleFooter, PrivacyPolicy, TermsConditions, LegalNotice, AdmissionFormModal
   },
   data() {

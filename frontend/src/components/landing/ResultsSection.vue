@@ -34,12 +34,6 @@
             <p v-if="user.stats" class="result-stats-text">{{ user.stats }}</p>
             <p v-if="user.duration" class="result-duration">{{ user.duration }}</p>
 
-            <div v-if="user.whatsapp_text" class="whatsapp-message">
-              <div class="whatsapp-bubble">
-                <p class="whatsapp-text">{{ user.whatsapp_text }}</p>
-                <span class="whatsapp-time">{{ user.whatsapp_time || '' }}</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -47,12 +41,7 @@
       <!-- CTA DEBAJO DE LAS FOTOS -->
       <div class="results-cta">
         <p>El siguiente cambio puede ser el tuyo</p>
-        <button
-          class="btn btn-primary"
-          @click="$emit('open-form')"
-        >
-          DESCUBRIR MI PUNTO DÉBIL
-        </button>
+        <CtaButton @click="$emit('open-form')">Descubre qué te frena</CtaButton>
       </div>
 
       <!-- SECCIÓN DE VIDEOS -->
@@ -87,6 +76,13 @@
                   <polygon points="21,16 39,26 21,36" fill="white"/>
                 </svg>
               </div>
+
+              <!-- Portada: quién habla y un detalle. Solo se muestra si hay datos -->
+              <div v-if="video.name" class="video-caption">
+                <strong class="video-name">{{ video.name }}</strong>
+                <span v-if="video.detail" class="video-detail">{{ video.detail }}</span>
+                <em v-if="video.quote" class="video-quote">“{{ video.quote }}”</em>
+              </div>
             </div>
 
             <video
@@ -106,18 +102,9 @@
             </video>
           </div>
         </div>
-      </div>
 
-      <!-- SECCIÓN TEST FUERZA -->
-      <div class="gift-cta-section">
-        <div class="gift-cta-inner">
-          <h3 class="gift-title">¿Quieres saber en qué punto estás realmente? 📊</h3>
-          <p class="gift-subtitle">
-            Introduce tus marcas actuales en el Test de Fuerza y descubre tus desequilibrios musculares en menos de 30 segundos.
-          </p>
-          <router-link to="/testfuerza" class="btn-gift">
-            Calcular mi NIVEL
-          </router-link>
+        <div class="videos-cta">
+          <CtaButton @click="$emit('open-form')">Descubre qué te frena</CtaButton>
         </div>
       </div>
 
@@ -185,9 +172,11 @@
 </template>
 <script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
+import CtaButton from '@/components/landing/CtaButton.vue'
 
 export default {
   name: 'ResultsSection',
+  components: { CtaButton },
   props: {
     content: { type: Object, default: null },
     loading: { type: Boolean, default: true }
@@ -195,9 +184,10 @@ export default {
   data() {
     return {
       videoTestimonials: [
-        { id: 1, src: '/videos/video1.mp4', poster: '/videos/thumbs/thumb1.webp', posterSmall: '/videos/thumbs/thumb1-small.webp' },
-        { id: 2, src: '/videos/video2.mp4', poster: '/videos/thumbs/thumb2.webp', posterSmall: '/videos/thumbs/thumb2-small.webp' },
-        { id: 3, src: '/videos/video3.mp4', poster: '/videos/thumbs/thumb3.webp', posterSmall: '/videos/thumbs/thumb3-small.webp' },
+        // name / detail / quote: se muestran sobre la portada cuando están rellenos
+        { id: 1, src: '/videos/video1.mp4', poster: '/videos/thumbs/thumb1.webp', posterSmall: '/videos/thumbs/thumb1-small.webp', name: 'Jordi, 53 años', detail: 'Más fuerza funcional en su día a día', quote: '' },
+        { id: 2, src: '/videos/video2.mp4', poster: '/videos/thumbs/thumb2.webp', posterSmall: '/videos/thumbs/thumb2-small.webp', name: 'Pedro, 34 años', detail: 'Más resistencia y funcionalidad', quote: '' },
+        { id: 3, src: '/videos/video3.mp4', poster: '/videos/thumbs/thumb3.webp', posterSmall: '/videos/thumbs/thumb3-small.webp', name: 'Chris, 29 años', detail: 'Más control de su propio cuerpo', quote: '' },
       ],
       playingVideos: {},
       showGiftModal: false,
@@ -341,32 +331,13 @@ export default {
 }
 
 .result-images { padding: 1.5rem; background: rgba(0, 0, 0, 0.2); }
-.result-images img { width: 100%; height: auto; border-radius: 10px; object-fit: cover; }
+/* mismo formato para todas las fotos aunque alguna venga más cuadrada */
+.result-images img { width: 100%; height: auto; aspect-ratio: 660 / 673; border-radius: 10px; object-fit: cover; }
 
 .result-info { padding: 1.5rem; }
 .result-info h4 { font-size: 1.5rem; color: white; margin: 0 0 0.5rem 0; font-weight: 700; }
 .result-stats-text { font-size: 1rem; color: var(--color-accent); font-weight: 600; margin: 0 0 0.25rem 0; }
-.result-duration { font-size: 0.9rem; color: var(--color-text-muted); margin: 0 0 1rem 0; font-weight: 500; }
-
-.whatsapp-message { margin-top: 1rem; }
-.whatsapp-bubble {
-  background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-.whatsapp-bubble::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -8px;
-  width: 0; height: 0;
-  border-style: solid;
-  border-width: 0 8px 8px 0;
-  border-color: transparent #075E54 transparent transparent;
-}
-.whatsapp-text { color: #ffffff; font-size: 0.9rem; line-height: 1.5; margin: 0 0 0.5rem 0; word-wrap: break-word; }
-.whatsapp-time { display: block; text-align: right; font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+.result-duration { font-size: 0.9rem; color: var(--color-text-muted); margin: 0; font-weight: 500; }
 
 /* CTA debajo de fotos */
 .results-cta {
@@ -405,6 +376,7 @@ export default {
 .videos-header p  { font-size: 1.1rem; color: var(--color-text-muted); margin: 0; }
 
 .videos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.videos-cta { display: flex; justify-content: center; margin-top: 3rem; }
 
 .video-wrapper {
   border-radius: 12px;
@@ -432,6 +404,16 @@ export default {
   cursor: pointer; background: rgba(0, 0, 0, 0.15); transition: background 0.2s;
 }
 .video-play-overlay:hover { background: rgba(0, 0, 0, 0.35); }
+.video-caption {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 4rem 1.1rem 1.1rem;
+  text-align: left; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.82) 70%);
+}
+.video-name { color: white; font-size: 1.25rem; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+.video-detail { color: var(--color-accent); font-size: 1rem; font-weight: 700; }
+.video-quote { color: #ffffff; font-size: 0.95rem; font-style: italic; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
 .play-icon-wrap { position: relative; z-index: 3; transition: transform 0.2s; }
 .video-play-overlay:hover .play-icon-wrap { transform: scale(1.12); }
 
@@ -566,10 +548,18 @@ export default {
 @media (max-width: 640px) {
   .results-section { padding: 4rem 1rem; }
   .section-title   { font-size: 2rem; }
-  .result-info h4  { font-size: 1.3rem; }
-  .whatsapp-text   { font-size: 0.85rem; }
+  /* fotos de 2 en 2 en móvil para acortar la página */
+  .results-grid    { grid-template-columns: 1fr 1fr; gap: 0.75rem; max-width: none; }
+  .section-header  { margin-bottom: 2rem; }
+  .result-card:hover { transform: none; }
+  .result-images   { padding: 0.5rem; }
+  .result-images img { border-radius: 8px; }
+  .result-info     { padding: 0.75rem 0.75rem 1rem; }
+  .result-info h4  { font-size: 1rem; margin-bottom: 0.35rem; }
+  .result-stats-text { font-size: 0.85rem; }
+  .result-duration { font-size: 0.8rem; }
   .videos-header h3 { font-size: 1.5rem; }
-  .results-cta     { padding: 2rem 1.5rem; }
+  .results-cta     { padding: 1.5rem 1rem; margin-top: 2rem; }
   .results-cta p   { font-size: 1.25rem; }
   .gift-title      { font-size: 1.5rem; }
   .btn-gift        { width: 100%; font-size: 1rem; }

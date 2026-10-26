@@ -6,15 +6,11 @@
           <span class="logo-accent">PETRU</span>WORKOUT
         </h3>
         <p>Entrenador personal especializado en calistenia y transformación física.</p>
+        <p class="footer-where">Entrenador de calistenia en Toledo, Madrid y online.</p>
       </div>
 
       <div class="footer-actions">
-      <button
-          class="btn btn-primary"
-          @click="$emit('open-form')"
-        >
-          DESCUBRIR MI PUNTO DÉBIL
-        </button>
+      <CtaButton @click="$emit('open-form')">Descubre qué te frena</CtaButton>
         <router-link to="/info" class="btn btn-secondary" @click="scrollToTop">
           📋 Más Información
         </router-link>
@@ -45,9 +41,11 @@
 
 <script>
 import { trackCalendlyClick } from '@/utils/tracking.js'
+import CtaButton from '@/components/landing/CtaButton.vue'
 
 export default {
   name: 'SimpleFooter',
+  components: { CtaButton },
   computed: {
     currentYear() {
       return new Date().getFullYear()
@@ -103,6 +101,11 @@ export default {
   margin: 0;
   max-width: 500px;
   margin: 0 auto;
+}
+
+.footer-brand .footer-where {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
 }
 
 .footer-actions {

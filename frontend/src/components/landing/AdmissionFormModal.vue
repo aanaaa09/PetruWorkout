@@ -129,7 +129,7 @@
       <div class="modal-footer">
         <button v-if="step > 1" class="btn-back" @click="prevStep">Atrás</button>
         <button v-if="step < 6" class="btn-next" :disabled="!canGoNext" @click="nextStep">Siguiente</button>
-        <button v-if="step === 6" class="btn-submit" :disabled="!isFormValid" @click="submitForm">Enviar y analizar mi nivel <span class="send-icon">🚀</span></button>
+        <button v-if="step === 6" class="btn-submit" :disabled="!isFormValid || sending" @click="submitForm">Enviar y analizar mi nivel <span class="send-icon">🚀</span></button>
       </div>
 
       <!-- Barra de progreso -->
@@ -164,27 +164,30 @@ export default {
         prefix: '+34',
         phone: ''
       },
+      sending: false,
       showCountryDropdown: false,
       countrySearchQuery: '',
       countries: countries,
-      ageOptions: ['Menos de 18', '18-24', '25-35', '+35'],
+      // 'Menos de 18' tiene lógica propia en submitForm (redirige a /mejorar)
+      ageOptions: ['Menos de 18', '18-25', '26-34', '+35'],
       goalOptions: [
-        'Ganar músculo',
-        'Perder grasa y definir',
-        'Aprender habilidades (Muscle-up, pino, front lever…)',
-        'Llegar a mi nivel máximo en Fuerza y Físico'
+        'Fuerza funcional para el día a día',
+        'Mejorar físico (Ganar masa, bajar grasa...)',
+        'Aprender habilidades (L-sit, pino, muscle-up)'
       ],
       levelOptions: [
         'Empiezo desde cero',
+        'Llevo tiempo sin entrenar',
         'Entreno, pero no progreso',
-        'Tengo Fuerza básica (dominadas, fondos, flexiones)',
-        'Nivel avanzado (Dominadas con peso, habilidades)'
+        'Tengo fuerza básica (dominadas, fondos, flexiones)',
+        'Nivel avanzado (dominadas con peso, habilidades)'
       ],
       blockOptions: [
         'No sé cómo entrenar bien',
+        'No tengo tiempo',
         'Falta de disciplina y constancia',
-        'Me estanco',
-        'Entreno mucho, pero no progreso'
+        'Molestias o miedo a lesionarme',
+        'Me estanco'
       ],
       solutionOptions: [
         'Solo busco el resultado y aplicar los consejos por mi cuenta.',
@@ -264,26 +267,44 @@ export default {
     prevStep() {
       if (this.step > 1) this.step--
     },
+    // Envía el contacto; si falla (corte de red momentáneo o error del servidor) reintenta una vez
+    async sendDiagnosis(body) {
+      const send = () => fetch('https://petruworkout-production.up.railway.app/api/lead/diagnosis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        keepalive: true
+      })
+      try {
+        const res = await send()
+        if (res.ok) return true
+      } catch (error) {
+        console.error('Error enviando datos al servidor:', error)
+      }
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      try {
+        const res = await send()
+        return res.ok
+      } catch (error) {
+        console.error('Error enviando datos al servidor (reintento):', error)
+        return false
+      }
+    },
     async submitForm() {
+      if (this.sending) return // evita enviar dos veces con un doble toque
+      this.sending = true
+
       // 1. Lógica de envío al backend (solo si es +18)
       if (this.answers.age !== 'Menos de 18') {
-        try {
-          await fetch('https://petruworkout-production.up.railway.app/api/lead/diagnosis', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: this.answers.name,
-              phone: this.answers.prefix + this.answers.phone,
-              age: this.answers.age,
-              level: this.answers.level,
-              goal: this.answers.goal,
-              block: this.answers.block,
-              solution: this.answers.solution
-            })
-          })
-        } catch (error) {
-          console.error('Error enviando datos al servidor:', error)
-        }
+        await this.sendDiagnosis(JSON.stringify({
+          name: this.answers.name,
+          phone: this.answers.prefix + this.answers.phone,
+          age: this.answers.age,
+          level: this.answers.level,
+          goal: this.answers.goal,
+          block: this.answers.block,
+          solution: this.answers.solution
+        }))
       }
 
       // 2. Lógica de redirección según la edad
@@ -309,13 +330,15 @@ export default {
   background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
-  align-items: center;
   z-index: 9999;
   backdrop-filter: blur(5px);
   padding: 1rem;
+  /* en pantallas muy bajas el formulario se desliza en vez de cortarse */
+  overflow-y: auto;
 }
 
 .modal-content {
+  margin: auto;
   background: var(--bg-secondary, #1a1a1a);
   border-radius: 20px;
   width: 100%;
@@ -669,6 +692,25 @@ export default {
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+/* Portátiles con poca altura: que el formulario (y el botón de enviar) quepa en pantalla */
+@media (min-width: 641px) and (max-height: 780px) {
+  .modal-overlay { padding: 0.5rem; }
+  .modal-header { padding: 1rem 1.5rem 0.5rem; }
+  .header-box { padding: 0.9rem 1rem; }
+  .modal-title { font-size: 1.3rem; }
+  .modal-desc { font-size: 0.95rem; margin-top: 0.4rem; }
+  .modal-body { min-height: auto; padding: 0.5rem 1.5rem 1rem; }
+  .question-title { margin-bottom: 0.9rem; }
+  .options-grid { gap: 0.5rem; }
+  .option-btn { padding: 0.75rem 1.2rem; font-size: 1rem; }
+  .contact-step .header-box { margin-bottom: 1rem; }
+  .form-group { margin-bottom: 1rem; }
+  .modal-footer { padding: 0.9rem 1.5rem; }
+}
+@media (min-width: 641px) and (max-height: 680px) {
+  .modal-desc { display: none; }
 }
 
 @media (max-width: 640px) {

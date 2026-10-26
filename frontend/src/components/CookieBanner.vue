@@ -46,6 +46,15 @@ export default {
       visible: false
     }
   },
+  watch: {
+    // Permite que otros elementos fijos (botón móvil) se coloquen encima del banner
+    visible(v) {
+      document.body.classList.toggle('cookie-visible', v)
+    }
+  },
+  beforeUnmount() {
+    document.body.classList.remove('cookie-visible')
+  },
   mounted() {
     // Verificar si ya aceptó las cookies
     let cookiesAccepted = false
@@ -118,13 +127,14 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 9999;
+  /* por debajo del formulario (z-index 9999) para no tapar sus botones */
+  z-index: 900;
 }
 
 .cookie-container {
   background: linear-gradient(135deg, rgba(17, 17, 17, 0.98) 0%, rgba(0, 0, 0, 0.98) 100%);
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(230, 57, 70, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
 }
 
@@ -190,7 +200,7 @@ export default {
 
 .btn-more-info {
   font-size: 0.875rem;
-  color: #e63946;
+  color: var(--color-text-muted);
   background: none;
   border: none;
   cursor: pointer;
@@ -200,20 +210,20 @@ export default {
 }
 
 .btn-more-info:hover {
-  color: #ff4d5a;
+  color: white;
 }
 
+/* Neutro a propósito: el único botón llamativo de la página debe ser el verde */
 .btn-accept {
-  background: linear-gradient(135deg, #e63946 0%, #d62828 100%);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.75rem 1.5rem;
   border-radius: 10px;
   font-weight: 700;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -222,9 +232,7 @@ export default {
 }
 
 .btn-accept:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.5);
-  background: linear-gradient(135deg, #ff4d5a 0%, #e63946 100%);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .btn-icon {
@@ -292,28 +300,26 @@ export default {
     padding-bottom: 0.5rem;
   }
 
+  /* Una sola fila de ~56px: texto a la izquierda, botones a la derecha */
   .cookie-content {
-    padding: 0.6rem 0.9rem; /* ✅ Reducido más el padding */
-    gap: 0.7rem; /* ✅ Menos espacio entre elementos */
+    flex-direction: row;
+    align-items: center;
+    padding: 0.55rem 0.9rem;
+    gap: 0.75rem;
   }
 
   .cookie-text {
-    gap: 0.7rem; /* ✅ Menos espacio entre icono y texto */
+    gap: 0;
   }
 
-  .cookie-icon {
-    font-size: 1.3rem; /* ✅ Icono más pequeño */
-    margin-top: 0;
+  .cookie-icon,
+  .cookie-title {
+    display: none;
   }
 
   .cookie-message {
-    font-size: 0.75rem; /* ✅ Texto más pequeño */
-    line-height: 1.4; /* ✅ Altura de línea ajustada */
-  }
-
-  .cookie-title {
-    margin: 0 0 0.3rem 0; /* ✅ Menos margen */
-    font-size: 0.8rem; /* ✅ Título más pequeño */
+    font-size: 0.72rem;
+    line-height: 1.3;
   }
 
   /* ✅ Ocultar versión desktop y mostrar móvil */
@@ -326,22 +332,25 @@ export default {
   }
 
   .cookie-actions {
-    gap: 0.7rem; /* ✅ Menos espacio entre botones */
+    width: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
   }
 
   .btn-more-info {
-    font-size: 0.75rem; /* ✅ Botón más pequeño */
+    font-size: 0.7rem;
   }
 
   .btn-accept {
-    width: 100%;
     justify-content: center;
-    padding: 0.55rem 1rem; /* ✅ Padding reducido */
-    font-size: 0.8rem; /* ✅ Texto más pequeño */
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem;
+    margin-left: 0;
   }
 
   .btn-icon {
-    font-size: 0.9rem;
+    display: none;
   }
 }
 </style>

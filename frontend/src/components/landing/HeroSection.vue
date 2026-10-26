@@ -1,257 +1,226 @@
 <template>
   <section id="hero" class="hero-section">
-    <div class="hero-bg">
-      <div class="hero-overlay"></div>
-    </div>
-
     <div class="hero-content">
-      <div class="hero-text">
-        <h1 class="hero-title" v-html="heroTitle"></h1>
+      <h1 class="hero-title" v-html="heroTitle"></h1>
+      <p class="hero-sub">{{ heroSub }}</p>
 
-        <ul class="benefits-list">
-          <li v-for="(benefit, i) in benefits" :key="i">
-            <span class="check">✅</span>
-            {{ benefit }}
-          </li>
-        </ul>
-
-        <!-- Botón que abre el nuevo modal de admisión -->
-        <button
-          class="btn-gift"
-          @click="$emit('open-form')"
-        >
-          {{ btnText }}
-        </button>
+      <!-- BOCETO: clips de ejemplo, se sustituyen por los vídeos reales de clientes -->
+      <div class="clips" ref="clips">
+        <figure v-for="(clip, i) in clips" :key="i" class="clip">
+          <video
+            :src="clip.src"
+            :poster="clip.poster"
+            loop
+            muted
+            playsinline
+            preload="metadata"
+            aria-hidden="true"
+          ></video>
+          <figcaption>
+            <strong>{{ clip.name }}</strong>
+            <span class="clip-result">{{ clip.result }}</span>
+            <span class="clip-time">{{ clip.time }}</span>
+          </figcaption>
+        </figure>
       </div>
 
-      <!-- Imagen escritorio -->
-      <div class="hero-image hero-image-desktop">
-        <img
-          :src="desktopImage"
-          alt="Petru - Entrenador Personal de Calistenia"
-          width="441"
-          height="450"
-          fetchpriority="high"
-          loading="eager"
-          @error="handleImageError"
-        />
+      <div class="cta-box">
+        <CtaButton @click="$emit('open-form')">{{ btnText }}</CtaButton>
+        <p class="cta-note">{{ note }}</p>
       </div>
-
-      <!-- Imagen móvil -->
-      <div class="hero-image hero-image-mobile">
-        <img
-          :src="mobileImage"
-          alt="Petru - Entrenador Personal de Calistenia"
-          width="300"
-          height="300"
-          fetchpriority="high"
-          loading="eager"
-          @error="handleImageError"
-        />
-      </div>
-    </div>
-
-    <div class="scroll-indicator">
-      <span>Descubre más</span>
-      <div class="scroll-arrow">↓</div>
     </div>
   </section>
 </template>
 
 <script>
-import { trackCalendlyClick } from '@/utils/tracking.js'
+import CtaButton from '@/components/landing/CtaButton.vue'
 
 export default {
   name: 'HeroSection',
+  components: { CtaButton },
   props: {
     content: { type: Object, default: null },
     loading: { type: Boolean, default: true }
   },
-  computed: {
-    heroTitle() {
-      return this.content?.title || 'El Sistema para entrenar en Casa o en el Parque y conseguir'
-    },
-    heroHighlight() {
-      return this.content?.highlight || 'fuerza real'
-    },
-    benefits() {
-      return this.content?.benefits?.length ? this.content.benefits : [
-        'Cuerpo atlético y definido',
-        'Gana fuerza y movilidad para el día a día',
-        'Estrategia secreta para activar tu metabolismo y quemar grasa',
-        'Motivación diaria para mantenerte constante y no abandonar',
-      ]
-    },
-    btnText() {
-      return this.content?.calendly_button_text || 'EMPIEZA AHORA'
-    },
-    desktopImage() {
-      return this.content?.desktop_image || '/images/petru-hero-nuevo.webp'
-    },
-    mobileImage() {
-      return this.content?.mobile_image || '/images/petru-hero-nuevo.webp'
-    },
+  data() {
+    return {
+      observer: null,
+      // .t2 pasa a línea propia solo en escritorio (siempre 2 líneas)
+      heroTitle: 'Un cuerpo <span class="highlight">fuerte y ágil</span> <span class="t2">a&nbsp;los&nbsp;30, a&nbsp;los&nbsp;40 y&nbsp;a&nbsp;los&nbsp;50</span>',
+      heroSub: 'Mira lo que consiguen mis clientes.',
+      btnText: 'Descubre qué te frena',
+      note: '30 segundos · Gratis · Sin presión',      clips: [
+        // Pedro (63) primero: es la prueba más fuerte para quien tiene 50 o más
+        { src: '/videos/hero/pedro.mp4', poster: '/videos/hero/pedro.webp', name: 'Pedro, 63 años', result: 'De 1 a 10 dominadas', time: '6 meses' },
+        { src: '/videos/hero/handstand.mp4', poster: '/videos/hero/handstand.webp', name: 'Franck, 29 años', result: 'De 0 a 30 s de pino', time: '6 meses' },
+        { src: '/videos/hero/muscleup.mp4', poster: '/videos/hero/muscleup.webp', name: 'Sergio, 42 años', result: 'De 0 a 2 muscle-ups', time: '3 meses' },
+      ],
+    }
   },
-  methods: {
-    handleImageError(e) { e.target.style.display = 'none' }
+  mounted() {
+    const videos = this.$refs.clips?.querySelectorAll('video') || []
+    // Solo se reproducen los clips visibles: ahorra datos y batería en móvil
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (isIntersecting) target.play().catch(() => {})
+        else target.pause()
+      })
+    }, { threshold: 0.4 })
+    videos.forEach(v => {
+      v.muted = true
+      this.observer.observe(v)
+    })
+  },
+  beforeUnmount() {
+    this.observer?.disconnect()
   },
 }
 </script>
+
 <style scoped>
-/* ===== ESTILOS GENERALES ===== */
 .hero-section {
-  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  position: relative;
-  padding: 6rem 2rem 4rem;
-  overflow: hidden;
+  padding: 6rem 2rem 3rem;
+  background: linear-gradient(135deg, rgba(13,13,13,0.95) 0%, rgba(26,26,26,0.9) 100%);
 }
 
-.hero-bg {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 0;
-  background: linear-gradient(135deg, rgba(13,13,13,0.95) 0%, rgba(26,26,26,0.90) 100%);
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, rgba(13,13,13,0.95) 0%, rgba(26,26,26,0.85) 50%, rgba(13,13,13,0.9) 100%);
-}
-
-/* ===== CONTENIDO HERO ===== */
 .hero-content {
-  max-width: 1400px;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 4rem;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-
-.hero-text {
+  max-width: 1000px;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
 }
 
 .hero-title {
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-size: clamp(1.75rem, 4.5vw, 3rem);
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.15;
   color: white;
   margin: 0;
+  max-width: 800px;
+  text-wrap: balance;
 }
-
 :deep(.hero-title .highlight) { color: var(--color-accent); }
 
-.benefits-list {
-  list-style: none;
-  padding: 0;
+.hero-sub {
+  margin: -0.5rem 0 0;
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+}
+
+/* ===== CLIPS ===== */
+.clips {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.clip {
+  position: relative;
   margin: 0;
+  flex: 0 0 auto;
+  width: clamp(180px, 22vw, 230px);
+  aspect-ratio: 9 / 16;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+}
+
+.clip video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.clip figcaption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 2.5rem 0.75rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.15rem;
+  text-align: left;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%);
 }
-
-.benefits-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  font-size: 1.1rem;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.check {
-  color: var(--color-accent);
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  line-height: 1.4;
-}
-
-.btn-gift {
-  display: inline-block;
-  background: var(--gradient-primary);
+.clip figcaption strong { color: white; font-size: 0.95rem; }
+.clip figcaption span { display: block; color: var(--color-accent); font-size: 0.8rem; font-weight: 700; }
+/* el punto queda al final de la primera línea y el plazo siempre va entero en la segunda */
+.clip figcaption .clip-result::after { content: ' ·'; }
+.clip figcaption .clip-time {
   color: white;
-  padding: 1.2rem 2rem;
-  border: none;
-  outline: none;
-  border-radius: 12px;
   font-weight: 800;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(6,214,160,0.4);
-  text-align: center;
-  text-decoration: none;
-}
-.btn-gift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(6,214,160,0.6);
+  /* borde negro alrededor del texto blanco */
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 4px #000;
+  white-space: nowrap;
 }
 
-/* ===== IMÁGENES ===== */
-.hero-image-desktop { position: relative; display: flex; justify-content: center; }
-.hero-image-mobile  { display: none; }
-
-.hero-image img {
-  max-width: 750px;
+/* ===== BOTÓN PRINCIPAL ===== */
+.cta-box {
   width: 100%;
-  height: 450px;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 20px;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-}
-
-/* ===== SCROLL ===== */
-.scroll-indicator {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  animation: bounce 2s infinite;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
 }
-.scroll-arrow { font-size: 1.5rem; }
 
-@keyframes bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%       { transform: translateX(-50%) translateY(10px); }
+.cta-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* ===== ESCRITORIO =====
+   Todo el hero crece con la altura de la ventana: lo más grande posible
+   pero con el botón siempre visible sin hacer scroll (portátiles incluidos) */
+@media (min-width: 769px) {
+  .hero-section { padding: 5rem 2rem 2rem; }
+  .hero-content { max-width: 1200px; gap: 1.1rem; }
+  .hero-title { font-size: clamp(2rem, 5.2vh, 3.6rem); max-width: 1000px; }
+  :deep(.hero-title .t2) { display: block; }
+  .hero-sub { margin-top: -0.25rem; font-size: clamp(1.05rem, 2.2vh, 1.35rem); }
+  .clips { gap: 1.5rem; }
+  .clip { width: auto; height: clamp(260px, calc(100vh - 410px), 640px); border-radius: 20px; }
+  .clip figcaption { padding: 3rem 1rem 1rem; }
+  .clip figcaption strong { font-size: 1.1rem; }
+  .clip figcaption span { font-size: 0.95rem; }
+  .cta-box { margin-top: 0.25rem; gap: 0.7rem; }
+  .cta-box :deep(.cta-btn) { max-width: 560px; padding: 1.35rem 2rem; font-size: 1.45rem; }
+  .cta-note { font-size: 1.05rem; }
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .hero-content { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
-  .hero-text { align-items: center; }
-  .benefits-list { align-items: flex-start; max-width: 600px; text-align: left; }
-  .hero-image-desktop { order: -1; }
-  .hero-image img { max-width: 450px; }
-}
+@media (max-width: 768px) {
+  .hero-section { padding: 5rem 0 2rem; }
+  .hero-content { gap: 1.1rem; }
+  .hero-title { padding: 0 1.25rem; }
+  .hero-sub { padding: 0 1.25rem; font-size: 1rem; }
 
-@media (max-width: 640px) {
-  .hero-section { padding: 5rem 1.5rem 3rem; }
-  .hero-content { grid-template-columns: 1fr; gap: 2.5rem; }
-  .hero-text { order: 2; align-items: center; text-align: center; gap: 1.5rem; }
-  .hero-image-desktop { display: none; }
-  .hero-image-mobile  { display: flex; order: 1; justify-content: center; }
-  .hero-image img     { max-width: 300px; width: 100%; height: auto; }
-  .hero-title         { font-size: 1.75rem; }
-  .benefits-list      { order: 2; align-items: flex-start; width: 100%; text-align: left; gap: 0.875rem; }
-  .benefits-list li   { font-size: 1rem; }
-  .btn-gift           { order: 3; font-size: 1rem; padding: 1.1rem 1.5rem; width: 100%; }
-  .scroll-indicator   { display: none; }
+  /* carrusel horizontal con el siguiente clip asomando */
+  .clips {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 1.25rem;
+    scroll-padding: 0 1.25rem;
+    gap: 0.75rem;
+    scrollbar-width: none;
+  }
+  .clips::-webkit-scrollbar { display: none; }
+  .clip { width: 148px; scroll-snap-align: start; }
+  .clip figcaption strong { font-size: 0.8rem; }
+  .clip figcaption span { font-size: 0.7rem; }
+
+  .cta-box { padding: 0 1.25rem; }
+  .cta-note { font-size: 0.8rem; }
 }
 </style>

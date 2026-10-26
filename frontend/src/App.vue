@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view />
-    <CookieBanner />
+    <CookieBanner v-if="showCookieBanner" />
   </div>
 </template>
 
@@ -12,6 +12,12 @@ import CookieBanner from "@/components/CookieBanner.vue";
 export default {
   name: 'App',
   components: {CookieBanner},
+  data() {
+    return {
+      // Banner de cookies desactivado a petición: poner a true para volver a mostrarlo
+      showCookieBanner: false
+    }
+  },
   mounted() {
     // Inicializar tracking cuando la app se carga
     initTracking()

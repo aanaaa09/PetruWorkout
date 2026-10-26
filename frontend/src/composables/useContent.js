@@ -37,12 +37,12 @@ export function useContent() {
         },
         {
           id: 2,
-          name: "Oscar",
-          age: "27 años",
-          stats: "Antes 26% grasa, ahora 17%",
-          duration: "6 Meses",
-          whatsapp_text: "Uff tus rutinas son mortales jajajaj. Cada día que voy a entrenar se sienten todo los músculos y eso me gusta. Es lo que necesitaba tener un paso a paso y seguirlo además que me ahorra muchisimo tiempo. Gracias Petru 💪",
-          whatsapp_time: "22:31",
+          name: "Sergio",
+          age: "42 años",
+          stats: "+3 kg de músculo",
+          duration: "4 Meses",
+          // sin whatsapp_text: es la historia del caso contada por Petru, no una cita del cliente
+          story: "Comía mucho y no conseguía subir de peso. Con una buena organización de las comidas y buenas rutinas ha ganado masa de verdad y se le ve más fuerte.",
           image_slug: "user2"
         },
         {
@@ -66,7 +66,7 @@ export function useContent() {
           image_slug: "user4"
         }
       ],
-      _img_version: 1774981036
+      _img_version: 1793030000
     },
     testimonials: {
       section_tag: "RESEÑAS",

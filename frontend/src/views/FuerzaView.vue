@@ -6,12 +6,12 @@
       <div class="success-header">
         <h1>¡Diagnóstico recibido con éxito!&nbsp;👌</h1>
         <p class="subtitle">
-          Revisaré tus respuestas personalmente en las próximas horas para ver qué está fallando en tu entrenamiento y explicarte cuál sería el paso a paso
+          Revisaré tus respuestas personalmente en las próximas horas y te escribiré por WhatsApp con lo que veo en tu caso y cuál sería el mejor paso a paso para ti
         </p>
       </div>
 
       <div class="video-section">
-        <p class="video-intro">Mientras tanto, mira lo que han conseguido otros alumnos en solo 3 meses:</p>
+        <p class="video-intro">Mientras tanto, mira lo que han conseguido otros clientes:</p>
         
         <div class="video-wrapper">
           <iframe 
@@ -27,13 +27,13 @@
       </div>
 
       <div class="cta-section">
-        <h3 class="cta-title">¿Quieres acelerar el proceso?</h3>
+        <h3 class="cta-title">¿Prefieres que lo hablemos ya?</h3>
         <p class="cta-desc">
-          Si vas totalmente en serio y quieres que hablemos mañana mismo para valorar tu caso y te comente mi servicio, reserva una sesión de 10 minutos en el calendario:
+          No hace falta: te escribiré igualmente por WhatsApp. Pero si prefieres hablar tu caso cuanto antes, puedes reservar una llamada opcional de 10 minutos en el calendario:
         </p>
-        
+
         <a href="https://calendly.com/petruworkout/reunion" target="_blank" rel="noopener noreferrer" class="btn-calendly">
-          🗓️ Reservar mi valoración
+          🗓️ Reservar una llamada (opcional)
         </a>
       </div>
 
