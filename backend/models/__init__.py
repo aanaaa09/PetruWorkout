@@ -5,5 +5,6 @@ from .page_visit import PageVisit
 from .calendly_click import CalendlyClick
 from .calendly_booking import CalendlyBooking
 from .session_tracking import SessionTracking
+from .diagnostico_lead import DiagnosticoLead
 
-__all__ = ["Usuario", "Sesion", "Consulta", "PageVisit", "CalendlyClick", "CalendlyBooking","SessionTracking"]
+__all__ = ["Usuario", "Sesion", "Consulta", "PageVisit", "CalendlyClick", "CalendlyBooking","SessionTracking", "DiagnosticoLead"]
